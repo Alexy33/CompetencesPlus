@@ -21,11 +21,22 @@ const VIDEO_MODULE = "src/server/video";
 /** Les listes fermees du dispositif y vivent, hebergeurs compris. */
 const VOCABULARY = "src/lib/vocabulary.ts";
 /**
- * La migration de l'existant est, par construction, propre au stockage local :
- * elle deplace des fichiers d'un ancien repertoire vers le nouveau. Elle est le
- * seul endroit du depot ou dependre de l'implementation locale a un sens.
+ * Scripts d'exploitation dont le stockage local EST le sujet : ils lisent des
+ * fichiers poses sur le disque, la ou tout le reste du dispositif ignore
+ * jusqu'a l'existence d'un disque.
+ *
+ * Liste volontairement explicite, et courte. Y ajouter une entree doit se
+ * justifier de la meme facon : « ce fichier ne peut pas faire son travail sans
+ * connaitre le stockage local ». Si la reponse est « ce serait plus pratique »,
+ * la reponse est non.
  */
-const MIGRATION_SCRIPT = "scripts/migrate-videos.ts";
+const LOCAL_STORAGE_SCRIPTS = [
+  // Deplace les videos de l'ancien repertoire d'upload vers le stockage du
+  // fournisseur.
+  "scripts/migrate-videos.ts",
+  // Relit la sauvegarde prise avant migration pour remettre le temoin d'aplomb.
+  "scripts/restore-witness.ts",
+];
 
 function sourceFiles(dir: string): string[] {
   const out: string[] = [];
@@ -47,7 +58,7 @@ function applicationFiles(): string[] {
     (file) =>
       !file.startsWith(VIDEO_MODULE) &&
       file !== VOCABULARY &&
-      file !== MIGRATION_SCRIPT,
+      !LOCAL_STORAGE_SCRIPTS.includes(file),
   );
 }
 

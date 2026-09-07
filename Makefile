@@ -1,7 +1,7 @@
 # Raccourcis pour l'equipe. `make` seul affiche l'aide.
 .DEFAULT_GOAL := help
 .PHONY: help dev prod build stop clean logs shell migrate seed openapi test backup video \
-        video-migrate video-local video-degraded video-etat
+        video-migrate video-temoin video-local video-degraded video-etat
 
 help: ## Affiche cette aide
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk -F':.*?## ' '{printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'
@@ -35,6 +35,9 @@ seed: ## Remplit la base avec le jeu de demonstration (destructif)
 
 video-migrate: ## Range les videos existantes dans le stockage du fournisseur (rejouable)
 	docker compose --profile dev exec web-dev npm run video:migrate
+
+video-temoin: ## Restaure la video du profil temoin depuis la sauvegarde, et la valide
+	@docker compose --profile dev exec -T web-dev npm run video:temoin --silent
 
 video-local: ## Bascule sur l'hebergement local du dispositif (etat nominal)
 	@VIDEO_PROVIDER=local docker compose --profile dev up -d --force-recreate web-dev

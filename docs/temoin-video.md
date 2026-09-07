@@ -57,16 +57,24 @@ main, aucun fichier posé directement dans le stockage.
 L'identifiant change à chaque dépôt : c'est le principe même d'un identifiant
 opaque. Ce qui doit rester constant, et qui l'est, ce sont les octets.
 
-Pour restaurer de nouveau, la sauvegarde étant toujours dans le volume :
+Pour restaurer de nouveau — une seule commande :
 
 ```bash
-docker cp profilsactifs-dev:/data/sauvegarde-avant-video/uploads/efd93871-3699-41ed-ab68-bff8afca1f87.mp4 /tmp/temoin.mp4
-curl -s -c /tmp/c.txt -X POST localhost:3000/api/auth/sign-in/email \
-  -H 'Content-Type: application/json' -d '{"email":"amina@exemple.fr","password":"demo1234"}'
-curl -s -b /tmp/c.txt -X PUT localhost:3000/api/me/profile/video \
-  -H 'Content-Type: video/mp4' --data-binary @/tmp/temoin.mp4
-# puis valider la video depuis /admin, onglet Videos
+make video-temoin      # ou : npm run video:temoin
 ```
+
+Elle relit la sauvegarde (toujours dans le volume, sous
+`/data/sauvegarde-avant-video/`), la confie à `VideoProvider.store()` comme
+n'importe quel dépôt, écrit la référence opaque et valide la vidéo — sans quoi
+la fiche publique la masquerait avant même d'interroger l'hébergeur.
+
+Idempotente : si le témoin porte déjà une vidéo lisible, elle ne fait rien.
+L'identifiant opaque change à chaque restauration, les octets non
+(`e2c53b1bb3275ec01da52d26c0f393c9`).
+
+Attendez-vous à en avoir besoin : une recette manuelle dépose, remplace et
+supprime des vidéos — c'est son travail — et le témoin finit régulièrement sans
+vidéo. `make video-etat` le signale quand c'est arrivé.
 
 ## Vérifications
 
