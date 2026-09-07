@@ -1,6 +1,6 @@
 # Déclaration d'accessibilité — partielle (R.7)
 
-**Référence :** JEB/DNI/2026-003 — R.7
+**Référence :** audit d’accessibilité interne
 **Date de mesure :** 3 septembre 2026 (refaite après intégration de `dev`)
 **Outil :** `scripts/a11y-audit.mjs` (`npm run a11y`), Chromium 1234 sans affichage
 
@@ -73,7 +73,7 @@ Chaque élément atteignable au clavier est atteint par la tabulation, et chacun
 porte un indicateur mesuré au-dessus de 3:1. Aucun piège au clavier n'a été
 rencontré sur les trois parcours.
 
-Relevés bruts : `docs/rapports/a11y-avant.json` et `docs/rapports/a11y-apres.json`.
+Les relevés historiques ont été placés dans `docs/_archive/identite-etat/rapports/` car ils décrivent l’ancienne identité.
 
 ## Écart subsistant, assumé
 
@@ -84,7 +84,7 @@ alors ni `:focus`, ni `:focus-visible`, et `:focus-within` ne franchit pas la
 frontière d'origine. Aucune règle de notre feuille de style ne peut peindre
 d'anneau à ce moment ; l'indicateur dépend du lecteur tiers.
 
-Mesure à l'appui : `docs/rapports/a11y-apres-embed-tiers.json`, ligne
+Mesure historique archivée : `docs/_archive/identite-etat/rapports/a11y-apres-embed-tiers.json`, ligne
 `iframe.aspect-video`, `indicated: false`.
 
 Le lecteur **natif**, servi par `/api/videos/{id}`, ne présente pas ce défaut :

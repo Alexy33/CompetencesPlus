@@ -1,6 +1,6 @@
 # Video de presentation (2 min)
 
-Demonstration filmee de ProfilsActifs (JEB/DNI/2026-003).
+Démonstration filmée de ProfilsActifs.
 
 Le tournage est **automatise** : Playwright joue le parcours et filme, ffmpeg
 incruste les sous-titres. Une demo rejouee a la main derive a chaque prise —
@@ -14,9 +14,7 @@ make video      # tourne, puis incruste les sous-titres
 
 | Fichier | Contenu |
 | --- | --- |
-| `docs/captures/video/presentation.mp4` | la video, sous-titres incrustes |
-| `docs/captures/video/presentation-brut.webm` | le rush sans sous-titres |
-| `docs/captures/video/sous-titres.srt` | les sous-titres, pour un remontage |
+Les anciens exports vidéo ont été mis de côté dans `docs/_archive/identite-etat/captures/video/`. Ils doivent être régénérés avant toute utilisation.
 
 Le parcours vit dans `scripts/demo/tournage.spec.ts`, sa configuration dans
 `scripts/demo/playwright.tournage.ts`. Ils sont hors de `e2e/` a dessein : un
@@ -54,7 +52,7 @@ mot de passe `demo1234` :
 | 1-2 | aucun | accueil + catalogue public |
 | 3-5 | `amina@exemple.fr` | espace demandeur |
 | 6 | `recruteur@exemple.fr` | espace recruteur |
-| 7 | `admin@jeb.gouv.fr` | moderation |
+| 7 | `admin@exemple.fr` | moderation |
 
 Capture en **1440x900** (format ordinateur portable), 25 fps, locale `fr-FR`,
 fuseau `Europe/Paris`.
