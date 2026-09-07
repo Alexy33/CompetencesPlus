@@ -2,7 +2,7 @@
 
 import { Menu } from "lucide-react";
 
-import { BlocMarque } from "./bloc-marque";
+import { ProductName } from "./product-name";
 import { SidebarPanel } from "./sidebar/sidebar-panel";
 import { useModalDrawer } from "./sidebar/use-modal-drawer";
 import type { SidebarSession } from "./sidebar/types";
@@ -28,7 +28,7 @@ export function SiteSidebar({ session }: { session: SidebarSession | null }) {
         >
           <Menu aria-hidden="true" className="size-6" />
         </button>
-        <BlocMarque />
+        <ProductName />
       </div>
 
       {open ? (

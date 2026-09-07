@@ -1,6 +1,7 @@
 import { getCurrentSession } from "@/lib/auth-session";
 import type { UserRole } from "@/lib/vocabulary";
 import { SiteSidebar } from "./site-sidebar";
+import { PublicNotice } from "./public-notice";
 
 export async function SiteShell({ children }: { children: React.ReactNode }) {
   const session = await getCurrentSession();
@@ -20,6 +21,7 @@ export async function SiteShell({ children }: { children: React.ReactNode }) {
       />
       <div id="contenu" tabIndex={-1} className="lg:pl-64">
         {children}
+        <PublicNotice />
       </div>
     </div>
   );
