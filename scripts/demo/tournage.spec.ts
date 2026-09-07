@@ -3,7 +3,7 @@ import { expect, test, type Page } from "@playwright/test";
 const PASSWORD = "demo1234";
 const CANDIDATE = "amina@exemple.fr";
 const RECRUITER = "recruteur@exemple.fr";
-const ADMIN = "admin@jeb.gouv.fr";
+const ADMIN = "admin@exemple.fr";
 
 type Cue = { start: number; end: number; text: string };
 const cues: Cue[] = [];

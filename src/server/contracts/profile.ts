@@ -131,11 +131,11 @@ export const CatalogQuery = PaginationQuery.extend({
     .string()
     .trim()
     .optional()
-    .meta({ description: "Recherche libre sur le nom, l'intitule, le secteur et les competences." }),
+    .meta({ description: "Recherche libre sur l'intitulé, le secteur, la ville et les compétences." }),
   sector: SectorSchema.optional(),
   city: CitySchema.optional(),
   certified: QueryBoolean.optional().meta({
-    description: "true : uniquement les profils certifies JEB.",
+    description: "true : uniquement les profils dont l'évaluation est validée.",
   }),
   skills: z
     .array(SkillSchema)

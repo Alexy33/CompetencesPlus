@@ -50,6 +50,17 @@ test.describe("Catalogue public", () => {
     }
   });
 
+  test("exclut le nom de la recherche libre sans casser les criteres professionnels", async ({ request }) => {
+    const byName = await (await request.get("/api/profiles?q=Berthier&pageSize=20")).json();
+    expect(byName.items.some((item: { name: string }) => item.name === "Amina Berthier")).toBe(false);
+
+    const byTitle = await (await request.get("/api/profiles?q=Charg%C3%A9e%20de%20relation%20client&pageSize=20")).json();
+    expect(byTitle.items.some((item: { name: string }) => item.name === "Amina Berthier")).toBe(true);
+
+    const bySkill = await (await request.get("/api/profiles?q=Communication&pageSize=20")).json();
+    expect(bySkill.items.some((item: { name: string }) => item.name === "Amina Berthier")).toBe(true);
+  });
+
   test("ne divulgue pas les profils non publies", async ({ request }) => {
     const response = await request.get("/api/profiles/identifiant-inexistant");
     expect(response.status()).toBe(404);
@@ -191,7 +202,7 @@ test.describe("Espace recruteur", () => {
 
 test.describe("Administration", () => {
   test("modere, gere les questions et les reglages", async ({ playwright, baseURL }) => {
-    const admin = await contextFor(baseURL!, playwright, "admin@jeb.gouv.fr");
+    const admin = await contextFor(baseURL!, playwright, "admin@exemple.fr");
 
     expect((await admin.get("/api/admin/stats")).status()).toBe(200);
 
