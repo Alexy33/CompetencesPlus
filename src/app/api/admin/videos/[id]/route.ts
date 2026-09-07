@@ -12,7 +12,7 @@ import {
 } from "@/server/contracts/common";
 import { DecideVideoBody, VideoModerationRowSchema } from "@/server/contracts/admin";
 import { notify } from "@/server/services/notifications";
-import { decideVideoModeration } from "@/server/services/video";
+import { decideVideoModeration, describeVideo } from "@/server/services/video";
 
 export const dynamic = "force-dynamic";
 
@@ -28,8 +28,8 @@ export const { PATCH } = defineRoute({
     "Un refus exige un motif : il est enregistre, notifie au candidat et affiche",
     "sur son espace. La decision conserve son auteur et sa date.",
     "",
-    "Tant que la video n'est pas validee, `GET /api/videos/{id}` repond 404 a",
-    "toute autre personne que son titulaire et l'administration.",
+    "Tant que la video n'est pas validee, `GET /api/videos/{videoId}` repond 404",
+    "a toute autre personne que son titulaire et l'administration.",
   ].join("\n"),
   access: "admin",
   params: IdParam,
@@ -42,14 +42,14 @@ export const { PATCH } = defineRoute({
   },
   handler: async ({ params, body, session }) => {
     const [target] = await db
-      .select({ userId: profile.userId, videoUrl: profile.videoUrl })
+      .select({ userId: profile.userId, videoId: profile.videoId })
       .from(profile)
       .where(eq(profile.id, params.id))
       .limit(1);
 
     if (!target) throw ApiError.notFound("Ce profil n'existe pas.");
 
-    if (!target.videoUrl) throw ApiError.notFound("Ce profil ne porte aucune video.");
+    if (!target.videoId) throw ApiError.notFound("Ce profil ne porte aucune video.");
 
     await decideVideoModeration(params.id, body.decision, session.user.id, body.reason ?? null);
 
@@ -75,7 +75,7 @@ export const { PATCH } = defineRoute({
       profileId: row.profile.id,
       name: row.name,
       title: row.profile.title,
-      videoUrl: row.profile.videoUrl,
+      video: await describeVideo(row.profile),
       profileStatus: row.profile.status,
       videoStatus: row.profile.videoStatus,
       reason: row.profile.videoReviewReason,

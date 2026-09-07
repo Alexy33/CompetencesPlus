@@ -12,7 +12,7 @@ const NOT_IN_MANIFEST = [
   "docs/route.ts",
   "swagger/route.ts",
   "me/profile/video/route.ts",
-  "videos/[id]/route.ts",
+  "videos/[videoId]/route.ts",
 ];
 
 function findRouteFiles(dir: string): string[] {

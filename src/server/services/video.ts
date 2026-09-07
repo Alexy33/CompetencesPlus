@@ -1,53 +1,38 @@
-import { createReadStream } from "node:fs";
-import { mkdir, rm, stat, readdir, rename } from "node:fs/promises";
-import { dirname, join, resolve } from "node:path";
-import { Readable } from "node:stream";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { profile } from "@/db/schema";
-import { VIDEO_CONSENT_VERSION, type VideoStatus } from "@/lib/vocabulary";
+import { VIDEO_CONSENT_VERSION, type VideoProviderName, type VideoStatus } from "@/lib/vocabulary";
+import { ExternalEmbedProvider } from "@/server/video/embed-provider";
+import { extensionForMime } from "@/server/video/mime";
+import {
+  describeVideo,
+  NO_VIDEO,
+  type VideoReference,
+  type VideoView,
+} from "@/server/video/presentation";
+import {
+  UnsupportedVideoTypeError,
+  VideoProviderUnavailableError,
+  type StoredVideo,
+  type VideoByteRange,
+} from "@/server/video/provider";
+import {
+  activeVideoProvider,
+  deletionVideoProvider,
+  enabledVideoProvider,
+} from "@/server/video/registry";
 
 export const MAX_VIDEO_BYTES = 100 * 1024 * 1024;
 
-const EXTENSION_BY_MIME: Record<string, string> = {
-  "video/mp4": "mp4",
-  "video/webm": "webm",
-  "video/ogg": "ogv",
-  "video/quicktime": "mov",
-};
+/**
+ * Conserve pour les appelants existants (et teste unitairement) : c'est la
+ * seule chose que les routes ont encore besoin de savoir d'un type MIME, pour
+ * refuser un fichier avant meme de solliciter un hebergeur.
+ */
+export { extensionForMime };
 
-const MIME_BY_EXTENSION: Record<string, string> = {
-  mp4: "video/mp4",
-  webm: "video/webm",
-  ogv: "video/ogg",
-  ogg: "video/ogg",
-  mov: "video/quicktime",
-  m4v: "video/mp4",
-};
-
-export function extensionForMime(mime: string | null | undefined): string | null {
-  if (!mime) return null;
-  return EXTENSION_BY_MIME[mime.split(";")[0].trim().toLowerCase()] ?? null;
-}
-
-function storageDir(): string {
-  const dbPath = (process.env.DATABASE_URL ?? "file:./local.db").replace(/^file:/, "");
-  const custom = process.env.VIDEO_UPLOAD_DIR?.trim();
-  return custom ? resolve(custom) : resolve(dirname(dbPath), "uploads");
-}
-
-async function ensureDir(): Promise<string> {
-  const dir = storageDir();
-  await mkdir(dir, { recursive: true });
-  return dir;
-}
-
-export class VideoTooLargeError extends Error {
-  constructor() {
-    super("Fichier trop volumineux : 100 Mo maximum (CDC §3.2).");
-    this.name = "VideoTooLargeError";
-  }
-}
+export { describeVideo, NO_VIDEO };
+export type { VideoReference, VideoView };
 
 export class MissingVideoConsentError extends Error {
   constructor() {
@@ -59,100 +44,172 @@ export class MissingVideoConsentError extends Error {
   }
 }
 
-export interface StoredVideo {
-  path: string;
-  bytes: number;
-  extension: string;
+export class EmbedProviderDisabledError extends Error {
+  constructor() {
+    super(
+      "L'hebergement par lien tiers (YouTube, Vimeo) est desactive sur ce " +
+        "deploiement. Televersez votre video : elle sera hebergee par le dispositif.",
+    );
+    this.name = "EmbedProviderDisabledError";
+  }
 }
+
+// --- Lecture de la reference persistee -------------------------------------
+
+async function readReference(profileId: string): Promise<VideoReference | null> {
+  const [row] = await db
+    .select({ videoId: profile.videoId, videoProvider: profile.videoProvider })
+    .from(profile)
+    .where(eq(profile.id, profileId))
+    .limit(1);
+
+  return row ?? null;
+}
+
+/** Profil proprietaire d'un identifiant opaque. Sert a autoriser la lecture. */
+export async function findProfileByVideoId(videoId: string) {
+  const [row] = await db
+    .select({
+      profileId: profile.id,
+      userId: profile.userId,
+      videoId: profile.videoId,
+      videoProvider: profile.videoProvider,
+      profileStatus: profile.status,
+      videoStatus: profile.videoStatus,
+    })
+    .from(profile)
+    .where(eq(profile.videoId, videoId))
+    .limit(1);
+
+  return row ?? null;
+}
+
+// --- Depot -----------------------------------------------------------------
 
 export async function assertVideoConsent(profileId: string): Promise<void> {
   const consent = await readVideoConsent(profileId);
   if (!consent?.granted) throw new MissingVideoConsentError();
 }
 
-export async function saveProfileVideo(
+async function persistReference(profileId: string, stored: StoredVideo | null): Promise<void> {
+  await db
+    .update(profile)
+    .set({
+      videoId: stored?.videoId ?? null,
+      videoProvider: stored?.provider ?? null,
+      updatedAt: new Date(),
+    })
+    .where(eq(profile.id, profileId));
+}
+
+/**
+ * Confie le fichier a l'hebergeur actif et enregistre la reference rendue.
+ *
+ * L'ancienne video est supprimee AVANT d'enregistrer la nouvelle : jamais deux
+ * references, jamais d'octets orphelins. L'etat rendu peut etre `processing` —
+ * l'appelant ne doit pas supposer que la video est lisible.
+ */
+export async function storeProfileVideo(
   profileId: string,
-  extension: string,
+  mimeType: string,
   body: ReadableStream<Uint8Array>,
 ): Promise<StoredVideo> {
-
   await assertVideoConsent(profileId);
 
-  const dir = await ensureDir();
+  const stored = await activeVideoProvider().store({
+    body,
+    mimeType,
+    maxBytes: MAX_VIDEO_BYTES,
+  });
 
   await deleteProfileVideo(profileId);
-
-  const finalPath = join(/*turbopackIgnore: true*/ dir, `${profileId}.${extension}`);
-  const partPath = `${finalPath}.part`;
-
-  const { createWriteStream } = await import("node:fs");
-  const out = createWriteStream(partPath);
-
-  let bytes = 0;
-  try {
-    const reader = body.getReader();
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      bytes += value.byteLength;
-      if (bytes > MAX_VIDEO_BYTES) {
-        out.destroy();
-        await rm(partPath, { force: true });
-        throw new VideoTooLargeError();
-      }
-      if (!out.write(value)) {
-        await new Promise<void>((ok) => out.once("drain", ok));
-      }
-    }
-    await new Promise<void>((ok, ko) => out.end((err?: Error | null) => (err ? ko(err) : ok())));
-  } catch (error) {
-    out.destroy();
-    await rm(partPath, { force: true });
-    throw error;
-  }
-
-  if (bytes === 0) {
-    await rm(partPath, { force: true });
-    throw new Error("Corps de requête vide.");
-  }
-
-  await rename(partPath, finalPath);
-
+  await persistReference(profileId, stored);
   await resetVideoModeration(profileId);
 
-  return { path: finalPath, bytes, extension };
+  return stored;
 }
 
-export async function findProfileVideo(
-  profileId: string,
-): Promise<{ path: string; size: number; mime: string } | null> {
-  try {
-    const dir = storageDir();
-    const entries = await readdir(dir);
-    const match = entries.find(
-      (name) => name.startsWith(`${profileId}.`) && !name.endsWith(".part"),
+/**
+ * Enregistre un lien tiers (YouTube, Vimeo) — uniquement si ce fournisseur est
+ * allume sur ce deploiement. Il ne l'est pas par defaut.
+ */
+export async function setProfileVideoLink(profileId: string, rawUrl: string): Promise<StoredVideo> {
+  await assertVideoConsent(profileId);
+
+  const provider = enabledVideoProvider("embed");
+  if (!(provider instanceof ExternalEmbedProvider)) throw new EmbedProviderDisabledError();
+
+  const stored = await provider.storeLink(rawUrl);
+  if (!stored) {
+    throw new UnsupportedVideoTypeError(
+      "lien non reconnu : seuls YouTube et Vimeo sont acceptes par cet hebergeur",
     );
-    if (!match) return null;
-    const path = join(/*turbopackIgnore: true*/ dir, match);
-    const info = await stat(path);
-    const ext = match.split(".").pop()?.toLowerCase() ?? "";
-    return { path, size: info.size, mime: MIME_BY_EXTENSION[ext] ?? "application/octet-stream" };
-  } catch {
-    return null;
   }
+
+  await deleteProfileVideo(profileId);
+  await persistReference(profileId, stored);
+  await resetVideoModeration(profileId);
+
+  return stored;
 }
 
-export async function deleteProfileVideo(profileId: string): Promise<void> {
-  try {
-    const dir = storageDir();
-    const entries = await readdir(dir).catch(() => [] as string[]);
-    await Promise.all(
-      entries
-        .filter((name) => name.startsWith(`${profileId}.`))
-        .map((name) => rm(join(/*turbopackIgnore: true*/ dir, name), { force: true })),
-    );
-  } catch {}
+// --- Suppression -----------------------------------------------------------
+
+export interface VideoDeletion {
+  /** Une reference existait bel et bien. */
+  hadVideo: boolean;
+  /** Des octets ont reellement disparu du stockage. */
+  bytesRemoved: boolean;
+  /** L'hebergeur n'a pas repondu : la reference est retiree, pas les octets. */
+  providerUnavailable: boolean;
 }
+
+/**
+ * Chemin de suppression UNIQUE du dispositif.
+ *
+ * Suppression volontaire par le candidat, retrait du consentement, remplacement
+ * d'une video : tout passe ici, donc par `VideoProvider.delete()`. Il n'existe
+ * aucune autre facon d'effacer un fichier video dans le code.
+ */
+export async function deleteProfileVideo(profileId: string): Promise<VideoDeletion> {
+  const reference = await readReference(profileId);
+
+  if (!reference?.videoId || !reference.videoProvider) {
+    return { hadVideo: false, bytesRemoved: false, providerUnavailable: false };
+  }
+
+  // L'hebergeur est sollicite meme s'il n'est plus celui qui sert les lectures :
+  // laisser des octets derriere soi n'est pas une option.
+  const provider = deletionVideoProvider(reference.videoProvider);
+
+  let bytesRemoved = false;
+  let providerUnavailable = false;
+
+  if (!provider) {
+    providerUnavailable = true;
+    console.warn(
+      `[video] hebergeur « ${reference.videoProvider} » inconnu : reference ${reference.videoId} retiree sans suppression.`,
+    );
+  } else {
+    try {
+      bytesRemoved = await provider.delete(reference.videoId);
+    } catch (error) {
+      if (!(error instanceof VideoProviderUnavailableError)) throw error;
+      providerUnavailable = true;
+      // Le retrait est une obligation : la reference part quand meme, mais le
+      // fait est trace pour que la suppression puisse etre rejouee.
+      console.error(
+        `[video] suppression impossible chez « ${reference.videoProvider} » (${reference.videoId}) : ${error.message}`,
+      );
+    }
+  }
+
+  await persistReference(profileId, null);
+
+  return { hadVideo: true, bytesRemoved, providerUnavailable };
+}
+
+// --- Consentement ----------------------------------------------------------
 
 export interface VideoConsent {
   granted: boolean;
@@ -196,6 +253,8 @@ export async function grantVideoConsent(profileId: string): Promise<VideoConsent
 }
 
 export async function revokeVideoConsent(profileId: string): Promise<VideoConsent> {
+  // Meme chemin que la suppression ordinaire : `VideoProvider.delete()`. Le
+  // retrait du consentement fait disparaitre les octets, pas seulement la ligne.
   await deleteProfileVideo(profileId);
 
   const now = new Date();
@@ -204,7 +263,6 @@ export async function revokeVideoConsent(profileId: string): Promise<VideoConsen
     .set({
       videoConsentGranted: false,
       videoConsentRevokedAt: now,
-      videoUrl: null,
 
       videoStatus: "pending",
       videoReviewReason: null,
@@ -217,6 +275,8 @@ export async function revokeVideoConsent(profileId: string): Promise<VideoConsen
   const after = await readVideoConsent(profileId);
   return after ?? { granted: false, grantedAt: null, version: null, revokedAt: now };
 }
+
+// --- Moderation ------------------------------------------------------------
 
 export interface VideoModeration {
   status: VideoStatus;
@@ -275,38 +335,10 @@ export async function decideVideoModeration(
   return readVideoModeration(profileId);
 }
 
-export function openVideoStream(
-  path: string,
-  size: number,
-  rangeHeader: string | null,
-): {
-  status: 200 | 206;
-  headers: Record<string, string>;
-  stream: ReadableStream<Uint8Array>;
-} {
-  const parsed = parseRange(rangeHeader, size);
+// --- Lecture ---------------------------------------------------------------
 
-  if (!parsed) {
-    return {
-      status: 200,
-      headers: { "Content-Length": String(size), "Accept-Ranges": "bytes" },
-      stream: Readable.toWeb(createReadStream(path)) as ReadableStream<Uint8Array>,
-    };
-  }
-
-  const { start, end } = parsed;
-  return {
-    status: 206,
-    headers: {
-      "Content-Length": String(end - start + 1),
-      "Content-Range": `bytes ${start}-${end}/${size}`,
-      "Accept-Ranges": "bytes",
-    },
-    stream: Readable.toWeb(createReadStream(path, { start, end })) as ReadableStream<Uint8Array>,
-  };
-}
-
-function parseRange(header: string | null, size: number): { start: number; end: number } | null {
+/** `Range: bytes=…`. Rend `null` si l'en-tete est absent ou inexploitable. */
+export function parseRangeHeader(header: string | null, size: number): VideoByteRange | null {
   if (!header) return null;
   const match = /^bytes=(\d*)-(\d*)$/.exec(header.trim());
   if (!match) return null;
@@ -323,3 +355,5 @@ function parseRange(header: string | null, size: number): { start: number; end: 
   if (Number.isNaN(start) || Number.isNaN(end) || start > end || start >= size) return null;
   return { start, end: Math.min(end, size - 1) };
 }
+
+export type { VideoProviderName };
