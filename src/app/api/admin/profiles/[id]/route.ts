@@ -58,7 +58,7 @@ export const { PATCH } = defineRoute({
       id: updated.id,
       name: owner?.name ?? "",
       title: updated.title,
-      videoUrl: updated.videoUrl,
+      hasVideo: updated.videoId !== null,
       status: updated.status,
       createdAt: updated.createdAt.toISOString(),
     };
@@ -71,7 +71,7 @@ export const { DELETE } = defineRoute({
   tags: ["Administration"],
   summary: "Supprimer un profil",
   description:
-    "Supprime definitivement un profil et ses donnees associees (competences, favoris et prises de contact). Le compte utilisateur est conserve.",
+    "Supprime definitivement un profil et ses donnees associees (competences, favoris et prises de contact), ainsi que sa video chez l'hebergeur — octets compris. Le compte utilisateur est conserve.",
   access: "admin",
   params: IdParam,
   responses: {
@@ -80,14 +80,21 @@ export const { DELETE } = defineRoute({
     ...NOT_FOUND_RESPONSE,
   },
   handler: async ({ params }) => {
-    const deleted = await db
-      .delete(profile)
+    const [target] = await db
+      .select({ id: profile.id })
+      .from(profile)
       .where(eq(profile.id, params.id))
-      .returning({ id: profile.id });
+      .limit(1);
 
-    if (deleted.length === 0) throw ApiError.notFound("Ce profil n'existe pas.");
+    if (!target) throw ApiError.notFound("Ce profil n'existe pas.");
 
+    // Les octets AVANT la ligne : la reference video (identifiant opaque et nom
+    // de l'hebergeur) vit sur cette ligne. Une fois supprimee, plus personne ne
+    // sait a qui reclamer l'effacement, et le fichier reste orphelin.
     await deleteProfileVideo(params.id);
+
+    await db.delete(profile).where(eq(profile.id, params.id));
+
     return { ok: true as const };
   },
 });

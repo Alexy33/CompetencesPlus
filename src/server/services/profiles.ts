@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { profile, profileSkill, user } from "@/db/schema";
 import type { City, ProfileStatus, Sector, Skill, VideoStatus } from "@/lib/vocabulary";
 import { MAJORITY_AGE, isMinor } from "@/lib/age";
+import { NO_VIDEO, describeVideo, type VideoView } from "@/server/video/presentation";
 
 type ProfileRow = typeof profile.$inferSelect;
 
@@ -20,7 +21,11 @@ export interface ProfileCard {
 
 export interface FullProfile extends ProfileCard {
   bio: string;
-  videoUrl: string | null;
+  /**
+   * Etat de la video tel qu'il doit s'afficher. Ni chemin, ni nom de fichier :
+   * l'hebergeur a deja ete interroge (cf. `src/server/video/presentation.ts`).
+   */
+  video: VideoView;
   status: ProfileStatus;
   contactCount: number;
   certifiedAt: string | null;
@@ -74,21 +79,30 @@ export function toCard(row: ProfileRow, name: string, skills: Skill[]): ProfileC
   };
 }
 
+/**
+ * Une video n'est montree au public que si la moderation l'a validee et que
+ * son titulaire est majeur. Le titulaire et l'administration la voient dans
+ * tous les cas.
+ */
+export function videoIsVisibleTo(
+  row: Pick<ProfileRow, "videoStatus">,
+  birthDate: string | null,
+  viewer: ProfileViewer,
+): boolean {
+  const privileged = viewer === "owner" || viewer === "admin";
+  return privileged || (!isMinor(birthDate) && row.videoStatus === "approved");
+}
+
 function toFull(
   row: ProfileRow,
   name: string,
   skills: Skill[],
-  birthDate: string | null,
-  viewer: ProfileViewer,
+  video: VideoView,
 ): FullProfile {
-
-  const privileged = viewer === "owner" || viewer === "admin";
-  const hideVideo = !privileged && (isMinor(birthDate) || row.videoStatus !== "approved");
-
   return {
     ...toCard(row, name, skills),
     bio: row.bio,
-    videoUrl: hideVideo ? null : row.videoUrl,
+    video,
     status: row.status,
     contactCount: row.contactCount,
     certifiedAt: row.certifiedAt?.toISOString() ?? null,
@@ -254,8 +268,14 @@ async function findOne(
       )[0]?.name ?? null)
     : null;
 
+  // Interroger l'hebergeur ne peut pas faire echouer la fiche : `describeVideo`
+  // ne jette jamais, il rend au pire un etat « indisponible ».
+  const video = videoIsVisibleTo(row.profile, row.birthDate, viewer)
+    ? await describeVideo(row.profile)
+    : NO_VIDEO;
+
   return {
-    ...toFull(row.profile, row.name, skills.get(row.profile.id) ?? [], row.birthDate, viewer),
+    ...toFull(row.profile, row.name, skills.get(row.profile.id) ?? [], video),
     views: row.profile.views,
     videoConsent: {
       granted: row.profile.videoConsentGranted,

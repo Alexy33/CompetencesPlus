@@ -7,9 +7,43 @@ import {
   QueryBoolean,
   SectorSchema,
   SkillSchema,
+  VideoProviderSchema,
   VideoStatusSchema,
+  VideoViewStateSchema,
   pageOf,
 } from "./common";
+
+export const VideoPlaybackSchema = named(
+  "VideoPlayback",
+  z.object({
+    kind: z.enum(["stream", "embed"]).meta({
+      description:
+        "stream : octets servis par GET /api/videos/{videoId} (balise video). embed : lecteur tiers a encapsuler.",
+    }),
+    url: z.string(),
+  }),
+);
+
+export const VideoViewSchema = named(
+  "VideoView",
+  z
+    .object({
+      state: VideoViewStateSchema,
+      provider: VideoProviderSchema.nullable().meta({
+        description: "Hebergeur declare sur la fiche. Informatif.",
+      }),
+      playback: VideoPlaybackSchema.nullable().meta({
+        description: "Renseigne uniquement quand state vaut ready.",
+      }),
+      message: z.string().nullable().meta({
+        description: "Message a afficher a la place du lecteur, hors etat ready.",
+      }),
+    })
+    .meta({
+      description:
+        "Etat de la video, hebergeur deja interroge. Aucun chemin de fichier n'est expose : la lecture passe toujours par une adresse controlee.",
+    }),
+);
 
 export const VideoConsentSchema = named(
   "VideoConsent",
@@ -71,7 +105,7 @@ export const ProfileSchema = named(
   "Profile",
   ProfileCardSchema.extend({
     bio: z.string(),
-    videoUrl: z.string().nullable(),
+    video: VideoViewSchema,
     status: ProfileStatusSchema,
     contactCount: z.number().int(),
     certifiedAt: z.iso.datetime().nullable(),
@@ -126,7 +160,10 @@ export const UpdateMyProfileBody = named(
       .max(500)
       .nullable()
       .optional()
-      .meta({ description: "URL de la presentation video (YouTube, Vimeo). null pour la retirer." }),
+      .meta({
+        description:
+          "Lien de presentation video (YouTube, Vimeo). null pour retirer la video. Ce mode d'hebergement est DESACTIVE par defaut (VIDEO_EMBED_ENABLED) : un lien est alors refuse en 403.",
+      }),
     skills: z.array(SkillSchema).max(8).optional(),
   }),
 );

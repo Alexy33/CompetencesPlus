@@ -7,10 +7,16 @@ import type { Skill } from "@/lib/vocabulary";
 import type { OwnProfile } from "@/server/services/profiles";
 import { MAX_SKILLS, type CertificationSummary, type Notification, type ProfileDraft } from "./types";
 
-const UPLOADED_VIDEO_PREFIX = "/api/videos/";
-
-function isUploadedVideo(url: string | null): boolean {
-  return Boolean(url?.startsWith(UPLOADED_VIDEO_PREFIX));
+/**
+ * Lien tiers eventuellement en place. Une video hebergee par le dispositif ne
+ * remplit jamais ce champ : elle n'a pas d'URL a saisir.
+ *
+ * On lit la FORME de la lecture (un lecteur encapsule), pas le nom de
+ * l'hebergeur : le client n'a aucune raison de connaitre la liste.
+ */
+function embedLinkOf(profile: OwnProfile): string {
+  const { playback } = profile.video;
+  return playback?.kind === "embed" ? playback.url : "";
 }
 
 function draftFrom(profile: OwnProfile): ProfileDraft {
@@ -20,17 +26,17 @@ function draftFrom(profile: OwnProfile): ProfileDraft {
     sector: profile.sector,
     city: profile.city,
     bio: profile.bio,
-    videoUrl: isUploadedVideo(profile.videoUrl) ? "" : (profile.videoUrl ?? ""),
+    videoUrl: embedLinkOf(profile),
     skills: profile.skills,
   };
 }
 
-export function useCandidateDashboard(initialProfile: OwnProfile) {
+export function useCandidateDashboard(initialProfile: OwnProfile, embedEnabled: boolean) {
   const [profile, setProfile] = useState(initialProfile);
   const [draft, setDraft] = useState<ProfileDraft>(() => draftFrom(initialProfile));
   const [certification, setCertification] = useState<CertificationSummary | null>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [busy, setBusy] = useState<"save" | "upload" | null>(null);
+  const [busy, setBusy] = useState<"save" | "upload" | "remove" | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -60,7 +66,18 @@ export function useCandidateDashboard(initialProfile: OwnProfile) {
     setBusy("save");
     setMessage(null);
 
-    const videoUrl = draft.videoUrl.trim() || (isUploadedVideo(profile.videoUrl) ? undefined : null);
+    // Le champ « lien » ne pilote la video que si l'hebergeur tiers est allume.
+    // Sinon on n'envoie rien : enregistrer le profil ne doit jamais effacer une
+    // video televersee.
+    const link = draft.videoUrl.trim();
+    const videoUrl = !embedEnabled
+      ? undefined
+      : link
+        ? link
+        : embedLinkOf(profile)
+          ? null
+          : undefined;
+
     const result = await apiSend<OwnProfile>("PATCH", "/api/me/profile", { ...draft, videoUrl });
 
     if (result.ok) {
@@ -80,8 +97,32 @@ export function useCandidateDashboard(initialProfile: OwnProfile) {
 
     if (result.ok) {
       setProfile(result.data);
+      patchDraft({ videoUrl: embedLinkOf(result.data) });
+      setMessage(
+        result.data.video.state === "processing"
+          ? "Vidéo reçue. Elle sera visible dès la fin du traitement."
+          : "Vidéo mise en ligne.",
+      );
+    } else {
+      setMessage(result.message);
+    }
+    setBusy(null);
+  }
+
+  /**
+   * Retrait de la video. Passe par la meme suppression que le retrait du
+   * consentement : les octets partent, pas seulement la ligne en base.
+   */
+  async function removeVideo() {
+    setBusy("remove");
+    setMessage(null);
+
+    const result = await apiSend<OwnProfile>("DELETE", "/api/me/profile/video");
+
+    if (result.ok) {
+      setProfile(result.data);
       patchDraft({ videoUrl: "" });
-      setMessage("Vidéo mise en ligne.");
+      setMessage("Vidéo supprimée du stockage.");
     } else {
       setMessage(result.message);
     }
@@ -99,5 +140,6 @@ export function useCandidateDashboard(initialProfile: OwnProfile) {
     toggleSkill,
     save,
     uploadVideo,
+    removeVideo,
   };
 }

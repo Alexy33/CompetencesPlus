@@ -62,8 +62,9 @@ pour que la personne sache à quoi elle s'engage au moment où elle décide.
 
 Pour un titulaire mineur :
 
-- sa **présentation vidéo n'est pas diffusée publiquement** — `videoUrl` est
-  retiré de la réponse d'API, et l'adresse directe du fichier répond **404** ;
+- sa **présentation vidéo n'est pas diffusée publiquement** — la réponse d'API
+  porte `video.state = "none"`, sans adresse de lecture, et l'adresse directe
+  répond **404** ;
 - son **profil n'apparaît pas** au catalogue consultable sans compte recruteur ;
 - il conserve l'accès à sa propre vidéo, et l'administration y accède pour la
   modération.

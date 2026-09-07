@@ -6,6 +6,13 @@ x-app-env: &app-env
   BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3000}
   NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
   NEXT_TELEMETRY_DISABLED: "1"
+  # Hebergeur video. `local` par defaut ; poser VIDEO_PROVIDER=peertube dans
+  # l'environnement (ou dans .env) bascule sur l'instance ministerielle
+  # factice et met le dispositif en mode degrade.
+  VIDEO_PROVIDER: ${VIDEO_PROVIDER:-local}
+  VIDEO_EMBED_ENABLED: ${VIDEO_EMBED_ENABLED:-false}
+  VIDEO_PEERTUBE_URL: ${VIDEO_PEERTUBE_URL:-}
+  VIDEO_LOCAL_PROCESSING_MS: ${VIDEO_LOCAL_PROCESSING_MS:-0}
 
 services:
   web-dev:

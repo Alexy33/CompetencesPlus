@@ -8,7 +8,9 @@ import {
   SECTORS,
   SKILLS,
   USER_ROLES,
+  VIDEO_PROVIDERS,
   VIDEO_STATUSES,
+  VIDEO_VIEW_STATES,
   mutable,
 } from "@/lib/vocabulary";
 import { named } from "../openapi/schemas";
@@ -30,6 +32,20 @@ export const VideoStatusSchema = named(
       "pending : deposee, en attente de moderation — servie au seul titulaire et a l'administration. approved : diffusable. rejected : refusee, motif communique au candidat.",
   }),
 );
+export const VideoProviderSchema = named(
+  "VideoProvider",
+  z.enum(mutable(VIDEO_PROVIDERS)).meta({
+    description:
+      "Hebergeur de la video. local : stockage du dispositif, servi par une route controlee. peertube : instance video du Ministere (non provisionnee). embed : lien tiers, desactive par defaut.",
+  }),
+);
+export const VideoViewStateSchema = named(
+  "VideoViewState",
+  z.enum(mutable(VIDEO_VIEW_STATES)).meta({
+    description:
+      "none : aucune video. processing : deposee, pas encore lisible. ready : lisible. unavailable : hebergeur muet — la fiche reste servie, le lecteur est remplace par un message.",
+  }),
+);
 export const ContactStatusSchema = named("ContactStatus", z.enum(mutable(CONTACT_STATUSES)));
 export const UserRoleSchema = named("UserRole", z.enum(mutable(USER_ROLES)));
 
@@ -46,6 +62,7 @@ export const ApiErrorSchema = named(
           "conflict",
           "unprocessable",
           "internal",
+          "unavailable",
         ]),
         message: z.string(),
         details: z

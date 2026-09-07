@@ -5,6 +5,7 @@ import { SiteShell } from "@/components/layout/site-shell";
 import { getCurrentSession } from "@/lib/auth-session";
 import { CITIES, SECTORS, SKILLS } from "@/lib/vocabulary";
 import { findProfileByUserId } from "@/server/services/profiles";
+import { videoConfig } from "@/server/video/registry";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +18,13 @@ export default async function CandidatePage() {
 
   return (
     <SiteShell>
-      <CandidateDashboard initialProfile={profile} sectors={SECTORS} cities={CITIES} skills={SKILLS} />
+      <CandidateDashboard
+        initialProfile={profile}
+        sectors={SECTORS}
+        cities={CITIES}
+        skills={SKILLS}
+        embedEnabled={videoConfig().embedEnabled}
+      />
     </SiteShell>
   );
 }

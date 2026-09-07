@@ -36,13 +36,16 @@ export function CandidateDashboard({
   sectors,
   cities,
   skills,
+  embedEnabled,
 }: {
   initialProfile: OwnProfile;
   sectors: readonly Sector[];
   cities: readonly City[];
   skills: readonly Skill[];
+  /** Hébergement par lien tiers activé sur ce déploiement (éteint par défaut). */
+  embedEnabled: boolean;
 }) {
-  const dashboard = useCandidateDashboard(initialProfile);
+  const dashboard = useCandidateDashboard(initialProfile, embedEnabled);
   const { profile, draft, busy } = dashboard;
 
   return (
@@ -78,15 +81,18 @@ export function CandidateDashboard({
 
           <VideoManager
             name={profile.name}
-            videoUrl={profile.videoUrl}
+            video={profile.video}
             draftUrl={draft.videoUrl}
+            embedEnabled={embedEnabled}
             uploading={busy === "upload"}
+            removing={busy === "remove"}
             disabled={busy !== null}
             onDraftUrlChange={(videoUrl) => dashboard.patchDraft({ videoUrl })}
             onUpload={dashboard.uploadVideo}
+            onRemove={dashboard.removeVideo}
             onSave={dashboard.save}
           >
-            {profile.videoUrl ? (
+            {profile.video.state !== "none" ? (
               <VideoModerationNotice moderation={profile.videoModeration} />
             ) : null}
             <ConsentSummary consent={profile.videoConsent} />

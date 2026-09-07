@@ -148,7 +148,8 @@ formulaire, donc un appel direct à l'API ne le contourne pas. Voir
 | `sector` | text (7 secteurs) | NOT NULL | — |
 | `city` | text (8 villes) | NOT NULL | — |
 | `bio` | text | NOT NULL | `''` |
-| `video_url` | text | NULL | — URL YouTube/Vimeo, jamais un fichier |
+| `video_id` | text | NULL, index `profile_video_id_idx` | — identifiant **opaque** rendu par l'hebergeur, jamais un chemin |
+| `video_provider` | text (`local` \| `peertube` \| `embed`) | NULL | — qui sait lire cet identifiant |
 | `status` | text (`pending` \| `published` \| `removed`) | NOT NULL | `'pending'` |
 | `score` | integer | NULL | — dernier score de certification obtenu |
 | `certified_at` | timestamp | NULL | — fait foi pour le badge JEB |

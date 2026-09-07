@@ -7,10 +7,12 @@ import { AUTH_RESPONSES, errorResponse } from "@/server/contracts/common";
 import { MyProfileSchema, UpdateMyProfileBody } from "@/server/contracts/profile";
 import { findProfileByUserId, replaceSkills } from "@/server/services/profiles";
 import {
-  assertVideoConsent,
+  deleteProfileVideo,
+  EmbedProviderDisabledError,
   MissingVideoConsentError,
-  resetVideoModeration,
+  setProfileVideoLink,
 } from "@/server/services/video";
+import { UnsupportedVideoTypeError } from "@/server/video/provider";
 
 export const dynamic = "force-dynamic";
 
@@ -21,14 +23,17 @@ const PROFILE_NOT_FOUND = {
 } as const;
 
 const CONSENT_REQUIRED = {
-  "403": errorResponse("Role insuffisant, ou diffusion video sans consentement en cours.", {
-    error: {
-      code: "forbidden",
-      message:
-        "Aucun consentement en cours pour la diffusion de la video. " +
-        "Acceptez le texte en vigueur avant de mettre une video en ligne ou d'en publier le lien.",
+  "403": errorResponse(
+    "Role insuffisant, diffusion video sans consentement en cours, ou hebergement par lien tiers desactive.",
+    {
+      error: {
+        code: "forbidden",
+        message:
+          "Aucun consentement en cours pour la diffusion de la video. " +
+          "Acceptez le texte en vigueur avant de mettre une video en ligne ou d'en publier le lien.",
+      },
     },
-  }),
+  ),
 } as const;
 
 const PROFILE_VALIDATION = {
@@ -66,8 +71,15 @@ export const { PATCH } = defineRoute({
   path: "/api/me/profile",
   tags: ["Espace demandeur"],
   summary: "Mettre a jour mon profil",
-  description:
-    "Mise a jour partielle : n'envoyez que les champs modifies. Le statut de moderation, le score et les compteurs ne sont pas modifiables ici.",
+  description: [
+    "Mise a jour partielle : n'envoyez que les champs modifies. Le statut de",
+    "moderation, le score et les compteurs ne sont pas modifiables ici.",
+    "",
+    "`videoUrl` confie un lien tiers (YouTube, Vimeo) au fournisseur `embed`,",
+    "**desactive par defaut** : sans `VIDEO_EMBED_ENABLED=true`, la reponse est",
+    "403. `null` retire la video en passant par la suppression du fournisseur,",
+    "octets compris.",
+  ].join("\n"),
   access: "candidate",
   body: UpdateMyProfileBody,
   responses: {
@@ -88,16 +100,10 @@ export const { PATCH } = defineRoute({
         .where(eq(user.id, session.user.id));
     }
 
-    if (typeof body.videoUrl === "string" && body.videoUrl.trim() !== "") {
-      try {
-        await assertVideoConsent(owned.id);
-      } catch (error) {
-        if (error instanceof MissingVideoConsentError) throw ApiError.forbidden(error.message);
-        throw error;
-      }
-    }
+    // La video n'est plus une colonne comme une autre : elle passe par le
+    // fournisseur, seul a savoir ou vivent les octets et comment les effacer.
+    const { name: _name, skills, videoUrl, ...columns } = body;
 
-    const { name: _name, skills, ...columns } = body;
     if (Object.keys(columns).length > 0) {
       await db
         .update(profile)
@@ -107,8 +113,19 @@ export const { PATCH } = defineRoute({
 
     if (skills) await replaceSkills(owned.id, skills);
 
-    if (body.videoUrl !== undefined && body.videoUrl !== owned.videoUrl) {
-      await resetVideoModeration(owned.id);
+    if (videoUrl !== undefined) {
+      if (videoUrl === null || videoUrl.trim() === "") {
+        await deleteProfileVideo(owned.id);
+      } else {
+        try {
+          await setProfileVideoLink(owned.id, videoUrl);
+        } catch (error) {
+          if (error instanceof MissingVideoConsentError) throw ApiError.forbidden(error.message);
+          if (error instanceof EmbedProviderDisabledError) throw ApiError.forbidden(error.message);
+          if (error instanceof UnsupportedVideoTypeError) throw ApiError.unprocessable(error.message);
+          throw error;
+        }
+      }
     }
 
     const updated = await findProfileByUserId(session.user.id);

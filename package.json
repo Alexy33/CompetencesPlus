@@ -13,6 +13,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "db:seed": "tsx src/db/seed/index.ts",
+    "video:migrate": "tsx scripts/migrate-videos.ts",
+    "video:temoin": "tsx scripts/restore-witness.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",

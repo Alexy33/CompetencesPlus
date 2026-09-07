@@ -21,7 +21,7 @@ export default async function ConsentPage() {
 
   return (
     <SiteShell>
-      <ConsentManager initialConsent={profile.videoConsent} hasVideo={Boolean(profile.videoUrl)} />
+      <ConsentManager initialConsent={profile.videoConsent} hasVideo={profile.video.state !== "none"} />
     </SiteShell>
   );
 }

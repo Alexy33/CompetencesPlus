@@ -2,6 +2,7 @@ import { z } from "zod";
 import { named } from "../openapi/schemas";
 import { MAX_PAGE_SIZE } from "@/lib/vocabulary";
 import { ProfileStatusSchema, VideoStatusSchema } from "./common";
+import { VideoViewSchema } from "./profile";
 import { QuestionTypeSchema } from "./questionnaire";
 
 export const AdminStatsSchema = named(
@@ -25,7 +26,9 @@ export const ModerationRowSchema = named(
     id: z.string(),
     name: z.string(),
     title: z.string(),
-    videoUrl: z.string().nullable(),
+    hasVideo: z.boolean().meta({
+      description: "Le profil porte une reference video. L'adresse de lecture n'est pas exposee ici.",
+    }),
     status: ProfileStatusSchema,
     createdAt: z.iso.datetime(),
   }),
@@ -44,7 +47,7 @@ export const VideoModerationRowSchema = named(
     profileId: z.string(),
     name: z.string().meta({ description: "Titulaire de la video." }),
     title: z.string(),
-    videoUrl: z.string().nullable(),
+    video: VideoViewSchema,
     profileStatus: ProfileStatusSchema,
     videoStatus: VideoStatusSchema,
     reason: z.string().nullable(),

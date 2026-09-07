@@ -45,7 +45,7 @@ export const { GET } = defineRoute({
         id: row.profile.id,
         name: row.name,
         title: row.profile.title,
-        videoUrl: row.profile.videoUrl,
+        hasVideo: row.profile.videoId !== null,
         status: row.profile.status,
         createdAt: row.profile.createdAt.toISOString(),
       })),

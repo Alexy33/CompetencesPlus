@@ -1,9 +1,17 @@
-import { PlayCircle } from "lucide-react";
+import { AlertTriangle, Loader2, PlayCircle } from "lucide-react";
 import type { ReactNode } from "react";
 
-import { resolveVideoSource } from "./video-source";
+import { VIDEO_NONE_MESSAGE } from "@/lib/vocabulary";
+import type { VideoView } from "@/server/video/presentation";
 
-export { toEmbedUrl } from "./video-source";
+/**
+ * Lecteur de la video d'un profil.
+ *
+ * Le composant ne sait pas d'ou viennent les octets : il lit l'etat rendu par
+ * l'hebergeur (`VideoView`). Quand il n'y a rien a lire — traitement en cours,
+ * hebergeur muet — il affiche le message a la place du lecteur. La fiche,
+ * elle, reste entiere.
+ */
 
 function VideoFrame({ children }: { children: ReactNode }) {
   return (
@@ -13,12 +21,18 @@ function VideoFrame({ children }: { children: ReactNode }) {
   );
 }
 
-function VideoPlaceholder({ children }: { children: ReactNode }) {
+function VideoPlaceholder({
+  icon,
+  children,
+}: {
+  icon: ReactNode;
+  children: ReactNode;
+}) {
   return (
     <VideoFrame>
       <div className="flex aspect-video w-full flex-col items-center justify-center bg-brand-100 px-6 text-center">
         <div className="flex size-16 items-center justify-center rounded-2xl bg-brand-200 text-brand-800">
-          <PlayCircle aria-hidden="true" className="size-7 stroke-[1.6]" />
+          {icon}
         </div>
         {children}
       </div>
@@ -26,38 +40,54 @@ function VideoPlaceholder({ children }: { children: ReactNode }) {
   );
 }
 
-export function ProfileVideo({ videoUrl, name }: { videoUrl: string | null; name: string }) {
-  const source = resolveVideoSource(videoUrl);
+function PlaceholderText({ children }: { children: ReactNode }) {
+  return (
+    <p className="mt-4 max-w-md font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-brand-800">
+      {children}
+    </p>
+  );
+}
 
-  if (source.kind === "none") {
+export function ProfileVideo({ video, name }: { video: VideoView; name: string }) {
+  if (video.state === "processing") {
     return (
-      <VideoPlaceholder>
-        <p className="mt-4 font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-brand-800">
-          Aucune présentation vidéo
-        </p>
+      <VideoPlaceholder
+        icon={<Loader2 aria-hidden="true" className="size-7 animate-spin stroke-[1.6]" />}
+      >
+        <PlaceholderText>{video.message}</PlaceholderText>
       </VideoPlaceholder>
     );
   }
 
-  if (source.kind === "upload") {
+  if (video.state === "unavailable") {
     return (
-      <VideoFrame>
-        <video
-          src={source.src}
-          controls
-          preload="metadata"
-          playsInline
-          className="aspect-video w-full"
-        />
-      </VideoFrame>
+      <VideoPlaceholder
+        icon={<AlertTriangle aria-hidden="true" className="size-7 stroke-[1.6]" />}
+      >
+        <PlaceholderText>{video.message}</PlaceholderText>
+      </VideoPlaceholder>
     );
   }
 
-  if (source.kind === "embed") {
+  if (video.state === "ready" && video.playback) {
+    if (video.playback.kind === "stream") {
+      return (
+        <VideoFrame>
+          <video
+            src={video.playback.url}
+            controls
+            preload="metadata"
+            playsInline
+            className="aspect-video w-full"
+          />
+        </VideoFrame>
+      );
+    }
+
     return (
       <VideoFrame>
         <iframe
-          src={source.src}
+          src={video.playback.url}
           title={`Présentation vidéo de ${name}`}
           allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
@@ -68,11 +98,8 @@ export function ProfileVideo({ videoUrl, name }: { videoUrl: string | null; name
   }
 
   return (
-    <VideoPlaceholder>
-      <p className="mt-5 max-w-md break-all font-mono text-xs text-ink-soft">{source.src}</p>
-      <p className="mt-2 font-mono text-xs font-semibold uppercase tracking-wider text-ink-soft">
-        Format d&apos;hébergement non pris en charge
-      </p>
+    <VideoPlaceholder icon={<PlayCircle aria-hidden="true" className="size-7 stroke-[1.6]" />}>
+      <PlaceholderText>{VIDEO_NONE_MESSAGE}</PlaceholderText>
     </VideoPlaceholder>
   );
 }

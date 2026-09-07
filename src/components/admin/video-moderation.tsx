@@ -6,12 +6,13 @@ import { Check, Loader2, ShieldQuestion, X } from "lucide-react";
 import { ProfileVideo } from "@/components/catalogue/profile-video";
 import { formatTimestamp } from "@/lib/dates";
 import type { ProfileStatus, VideoStatus } from "@/lib/vocabulary";
+import type { VideoView } from "@/server/video/presentation";
 
 export type VideoRow = {
   profileId: string;
   name: string;
   title: string;
-  videoUrl: string | null;
+  video: VideoView;
   profileStatus: ProfileStatus;
   videoStatus: VideoStatus;
   reason: string | null;
@@ -84,7 +85,7 @@ export function VideoModeration({
         <div className="mt-6 space-y-4">
           {rows.map((row) => (
             <article key={row.profileId} className="grid gap-5 rounded-2xl bg-white p-5 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)]">
-              <ProfileVideo videoUrl={row.videoUrl} name={row.name} />
+              <ProfileVideo video={row.video} name={row.name} />
 
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">

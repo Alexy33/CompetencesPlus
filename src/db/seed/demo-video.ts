@@ -1,15 +1,15 @@
 import { spawn } from "node:child_process";
-import { mkdir } from "node:fs/promises";
-import { dirname, join } from "node:path";
+import { mkdtemp, open, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { Readable } from "node:stream";
+
+import type { StoredVideo } from "@/server/video/provider";
+import { activeVideoProvider } from "@/server/video/registry";
 
 const BACKGROUND = "0x2c455d";
 const RESOLUTION = "1280x720";
 const DURATION_SECONDS = 8;
-
-function uploadDirectory(): string {
-  const dbPath = (process.env.DATABASE_URL ?? "file:./local.db").replace(/^file:/, "");
-  return process.env.VIDEO_UPLOAD_DIR?.trim() ?? join(dirname(dbPath), "uploads");
-}
 
 function sanitizeForDrawtext(value: string): string {
   return value
@@ -36,24 +36,40 @@ function runFfmpeg(args: string[]): Promise<void> {
   });
 }
 
-export async function generateDemoVideo(
-  profileId: string,
-  name: string,
-  title: string,
-): Promise<string> {
-  const directory = uploadDirectory();
-  await mkdir(directory, { recursive: true });
+/**
+ * Fabrique une video de demonstration et la confie a l'hebergeur actif.
+ *
+ * Le seed ne connait aucun chemin de stockage : il produit un fichier
+ * temporaire, le pousse par `VideoProvider.store()` et rend la reference
+ * opaque a inscrire en base — exactement comme le ferait un vrai depot.
+ */
+export async function generateDemoVideo(name: string, title: string): Promise<StoredVideo> {
+  const workspace = await mkdtemp(join(tmpdir(), "profilsactifs-seed-"));
+  const scratch = join(workspace, "presentation.mp4");
 
-  await runFfmpeg([
-    "-y",
-    "-loglevel", "error",
-    "-f", "lavfi", "-i", `color=c=${BACKGROUND}:s=${RESOLUTION}:d=${DURATION_SECONDS}`,
-    "-f", "lavfi", "-i", "anullsrc=channel_layout=stereo:sample_rate=44100",
-    "-vf", overlayFilter(name, title),
-    "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac",
-    "-shortest", "-movflags", "+faststart",
-    join(directory, `${profileId}.mp4`),
-  ]);
+  try {
+    await runFfmpeg([
+      "-y",
+      "-loglevel", "error",
+      "-f", "lavfi", "-i", `color=c=${BACKGROUND}:s=${RESOLUTION}:d=${DURATION_SECONDS}`,
+      "-f", "lavfi", "-i", "anullsrc=channel_layout=stereo:sample_rate=44100",
+      "-vf", overlayFilter(name, title),
+      "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac",
+      "-shortest", "-movflags", "+faststart",
+      scratch,
+    ]);
 
-  return `/api/videos/${profileId}`;
+    const handle = await open(scratch, "r");
+    try {
+      return await activeVideoProvider().store({
+        body: Readable.toWeb(handle.createReadStream()) as ReadableStream<Uint8Array>,
+        mimeType: "video/mp4",
+        maxBytes: 100 * 1024 * 1024,
+      });
+    } finally {
+      await handle.close().catch(() => {});
+    }
+  } finally {
+    await rm(workspace, { recursive: true, force: true });
+  }
 }

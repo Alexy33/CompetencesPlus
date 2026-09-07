@@ -33,7 +33,7 @@ que le contenu change :
 | --- | --- |
 | Téléversement d'un fichier | `PUT /api/me/profile/video` (dans `saveProfileVideo`) |
 | Suppression du fichier | `DELETE /api/me/profile/video` |
-| Changement du lien YouTube/Vimeo | `PATCH /api/me/profile` (si `videoUrl` diffère) |
+| Changement du lien YouTube/Vimeo | `PATCH /api/me/profile` (`videoUrl`) |
 | Retrait du consentement (R.3) | `DELETE /api/me/profile/video/consent` |
 
 La décision précédente est **effacée**, pas conservée : elle portait sur un autre
@@ -101,7 +101,7 @@ Deux verrous, volontairement redondants :
    l'administration. `404` et non `403` : un `403` confirmerait l'existence de
    la vidéo à qui la demande.
 2. **Le contrat** : `toFull` (`src/server/services/profiles.ts`) retire
-   `videoUrl` de la fiche pour tout autre lecteur — sinon la page afficherait un
+   `video` de la fiche pour tout autre lecteur — sinon la page afficherait un
    lecteur qui ne charge jamais.
 
 Le premier suffit à la sécurité ; le second évite une interface qui ment. C'est
@@ -130,7 +130,7 @@ Kervella** est refusée avec motif, les autres sont validées.
 `e2e/video-moderation.spec.ts` — quatre scénarios :
 
 1. dépôt → `pending`, `404` pour l'anonyme **et** pour le recruteur connecté,
-   `200` pour le titulaire et l'administration, `videoUrl` absente de la fiche
+   `200` pour le titulaire et l'administration, `video.state = none` sur la fiche
    publique ;
 2. validation → la même URL répond `200` à un visiteur anonyme ;
 3. refus sans motif → `400` ; refus motivé → `404` public et motif rendu au
