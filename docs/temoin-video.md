@@ -29,20 +29,52 @@ Sauvegarde prise avant migration, conservée dans le volume :
 
 | | |
 | --- | --- |
-| Nouvelle référence | `video_id = b1131f63732db0ab95da67861b5156a4`, `video_provider = local` |
+| Référence issue de la migration | `video_id = b1131f63732db0ab95da67861b5156a4`, `video_provider = local` |
 | Fichier | `/data/videos/b1/b1131f63732db0ab95da67861b5156a4.mp4` |
 | Taille | 30 809 121 octets — **inchangée** |
 | Empreinte | `e2c53b1bb3275ec01da52d26c0f393c9` — **inchangée** |
 
 Le fichier a été **déplacé**, pas recopié : `/data/uploads` est vide.
 
+### Référence actuelle
+
+Le témoin a été remplacé puis retiré au cours d'une session de recette
+manuelle — comportement normal du dispositif, pas une régression : un dépôt
+efface les octets du précédent et repasse la modération en `pending` (R.2), un
+retrait efface les octets. La vidéo d'origine a été **restaurée depuis la
+sauvegarde**, par le chemin applicatif réel (`PUT /api/me/profile/video` sous
+l'identité du titulaire, puis validation par la modération) — aucun SQL à la
+main, aucun fichier posé directement dans le stockage.
+
+| | |
+| --- | --- |
+| Référence en vigueur | `video_id = 1ec671ff04755836c9d7a5fbb53a1b47`, `video_provider = local` |
+| Fichier | `/data/videos/1e/1ec671ff04755836c9d7a5fbb53a1b47.mp4` |
+| Taille | 30 809 121 octets — **inchangée** |
+| Empreinte | `e2c53b1bb3275ec01da52d26c0f393c9` — **inchangée** |
+| Modération | `approved` |
+
+L'identifiant change à chaque dépôt : c'est le principe même d'un identifiant
+opaque. Ce qui doit rester constant, et qui l'est, ce sont les octets.
+
+Pour restaurer de nouveau, la sauvegarde étant toujours dans le volume :
+
+```bash
+docker cp profilsactifs-dev:/data/sauvegarde-avant-video/uploads/efd93871-3699-41ed-ab68-bff8afca1f87.mp4 /tmp/temoin.mp4
+curl -s -c /tmp/c.txt -X POST localhost:3000/api/auth/sign-in/email \
+  -H 'Content-Type: application/json' -d '{"email":"amina@exemple.fr","password":"demo1234"}'
+curl -s -b /tmp/c.txt -X PUT localhost:3000/api/me/profile/video \
+  -H 'Content-Type: video/mp4' --data-binary @/tmp/temoin.mp4
+# puis valider la video depuis /admin, onglet Videos
+```
+
 ## Vérifications
 
 | # | Vérification | Résultat |
 | --- | --- | --- |
 | 1 | `GET /profils/efd93871-…` | `200`, fiche complète |
-| 2 | La vidéo s'affiche | `<video src="/api/videos/b1131f63…">`, lecteur de 1 min 41 s — capture `captures/video-fournisseur/01-lecture-hebergeur-local.png` |
-| 3 | `GET /api/videos/b1131f63…` | `200`, `content-length: 30809121`, `accept-ranges: bytes` |
+| 2 | La vidéo s'affiche | `<video src="/api/videos/…">`, lecteur de 1 min 41 s — capture `captures/video-fournisseur/01-lecture-hebergeur-local.png` |
+| 3 | `GET /api/videos/<identifiant opaque>` | `200`, `content-length: 30809121`, `accept-ranges: bytes` |
 | 4 | Lecture par intervalle | `206`, `content-range: bytes 0-99/30809121` |
 | 5 | L'ancienne adresse ne répond plus | `GET /api/videos/efd93871-…` → `404` |
 | 6 | Aucun chemin physique servi | `/videos/b1/…mp4`, `/uploads/…mp4`, `/public/videos/…` → `404` |
