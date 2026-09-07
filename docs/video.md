@@ -153,6 +153,23 @@ make video-degraded          # équivaut à VIDEO_PROVIDER=peertube docker compo
 Puis ouvrir une fiche portant une vidéo. Capture :
 `captures/video-fournisseur/02-mode-degrade-peertube.png`.
 
+Ce qui marche, et ce qui ne marche pas, dans cet état :
+
+| Action | Réponse | Pourquoi |
+| --- | --- | --- |
+| Consulter une fiche | `200`, message à la place du lecteur | c'est le but |
+| Modifier son profil | `200` | la vidéo n'est pas le profil |
+| **Déposer une vidéo** | **`503`** | l'instance ministérielle n'existe pas : il n'y a rien à téléverser |
+| Lire une vidéo | `404` | aucun octet n'est servi par un hébergeur hors service |
+| Retirer sa vidéo | `200`, **octets supprimés** | la suppression sollicite l'hébergeur réel, en service ou non |
+
+La dernière ligne est volontaire : le retrait du consentement (R.3) est une
+obligation, elle ne peut pas dépendre de la disponibilité d'un hébergeur. Elle
+est aussi le seul piège de cet état — la fiche annonce une indisponibilité
+*temporaire* alors que le fichier existe toujours. Le bouton « Retirer la
+vidéo » demande donc confirmation, en disant explicitement que l'hébergeur est
+seulement injoignable et que le retrait, lui, est définitif.
+
 ## 7. Migration de l'existant
 
 Deux temps, dans cet ordre ou non — le script rattrape les deux cas :

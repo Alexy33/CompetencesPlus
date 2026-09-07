@@ -36,8 +36,10 @@ video-migrate: ## Range les videos existantes dans le stockage du fournisseur (r
 	docker compose --profile dev exec web-dev npm run video:migrate
 
 video-degraded: ## Relance en mode degrade (hebergeur ministeriel factice, indisponible)
-	VIDEO_PROVIDER=peertube docker compose --profile dev up -d --force-recreate web-dev
+	VIDEO_PROVIDER=peertube VIDEO_PEERTUBE_URL=https://video.exemple.gouv.fr \
+		docker compose --profile dev up -d --force-recreate web-dev
 	@echo "VIDEO_PROVIDER=peertube — ouvrez une fiche profil : elle reste intacte, sans lecteur."
+	@echo "Le depot d'une video repond 503 : l'instance ministerielle n'existe pas encore."
 
 openapi: ## Exporte la specification dans ./openapi.json
 	docker compose --profile dev exec web-dev npm run openapi:export

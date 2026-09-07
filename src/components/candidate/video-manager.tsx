@@ -12,6 +12,26 @@ import type { VideoView } from "@/server/video/presentation";
 const MAX_UPLOAD_LABEL = "Importer une vidéo (100 Mo max.)";
 const ACCEPTED_TYPES = "video/mp4,video/webm,video/ogg,video/quicktime";
 
+/**
+ * Le retrait détruit les octets, sans corbeille ni annulation possible.
+ *
+ * Le cas piégeux est l'hébergeur injoignable : la fiche annonce une
+ * indisponibilité *temporaire*, alors que le fichier, lui, existe toujours.
+ * Retirer la vidéo pour « débloquer » l'affichage la supprimerait pour de bon.
+ * On le dit avant, pas après.
+ */
+function removalWarning(state: VideoView["state"]): string {
+  const irreversible =
+    "Le fichier vidéo sera supprimé définitivement du stockage. Cette action est irréversible.";
+
+  return state === "unavailable"
+    ? "L'hébergeur vidéo ne répond pas pour le moment, mais votre vidéo n'est pas perdue : " +
+        "elle réapparaîtra dès qu'il sera de nouveau joignable.\n\n" +
+        irreversible +
+        "\n\nVoulez-vous vraiment la retirer ?"
+    : `${irreversible}\n\nVoulez-vous vraiment la retirer ?`;
+}
+
 export function VideoManager({
   name,
   video,
@@ -102,7 +122,9 @@ export function VideoManager({
               block
               tone="outline"
               className="mt-3"
-              onClick={onRemove}
+              onClick={() => {
+                if (window.confirm(removalWarning(video.state))) onRemove();
+              }}
               disabled={disabled}
             >
               {removing ? (
