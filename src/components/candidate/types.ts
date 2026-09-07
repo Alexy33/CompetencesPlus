@@ -8,6 +8,12 @@ export interface CertificationSummary {
   questionCount: number;
   score: number | null;
   passed: boolean | null;
+  questionnaireVersion: number;
+  currentQuestionnaireVersion: number;
+  /** Certification obtenue sous une version anterieure : a repasser. */
+  outdated: boolean;
+  catchUp: boolean;
+  pendingQuestionIds: string[];
 }
 
 export interface Notification {

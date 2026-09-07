@@ -329,15 +329,15 @@
           "Administration"
         ],
         "summary": "Questions et ponderations",
-        "description": "Vue complete du bareme, ponderations et points par reponse compris.",
+        "description": "Vue complete du bareme en vigueur, ponderations et points par reponse compris, avec sa version.",
         "operationId": "getAdminQuestions",
         "responses": {
           "200": {
-            "description": "Questions dans l'ordre d'affichage.",
+            "description": "Questions dans l'ordre du questionnaire.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AdminQuestionList"
+                  "$ref": "#/components/schemas/AdminQuestionnaire"
                 }
               }
             }
@@ -381,121 +381,30 @@
           }
         ]
       },
-      "post": {
+      "put": {
         "tags": [
           "Administration"
         ],
-        "summary": "Ajouter une question",
-        "description": "La question est ajoutee en fin de questionnaire et compte des la tentative suivante.",
-        "operationId": "postAdminQuestions",
+        "summary": "Publier une nouvelle version du questionnaire",
+        "description": "Enregistre le questionnaire fourni sous une version NOUVELLE (la plus haute + 1). Les versions deja publiees ne sont jamais modifiees : les tentatives ouvertes ou deja notees conservent leur bareme d'origine. La nouvelle version entre en vigueur pour les tentatives ouvertes ensuite.",
+        "operationId": "putAdminQuestions",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateQuestionInput"
+                "$ref": "#/components/schemas/PublishQuestionnaireInput"
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "Question creee.",
+            "description": "Nouvelle version publiee.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AdminQuestion"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Parametres ou corps de requete invalides.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Aucune session valide.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                },
-                "example": {
-                  "error": {
-                    "code": "unauthorized",
-                    "message": "Authentification requise."
-                  }
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Session valide, mais role insuffisant.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                },
-                "example": {
-                  "error": {
-                    "code": "forbidden",
-                    "message": "Cette ressource est reservee au role « candidate »."
-                  }
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "sessionCookie": []
-          }
-        ]
-      }
-    },
-    "/api/admin/questions/{id}": {
-      "patch": {
-        "tags": [
-          "Administration"
-        ],
-        "summary": "Modifier une question",
-        "description": "Mise a jour partielle. Fournir `options` remplace TOUTES les reponses de la question : les reponses deja enregistrees par les candidats en cours de tentative peuvent alors ne plus correspondre.",
-        "operationId": "patchAdminQuestionsById",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "minLength": 1
-            },
-            "description": "Identifiant de la ressource."
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateQuestionInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Question mise a jour.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AdminQuestion"
+                  "$ref": "#/components/schemas/AdminQuestionnaire"
                 }
               }
             }
@@ -542,8 +451,8 @@
               }
             }
           },
-          "404": {
-            "description": "Ressource introuvable.",
+          "409": {
+            "description": "Publication impossible : questionnaire refuse par la validation, ou dossier non inscriptible.",
             "content": {
               "application/json": {
                 "schema": {
@@ -551,93 +460,8 @@
                 },
                 "example": {
                   "error": {
-                    "code": "not_found",
-                    "message": "Ressource introuvable."
-                  }
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "sessionCookie": []
-          }
-        ]
-      },
-      "delete": {
-        "tags": [
-          "Administration"
-        ],
-        "summary": "Supprimer une question",
-        "description": "Les reponses deja enregistrees pour cette question sont supprimees avec elle (cascade), ce qui modifie le bareme des tentatives en cours.",
-        "operationId": "deleteAdminQuestionsById",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "minLength": 1
-            },
-            "description": "Identifiant de la ressource."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Question supprimee.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Ok"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Aucune session valide.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                },
-                "example": {
-                  "error": {
-                    "code": "unauthorized",
-                    "message": "Authentification requise."
-                  }
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Session valide, mais role insuffisant.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                },
-                "example": {
-                  "error": {
-                    "code": "forbidden",
-                    "message": "Cette ressource est reservee au role « candidate »."
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Ressource introuvable.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                },
-                "example": {
-                  "error": {
-                    "code": "not_found",
-                    "message": "Ressource introuvable."
+                    "code": "conflict",
+                    "message": "Questionnaire de certification invalide.\n\nQuestion « q3 » (« weight ») :\nInvalid input: expected number, received undefined."
                   }
                 }
               }
@@ -1376,7 +1200,7 @@
             }
           },
           "400": {
-            "description": "Corps invalide : `answers` absent, ou une valeur non entiere.",
+            "description": "Corps invalide : `answers` absent, ou une valeur non textuelle.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1430,7 +1254,7 @@
             }
           },
           "422": {
-            "description": "Corps valide, mais une cle ne designe aucune question, ou une valeur ne figure dans aucune option de la question visee.",
+            "description": "Corps valide, mais une cle ne designe aucune question, ou l'option choisie ne figure pas parmi celles de la question visee.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1453,13 +1277,72 @@
         ]
       }
     },
+    "/api/me/certification/catch-up": {
+      "post": {
+        "tags": [
+          "Certification"
+        ],
+        "summary": "Mettre a jour sa certification",
+        "description": "Ouvre une tentative sur le questionnaire en vigueur en ne reposant que les questions nouvelles ou dont le bareme a change : les autres reponses sont reportees. Sans effet si la certification est deja a jour, ou si une tentative est en cours.",
+        "operationId": "postMeCertificationCatch-up",
+        "responses": {
+          "200": {
+            "description": "Rattrapage ouvert. `pendingQuestionIds` liste les questions restant a repondre.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CertificationState"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Aucune session valide.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "error": {
+                    "code": "unauthorized",
+                    "message": "Authentification requise."
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Session valide, mais role insuffisant.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "error": {
+                    "code": "forbidden",
+                    "message": "Cette ressource est reservee au role « candidate »."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ]
+      }
+    },
     "/api/me/certification/restart": {
       "post": {
         "tags": [
           "Certification"
         ],
         "summary": "Repasser le questionnaire",
-        "description": "Ouvre une tentative vierge. Les tentatives precedentes sont conservees pour le suivi du dispositif ; aucun delai de carence n'est applique.",
+        "description": "Ouvre une tentative vierge. Les tentatives precedentes sont conservees pour le suivi du dispositif ; aucun delai de carence n'est applique. Si la certification porte sur une version anterieure du questionnaire, un rattrapage est ouvert a la place : seules les questions nouvelles ou modifiees sont reposees.",
         "operationId": "postMeCertificationRestart",
         "responses": {
           "200": {
@@ -3741,6 +3624,12 @@
         ],
         "additionalProperties": false
       },
+      "QuestionType": {
+        "type": "string",
+        "enum": [
+          "single_choice"
+        ]
+      },
       "VideoPlayback": {
         "type": "object",
         "properties": {
@@ -4335,6 +4224,9 @@
           "text": {
             "type": "string"
           },
+          "type": {
+            "$ref": "#/components/schemas/QuestionType"
+          },
           "position": {
             "type": "integer"
           },
@@ -4361,6 +4253,7 @@
         "required": [
           "id",
           "text",
+          "type",
           "position",
           "options"
         ],
@@ -4374,6 +4267,9 @@
           },
           "text": {
             "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/QuestionType"
           },
           "position": {
             "type": "integer"
@@ -4411,6 +4307,7 @@
         "required": [
           "id",
           "text",
+          "type",
           "position",
           "options",
           "weight"
@@ -4420,6 +4317,10 @@
       "Questionnaire": {
         "type": "object",
         "properties": {
+          "version": {
+            "type": "integer",
+            "description": "Version du questionnaire, declaree dans le fichier versionne."
+          },
           "questions": {
             "type": "array",
             "items": {
@@ -4432,6 +4333,7 @@
           }
         },
         "required": [
+          "version",
           "questions",
           "threshold"
         ],
@@ -4452,15 +4354,38 @@
           "answers": {
             "type": "object",
             "additionalProperties": {
-              "type": "integer"
+              "type": "string"
             },
-            "description": "Reponses enregistrees, indexees par identifiant de question."
+            "description": "Reponses enregistrees : identifiant de question -> identifiant de l'option choisie. Les points ne sont pas exposes."
           },
           "answered": {
             "type": "integer"
           },
           "questionCount": {
             "type": "integer"
+          },
+          "questionnaireVersion": {
+            "type": "integer",
+            "description": "Version du questionnaire de la tentative. Figee a son ouverture : une tentative n'est jamais rejouee sous une version ulterieure."
+          },
+          "currentQuestionnaireVersion": {
+            "type": "integer",
+            "description": "Version du questionnaire actuellement en vigueur."
+          },
+          "outdated": {
+            "type": "boolean",
+            "description": "Vrai si la certification obtenue porte sur une version anterieure : le candidat doit repasser le questionnaire. Le badge deja acquis reste visible des recruteurs."
+          },
+          "catchUp": {
+            "type": "boolean",
+            "description": "Vrai si la tentative en cours est un rattrapage de certification."
+          },
+          "pendingQuestionIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Rattrapage : questions restant a repondre. Les autres reponses ont ete reportees depuis la tentative precedente. Vide pour une passation ordinaire."
           },
           "threshold": {
             "type": "integer"
@@ -4484,6 +4409,11 @@
           "answers",
           "answered",
           "questionCount",
+          "questionnaireVersion",
+          "currentQuestionnaireVersion",
+          "outdated",
+          "catchUp",
+          "pendingQuestionIds",
           "threshold",
           "score",
           "passed",
@@ -4497,10 +4427,9 @@
           "answers": {
             "type": "object",
             "additionalProperties": {
-              "type": "integer",
-              "minimum": 0
+              "type": "string"
             },
-            "description": "Reponses a fusionner avec celles deja enregistrees."
+            "description": "Reponses a fusionner avec celles deja enregistrees : identifiant de question -> identifiant de l'option choisie. Les points rapportes ne transitent jamais par le client, ils sont resolus par le serveur depuis le questionnaire de la tentative."
           }
         },
         "required": [
@@ -4524,13 +4453,28 @@
           "certified": {
             "type": "boolean",
             "description": "Etat de certification du profil apres calcul."
+          },
+          "questionnaireVersion": {
+            "type": "integer",
+            "description": "Version du questionnaire ayant servi au calcul."
+          },
+          "currentQuestionnaireVersion": {
+            "type": "integer",
+            "description": "Version du questionnaire actuellement en vigueur."
+          },
+          "outdated": {
+            "type": "boolean",
+            "description": "Vrai si une version plus recente est parue : le questionnaire est a repasser."
           }
         },
         "required": [
           "score",
           "threshold",
           "passed",
-          "certified"
+          "certified",
+          "questionnaireVersion",
+          "currentQuestionnaireVersion",
+          "outdated"
         ],
         "additionalProperties": false
       },
@@ -5098,6 +5042,82 @@
         ],
         "additionalProperties": false
       },
+      "PublishQuestionnaireInput": {
+        "type": "object",
+        "properties": {
+          "questions": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64
+                },
+                "text": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 500
+                },
+                "type": {
+                  "$ref": "#/components/schemas/QuestionType"
+                },
+                "weight": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 5
+                },
+                "options": {
+                  "minItems": 2,
+                  "maxItems": 6,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 64
+                      },
+                      "label": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 300
+                      },
+                      "value": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Points rapportes par cette reponse."
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "label",
+                      "value"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "text",
+                "type",
+                "weight",
+                "options"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Questionnaire complet. Il est publie comme NOUVELLE version : les versions existantes ne sont jamais modifiees, et les tentatives en cours conservent la leur."
+          }
+        },
+        "required": [
+          "questions"
+        ],
+        "additionalProperties": false
+      },
       "UpdateQuestionInput": {
         "type": "object",
         "properties": {
@@ -5330,9 +5350,20 @@
         ],
         "additionalProperties": false
       },
-      "AdminQuestionList": {
+      "AdminQuestionnaire": {
         "type": "object",
         "properties": {
+          "version": {
+            "type": "integer",
+            "description": "Version du questionnaire en vigueur."
+          },
+          "versions": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "description": "Toutes les versions publiees, de la plus ancienne a la plus recente."
+          },
           "items": {
             "type": "array",
             "items": {
@@ -5341,6 +5372,8 @@
           }
         },
         "required": [
+          "version",
+          "versions",
           "items"
         ],
         "additionalProperties": false

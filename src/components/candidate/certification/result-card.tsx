@@ -1,6 +1,6 @@
 "use client";
 
-import { BadgeCheck, RotateCcw } from "lucide-react";
+import { AlertTriangle, BadgeCheck, RotateCcw } from "lucide-react";
 
 import { Action, ActionLink } from "@/components/common/action";
 import type { CertificationResult } from "./types";
@@ -44,13 +44,43 @@ export function ResultCard({
             : `Le seuil est de ${result.threshold}/100. Vous pouvez repasser le questionnaire sans délai.`}
         </p>
 
+        <p className="mt-4 font-mono text-xs text-ink-soft">
+          Questionnaire version {result.questionnaireVersion}
+        </p>
+
+        {result.outdated ? (
+          <div
+            role="status"
+            className="mx-auto mt-5 flex max-w-xl gap-2 rounded-xl bg-warning/15 p-4 text-left text-sm text-warning-fg"
+          >
+            <AlertTriangle aria-hidden="true" className="mt-0.5 size-5 shrink-0" />
+            <p className="leading-relaxed">
+              <strong>Vous devez repasser le questionnaire.</strong> Ce résultat porte sur la
+              version {result.questionnaireVersion}, or la version{" "}
+              {result.currentQuestionnaireVersion} est désormais en vigueur. Votre badge reste
+              visible des recruteurs jusqu’à votre nouvelle passation.
+            </p>
+          </div>
+        ) : null}
+
         <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-          <ActionLink href="/candidate" size="lg" className="rounded-2xl">
+          <ActionLink
+            href="/candidate"
+            size="lg"
+            tone={result.outdated ? "outline" : "action"}
+            className="rounded-2xl"
+          >
             Retour à mon espace
           </ActionLink>
-          <Action tone="outline" size="lg" className="rounded-2xl" onClick={onRestart} disabled={busy}>
+          <Action
+            tone={result.outdated ? "action" : "outline"}
+            size="lg"
+            className="rounded-2xl"
+            onClick={onRestart}
+            disabled={busy}
+          >
             <RotateCcw aria-hidden="true" className="size-4" />
-            Repasser
+            {result.outdated ? "Repasser en version " + result.currentQuestionnaireVersion : "Repasser"}
           </Action>
         </div>
       </section>

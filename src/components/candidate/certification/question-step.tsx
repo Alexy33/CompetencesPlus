@@ -56,10 +56,10 @@ export function QuestionStep({
   question: CertificationQuestion;
   position: number;
   total: number;
-  selected: number | undefined;
+  selected: string | undefined;
   busy: boolean;
   error: string | null;
-  onAnswer: (value: number) => void;
+  onAnswer: (optionId: string) => void;
   onPrevious: () => void;
   onNext: () => void;
   onSubmit: () => void;
@@ -83,13 +83,13 @@ export function QuestionStep({
       </h2>
 
       <div className="mt-8 grid gap-3">
-        {question.options.map((option, optionIndex) => (
+        {question.options.map((option) => (
           <OptionButton
             key={option.id}
             label={option.label}
-            active={selected === optionIndex}
+            active={selected === option.id}
             disabled={busy}
-            onSelect={() => onAnswer(optionIndex)}
+            onSelect={() => onAnswer(option.id)}
           />
         ))}
       </div>

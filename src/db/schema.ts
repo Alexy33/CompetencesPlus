@@ -188,6 +188,12 @@ export const company = sqliteTable("company", {
     .default(sql`(unixepoch())`),
 });
 
+/**
+ * @deprecated Le questionnaire est desormais versionne dans
+ * `certification/questions.vN.json`. Ces deux tables ne sont plus lues ni
+ * ecrites par l'application ; elles sont conservees pour ne pas detruire
+ * l'historique des installations existantes.
+ */
 export const question = sqliteTable("question", {
   id: text("id").primaryKey(),
   text: text("text").notNull(),
@@ -218,6 +224,17 @@ export const certificationAttempt = sqliteTable("certification_attempt", {
   status: text("status", { enum: ["in_progress", "submitted"] })
     .notNull()
     .default("in_progress"),
+
+  // Version du questionnaire sous laquelle la tentative a ete ouverte.
+  // Figee a la creation : une tentative v1 reste v1 apres le passage a v2.
+  questionnaireVersion: integer("questionnaire_version").notNull(),
+
+  // Rattrapage : tentative ouverte pour une mise a jour de certification, ou
+  // seules les questions modifiees sont reposees. Marque explicitement, et non
+  // deduit des reponses reportees : une version peut tout modifier a la fois,
+  // auquel cas aucune reponse n'est reportee.
+  catchUp: integer("catch_up", { mode: "boolean" }).notNull().default(false),
+
   score: integer("score"),
   passed: integer("passed", { mode: "boolean" }),
   submittedAt: integer("submitted_at", { mode: "timestamp" }),
@@ -232,10 +249,16 @@ export const certificationAnswer = sqliteTable(
     attemptId: text("attempt_id")
       .notNull()
       .references(() => certificationAttempt.id, { onDelete: "cascade" }),
-    questionId: text("question_id")
-      .notNull()
-      .references(() => question.id, { onDelete: "cascade" }),
-    value: integer("value").notNull(),
+    // Identifiant de question issu de certification/questions.vN.json.
+    // Pas de cle etrangere : le questionnaire n'est plus en base, et les
+    // reponses d'une tentative doivent survivre au passage a une version
+    // ulterieure qui ne contiendrait plus cette question.
+    questionId: text("question_id").notNull(),
+
+    // Option choisie, telle qu'identifiee dans questions.vN.json. On stocke le
+    // CHOIX, pas les points : le bareme appartient au questionnaire, et une
+    // reponse doit rester interpretable meme si les points changent.
+    optionId: text("option_id").notNull(),
   },
   (table) => [primaryKey({ columns: [table.attemptId, table.questionId] })],
 );

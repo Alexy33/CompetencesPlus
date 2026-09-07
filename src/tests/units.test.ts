@@ -78,13 +78,14 @@ describe("back — computeScore (bareme de la certification)", () => {
   const question = (id: string, weight: number, values: number[]): LoadedQuestion => ({
     id,
     text: id,
+    type: "single_choice",
     weight,
     position: 0,
     options: values.map((value, index) => ({ id: `${id}-${index}`, label: `${value}`, value })),
   });
 
   it("rend 100 quand toutes les meilleures reponses sont choisies", () => {
-    expect(computeScore([question("a", 1, [0, 1, 2])], { a: 2 })).toBe(100);
+    expect(computeScore([question("a", 1, [0, 1, 2])], { a: "a-2" })).toBe(100);
   });
 
   it("rend 0 sans aucune reponse", () => {

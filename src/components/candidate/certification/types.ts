@@ -9,12 +9,19 @@ export interface CertificationQuestion {
 
 export interface CertificationState {
   status: CertificationStatus;
-  answers: Record<string, number>;
+  /** Identifiant de question -> identifiant de l'option choisie. */
+  answers: Record<string, string>;
   answered: number;
   questionCount: number;
   threshold: number;
   score: number | null;
   passed: boolean | null;
+  questionnaireVersion: number;
+  currentQuestionnaireVersion: number;
+  outdated: boolean;
+  /** Rattrapage : questions restant a repondre. Vide sinon. */
+  catchUp: boolean;
+  pendingQuestionIds: string[];
 }
 
 export interface CertificationResult {
@@ -22,4 +29,7 @@ export interface CertificationResult {
   threshold: number;
   passed: boolean;
   certified: boolean;
+  questionnaireVersion: number;
+  currentQuestionnaireVersion: number;
+  outdated: boolean;
 }

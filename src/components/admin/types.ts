@@ -1,4 +1,4 @@
-import type { ProfileStatus } from "@/lib/vocabulary";
+import type { ProfileStatus, QuestionType } from "@/lib/vocabulary";
 
 export type Tab = "profils" | "videos" | "questionnaire";
 
@@ -29,6 +29,7 @@ export interface QuestionOption {
 export interface EditableQuestion {
   id: string;
   text: string;
+  type: QuestionType;
   weight: number;
   position: number;
   options: QuestionOption[];

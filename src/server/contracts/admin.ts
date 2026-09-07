@@ -3,6 +3,7 @@ import { named } from "../openapi/schemas";
 import { MAX_PAGE_SIZE } from "@/lib/vocabulary";
 import { ProfileStatusSchema, VideoStatusSchema } from "./common";
 import { VideoViewSchema } from "./profile";
+import { QuestionTypeSchema } from "./questionnaire";
 
 export const AdminStatsSchema = named(
   "AdminStats",
@@ -88,6 +89,41 @@ export const CreateQuestionBody = named(
       .min(2)
       .max(6)
       .meta({ description: "Au moins deux reponses possibles." }),
+  }),
+);
+
+export const PublishQuestionnaireBody = named(
+  "PublishQuestionnaireInput",
+  z.object({
+    questions: z
+      .array(
+        z.object({
+          id: z.string().trim().min(1).max(64),
+          text: z.string().trim().min(1).max(500),
+          type: QuestionTypeSchema,
+          weight: z.number().int().min(1).max(5),
+          options: z
+            .array(
+              z.object({
+                id: z.string().trim().min(1).max(64),
+                label: z.string().trim().min(1).max(300),
+                value: z
+                  .number()
+                  .int()
+                  .min(0)
+                  .meta({ description: "Points rapportes par cette reponse." }),
+              }),
+            )
+            .min(2)
+            .max(6),
+        }),
+      )
+      .min(1)
+      .meta({
+        description:
+          "Questionnaire complet. Il est publie comme NOUVELLE version : les versions " +
+          "existantes ne sont jamais modifiees, et les tentatives en cours conservent la leur.",
+      }),
   }),
 );
 

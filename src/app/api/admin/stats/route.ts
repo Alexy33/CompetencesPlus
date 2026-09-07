@@ -1,9 +1,10 @@
 import { sql } from "drizzle-orm";
 import { db } from "@/db";
-import { profile, question } from "@/db/schema";
+import { profile } from "@/db/schema";
 import { defineRoute } from "@/server/openapi/routes";
 import { AUTH_RESPONSES } from "@/server/contracts/common";
 import { AdminStatsSchema } from "@/server/contracts/admin";
+import { loadQuestions } from "@/server/services/certification";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +29,6 @@ export const { GET } = defineRoute({
       })
       .from(profile);
 
-    const [{ questions }] = await db.select({ questions: sql<number>`count(*)` }).from(question);
 
     const published = counts?.published ?? 0;
 
@@ -39,7 +39,7 @@ export const { GET } = defineRoute({
       certificationRate: published
         ? Math.round(((counts?.certifiedPublished ?? 0) / published) * 100)
         : 0,
-      questionCount: questions,
+      questionCount: loadQuestions().length,
       recruiterContacts: counts?.contacts ?? 0,
     };
   },

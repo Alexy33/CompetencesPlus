@@ -16,10 +16,20 @@ interface Collection<T> {
   items: T[];
 }
 
+/** Le questionnaire est servi avec la version du fichier en vigueur. */
+interface VersionedCollection<T> extends Collection<T> {
+  version: number;
+  versions: number[];
+}
+
 export function useAdminConsole() {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [profiles, setProfiles] = useState<ModeratedProfile[]>([]);
   const [questions, setQuestions] = useState<EditableQuestion[]>([]);
+  const [questionnaireVersion, setQuestionnaireVersion] = useState<number | null>(null);
+  // Copie de reference : sert a detecter les modifications non publiees.
+  const [publishedQuestions, setPublishedQuestions] = useState<EditableQuestion[]>([]);
+  const [publishing, setPublishing] = useState(false);
   const [settings, setSettings] = useState<PlatformSettings | null>(null);
   const [videos, setVideos] = useState<VideoRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,14 +40,18 @@ export function useAdminConsole() {
     const [nextStats, profilePage, questionPage, nextSettings, videoPage] = await Promise.all([
       apiLoad<AdminStats>("/api/admin/stats"),
       apiLoad<Collection<ModeratedProfile>>("/api/admin/profiles"),
-      apiLoad<Collection<EditableQuestion>>("/api/admin/questions"),
+      apiLoad<VersionedCollection<EditableQuestion>>("/api/admin/questions"),
       apiLoad<PlatformSettings>("/api/admin/settings"),
       apiLoad<Collection<VideoRow>>("/api/admin/videos"),
     ]);
 
     if (nextStats) setStats(nextStats);
     if (profilePage) setProfiles(profilePage.items);
-    if (questionPage) setQuestions(questionPage.items);
+    if (questionPage) {
+      setQuestions(questionPage.items);
+      setPublishedQuestions(questionPage.items);
+      setQuestionnaireVersion(questionPage.version);
+    }
     if (nextSettings) setSettings(nextSettings);
     if (videoPage) setVideos(videoPage.items);
     setLoading(false);
@@ -83,23 +97,6 @@ export function useAdminConsole() {
     setMessage("Réglages enregistrés.");
   }
 
-  async function saveQuestion(question: EditableQuestion) {
-    const result = await apiSend("PATCH", `/api/admin/questions/${question.id}`, {
-      text: question.text,
-      weight: question.weight,
-    });
-    setMessage(result.ok ? "Question enregistrée." : result.message);
-  }
-
-  async function deleteQuestion(id: string) {
-    const result = await apiSend("DELETE", `/api/admin/questions/${id}`);
-    if (!result.ok) return setMessage(result.message);
-
-    setQuestions((rows) => rows.filter((row) => row.id !== id));
-    setMessage("Question supprimée.");
-    void reload();
-  }
-
   async function decideVideo(
     profileId: string,
     decision: "approved" | "rejected",
@@ -126,10 +123,86 @@ export function useAdminConsole() {
     setQuestions((rows) => rows.map((row) => (row.id === id ? { ...row, ...patch } : row)));
   }
 
+  function addQuestion() {
+    const suffix = Date.now();
+    setQuestions((rows) => [
+      ...rows,
+      {
+        id: `q${rows.length + 1}-${suffix}`,
+        text: "",
+        type: "single_choice",
+        weight: 2,
+        position: rows.length,
+        options: [
+          { id: `q${rows.length + 1}-${suffix}-o1`, label: "", value: 0 },
+          { id: `q${rows.length + 1}-${suffix}-o2`, label: "", value: 1 },
+        ],
+      },
+    ]);
+  }
+
+  function removeQuestion(id: string) {
+    setQuestions((rows) => rows.filter((row) => row.id !== id));
+  }
+
+  function resetQuestions() {
+    setQuestions(publishedQuestions);
+    setMessage(null);
+  }
+
+  /**
+   * Publie l'etat courant comme nouvelle version. Le serveur refuse un
+   * questionnaire invalide et nomme la question fautive.
+   */
+  async function publishQuestionnaire() {
+    setPublishing(true);
+
+    const result = await apiSend<VersionedCollection<EditableQuestion>>(
+      "PUT",
+      "/api/admin/questions",
+      {
+        questions: questions.map((question) => ({
+          id: question.id,
+          text: question.text,
+          type: question.type,
+          weight: question.weight,
+          options: question.options.map((option) => ({
+            id: option.id,
+            label: option.label,
+            value: option.value,
+          })),
+        })),
+      },
+    );
+
+    setPublishing(false);
+
+    if (!result.ok) return setMessage(result.message);
+
+    setQuestions(result.data.items);
+    setPublishedQuestions(result.data.items);
+    setQuestionnaireVersion(result.data.version);
+    setMessage(
+      `Questionnaire publié en version ${result.data.version}. ` +
+        "Les tentatives déjà ouvertes conservent leur version.",
+    );
+    void reload();
+  }
+
+  const questionsDirty = JSON.stringify(questions) !== JSON.stringify(publishedQuestions);
+
   return {
     stats,
     profiles,
     questions,
+    questionnaireVersion,
+    questionsDirty,
+    publishing,
+    patchQuestion,
+    addQuestion,
+    removeQuestion,
+    resetQuestions,
+    publishQuestionnaire,
     settings,
     videos,
     loading,
@@ -140,8 +213,5 @@ export function useAdminConsole() {
     decideVideo,
     deleteProfile,
     saveSettings,
-    saveQuestion,
-    deleteQuestion,
-    patchQuestion,
   };
 }

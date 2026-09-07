@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "b483a5d6-8562-4019-936a-5d1d24813a8c",
-  "prevId": "7d0e088a-0522-44b0-959f-cca1eee7adf3",
+  "id": "79397497-b900-435f-9669-f8bface2ae9a",
+  "prevId": "8fd4486b-f9ba-4187-b91f-477a1138faef",
   "tables": {
     "account": {
       "name": "account",
@@ -146,9 +146,9 @@
           "notNull": true,
           "autoincrement": false
         },
-        "value": {
-          "name": "value",
-          "type": "integer",
+        "option_id": {
+          "name": "option_id",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -242,6 +242,14 @@
           "notNull": true,
           "autoincrement": false,
           "default": "(unixepoch())"
+        },
+        "catch_up": {
+          "name": "catch_up",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
         }
       },
       "indexes": {},

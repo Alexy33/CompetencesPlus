@@ -83,9 +83,14 @@ export function AdminDashboard() {
           {tab === "questionnaire" ? (
             <QuestionEditor
               questions={admin.questions}
+              version={admin.questionnaireVersion}
+              dirty={admin.questionsDirty}
+              publishing={admin.publishing}
               onPatch={admin.patchQuestion}
-              onSave={admin.saveQuestion}
-              onDelete={admin.deleteQuestion}
+              onAdd={admin.addQuestion}
+              onDelete={admin.removeQuestion}
+              onPublish={admin.publishQuestionnaire}
+              onReset={admin.resetQuestions}
             />
           ) : null}
         </>

@@ -31,6 +31,8 @@ export function CertificationQuestionnaire({
   initialState: CertificationState;
 }) {
   const certification = useCertification(initialQuestions, initialState);
+  // Rattrapage : le candidat ne repond qu'aux questions qui ont change.
+  const catchingUp = initialState.catchUp;
 
   if (initialQuestions.length === 0) return <UnavailableNotice />;
 
@@ -59,9 +61,24 @@ export function CertificationQuestionnaire({
           <p className="font-mono text-xs font-semibold uppercase tracking-wider text-ink-soft">
             Certification professionnelle JEB
           </p>
-          <h1 className="mt-3 text-3xl font-extrabold uppercase text-ink md:text-5xl">
-            Valorisez vos <span className="text-brand">aptitudes.</span>
-          </h1>
+          {catchingUp ? (
+            <>
+              <h1 className="mt-3 text-3xl font-extrabold uppercase text-ink md:text-5xl">
+                Mise à jour de votre <span className="text-brand">certification.</span>
+              </h1>
+              <p className="mt-3 max-w-2xl text-sm text-ink-soft">
+                Le questionnaire a évolué. Seules les{" "}
+                {initialQuestions.length === 1
+                  ? "questions qui ont changé vous sont posées"
+                  : `${initialQuestions.length} questions qui ont changé vous sont posées`}{" "}
+                : vos autres réponses sont conservées.
+              </p>
+            </>
+          ) : (
+            <h1 className="mt-3 text-3xl font-extrabold uppercase text-ink md:text-5xl">
+              Valorisez vos <span className="text-brand">aptitudes.</span>
+            </h1>
+          )}
         </div>
         <p className="shrink-0 font-mono text-xs font-semibold text-ink-soft">
           {certification.index + 1} / {initialQuestions.length}

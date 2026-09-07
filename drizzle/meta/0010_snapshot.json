@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "b483a5d6-8562-4019-936a-5d1d24813a8c",
-  "prevId": "7d0e088a-0522-44b0-959f-cca1eee7adf3",
+  "id": "9c4d1a70-2b8e-4f61-a3d5-6e0f8c2b7d14",
+  "prevId": "79397497-b900-435f-9669-f8bface2ae9a",
   "tables": {
     "account": {
       "name": "account",
@@ -146,9 +146,9 @@
           "notNull": true,
           "autoincrement": false
         },
-        "value": {
-          "name": "value",
-          "type": "integer",
+        "option_id": {
+          "name": "option_id",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -242,6 +242,14 @@
           "notNull": true,
           "autoincrement": false,
           "default": "(unixepoch())"
+        },
+        "catch_up": {
+          "name": "catch_up",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
         }
       },
       "indexes": {},
@@ -433,7 +441,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "'À qualifier'"
+          "default": "'\u00c0 qualifier'"
         },
         "created_at": {
           "name": "created_at",
@@ -675,8 +683,15 @@
           "autoincrement": false,
           "default": "''"
         },
-        "video_url": {
-          "name": "video_url",
+        "video_id": {
+          "name": "video_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "video_provider": {
+          "name": "video_provider",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
@@ -802,6 +817,13 @@
             "user_id"
           ],
           "isUnique": true
+        },
+        "profile_video_id_idx": {
+          "name": "profile_video_id_idx",
+          "columns": [
+            "video_id"
+          ],
+          "isUnique": false
         }
       },
       "foreignKeys": {

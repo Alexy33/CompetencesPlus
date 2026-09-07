@@ -13,6 +13,9 @@ if [ ! -w "$DB_DIR" ]; then
   exit 1
 fi
 
+QUESTIONNAIRE_PUBLISH_DIR="${QUESTIONNAIRE_DIR:-$DB_DIR/certification}"
+mkdir -p "$QUESTIONNAIRE_PUBLISH_DIR"
+
 echo "[dev-entrypoint] migrations Drizzle..."
 npm run db:migrate
 

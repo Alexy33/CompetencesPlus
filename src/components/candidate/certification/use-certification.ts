@@ -7,12 +7,18 @@ import type { CertificationResult, CertificationState, CertificationQuestion } f
 
 function resultFrom(state: CertificationState): CertificationResult | null {
   if (state.status !== "submitted" || state.score === null) return null;
+  // Certification perimee : on n'affiche pas l'ecran de resultat, le candidat
+  // est envoye directement sur les questions a rattraper.
+  if (state.outdated) return null;
 
   return {
     score: state.score,
     threshold: state.threshold,
     passed: Boolean(state.passed),
     certified: Boolean(state.passed),
+    questionnaireVersion: state.questionnaireVersion,
+    currentQuestionnaireVersion: state.currentQuestionnaireVersion,
+    outdated: state.outdated,
   };
 }
 
@@ -44,12 +50,14 @@ export function useCertification(
     return result.ok ? result.data : null;
   }
 
-  async function answer(value: number) {
+  // On transmet l'identifiant de l'option, jamais les points : le bareme
+  // reste cote serveur.
+  async function answer(optionId: string) {
     if (!question || busy) return;
 
     const next = await run(
       apiSend<CertificationState>("PUT", "/api/me/certification/answers", {
-        answers: { [question.id]: value },
+        answers: { [question.id]: optionId },
       }),
     );
     if (next) setState(next);
@@ -65,6 +73,13 @@ export function useCertification(
   async function restart() {
     const next = await run(apiSend<CertificationState>("POST", "/api/me/certification/restart"));
     if (!next) return;
+
+    // Rattrapage ouvert : la liste des questions posees change (seules celles
+    // qui ont evolue). Elle est calculee cote serveur, donc on recharge.
+    if (next.catchUp) {
+      window.location.reload();
+      return;
+    }
 
     setState(next);
     setResult(null);
