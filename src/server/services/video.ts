@@ -2,7 +2,6 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { profile } from "@/db/schema";
 import { VIDEO_CONSENT_VERSION, type VideoProviderName, type VideoStatus } from "@/lib/vocabulary";
-import { ExternalEmbedProvider } from "@/server/video/embed-provider";
 import { extensionForMime } from "@/server/video/mime";
 import {
   describeVideo,
@@ -19,7 +18,7 @@ import {
 import {
   activeVideoProvider,
   deletionVideoProvider,
-  enabledVideoProvider,
+  linkVideoProvider,
 } from "@/server/video/registry";
 
 export const MAX_VIDEO_BYTES = 100 * 1024 * 1024;
@@ -136,8 +135,10 @@ export async function storeProfileVideo(
 export async function setProfileVideoLink(profileId: string, rawUrl: string): Promise<StoredVideo> {
   await assertVideoConsent(profileId);
 
-  const provider = enabledVideoProvider("embed");
-  if (!(provider instanceof ExternalEmbedProvider)) throw new EmbedProviderDisabledError();
+  // Par capacite, jamais par nom : aucun hebergeur en service ne sait adopter
+  // une URL => le lien est refuse.
+  const provider = linkVideoProvider();
+  if (!provider) throw new EmbedProviderDisabledError();
 
   const stored = await provider.storeLink(rawUrl);
   if (!stored) {

@@ -10,9 +10,13 @@ import { MAX_SKILLS, type CertificationSummary, type Notification, type ProfileD
 /**
  * Lien tiers eventuellement en place. Une video hebergee par le dispositif ne
  * remplit jamais ce champ : elle n'a pas d'URL a saisir.
+ *
+ * On lit la FORME de la lecture (un lecteur encapsule), pas le nom de
+ * l'hebergeur : le client n'a aucune raison de connaitre la liste.
  */
 function embedLinkOf(profile: OwnProfile): string {
-  return profile.video.provider === "embed" ? (profile.video.playback?.url ?? "") : "";
+  const { playback } = profile.video;
+  return playback?.kind === "embed" ? playback.url : "";
 }
 
 function draftFrom(profile: OwnProfile): ProfileDraft {
@@ -70,7 +74,7 @@ export function useCandidateDashboard(initialProfile: OwnProfile, embedEnabled: 
       ? undefined
       : link
         ? link
-        : profile.video.provider === "embed"
+        : embedLinkOf(profile)
           ? null
           : undefined;
 

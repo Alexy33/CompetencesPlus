@@ -46,6 +46,30 @@ Une cinquième méthode, `openStream()`, est **optionnelle** : elle ne concerne
 que les hébergeurs dont les octets transitent par notre propre route contrôlée.
 PeerTube ne l'implémentera pas — il sert lui-même sa vidéo.
 
+## Ce que coûte le branchement, concrètement
+
+Deux fichiers, et rien d'autre :
+
+| Fichier | Modification |
+| --- | --- |
+| `src/server/video/peertube-provider.ts` | remplacer le corps des quatre méthodes par les appels d'API |
+| `src/server/video/registry.ts` | rien, si la classe garde son nom — sinon une ligne dans `createVideoProvider` |
+
+Aucune route, aucun service, aucun composant, aucune migration. Trois
+garde-fous le vérifient à chaque exécution de la suite
+(`__tests__/abstraction-holds.test.ts`) :
+
+- aucun code applicatif ne compare le nom d'un hébergeur ;
+- aucun code applicatif n'instancie ni ne reconnaît une implémentation
+  concrète (`new`, `instanceof`) ;
+- l'application n'importe de `src/server/video/` que le contrat, le registre et
+  la présentation — jamais un module d'implémentation.
+
+Une violation fait échouer la suite en nommant le fichier fautif. La seule
+exception assumée est `scripts/migrate-videos.ts`, qui déplace des fichiers d'un
+ancien répertoire vers le nouveau : dépendre du stockage local y est le sujet
+même du script.
+
 ## Ce qu'on ferait autrement quand l'instance existera
 
 `FakePeerTubeProvider` devient le vrai client, et rien d'autre ne bouge :

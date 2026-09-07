@@ -101,6 +101,16 @@ export interface VideoProvider {
    * pas — l'application lit alors `playbackUrl()`.
    */
   openStream?(videoId: string, range: VideoByteRange | null): Promise<VideoStreamSlice | null>;
+
+  /**
+   * Optionnel : hebergeurs qui adoptent un contenu deja publie ailleurs, par son
+   * URL, plutot qu'un fichier. Rend `null` si l'URL n'est pas reconnue.
+   *
+   * L'application ne demande jamais « es-tu l'hebergeur de liens ? » mais
+   * « quelqu'un sait-il prendre une URL ? ». Un futur client PeerTube capable
+   * d'importer depuis une URL n'aurait qu'a implementer cette methode.
+   */
+  storeLink?(rawUrl: string): Promise<StoredVideo | null>;
 }
 
 /** L'hebergeur ne repond pas. Declenche le mode degrade, jamais un 500. */

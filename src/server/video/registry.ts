@@ -136,6 +136,24 @@ export function enabledVideoProvider(name: string | null | undefined): VideoProv
   return current().enabled.get(name) ?? null;
 }
 
+/** Hebergeur `VideoProvider` sachant adopter une URL (cf. `storeLink`). */
+export type LinkCapableProvider = VideoProvider &
+  Required<Pick<VideoProvider, "storeLink">>;
+
+/**
+ * Hebergeur en service capable d'adopter un lien tiers, s'il y en a un.
+ *
+ * Resolution par CAPACITE, pas par nom : rien ici ne mentionne « embed ». Sur
+ * un deploiement ou l'hebergement par lien est eteint, il n'y en a aucun, et
+ * l'application refuse le lien sans avoir a savoir pourquoi.
+ */
+export function linkVideoProvider(): LinkCapableProvider | null {
+  for (const provider of current().enabled.values()) {
+    if (typeof provider.storeLink === "function") return provider as LinkCapableProvider;
+  }
+  return null;
+}
+
 /**
  * Hebergeur a solliciter pour SUPPRIMER, meme s'il n'est pas en service.
  *
