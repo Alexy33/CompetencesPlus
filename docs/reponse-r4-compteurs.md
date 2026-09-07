@@ -1,7 +1,7 @@
 # R.4 — Compteurs d'audience : réponse et décision
 
 **Objet :** demande de Mme Pontaillac relative au compteur de « j'aime »
-**Référence :** JEB/DNI/2026-003 — R.4
+**Référence :** demande interne R.4
 **Échéance :** vendredi 12h00
 
 ## 1. La demande est sans objet en l'état

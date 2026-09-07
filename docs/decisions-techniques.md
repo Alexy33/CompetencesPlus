@@ -8,44 +8,29 @@ lisent pas dans le code sont consignées ici.
 Tailwind v4 n'a plus de `tailwind.config.js` : tout est déclaré dans le bloc `@theme`,
 et chaque entrée génère l'utilitaire correspondant.
 
-- **Une seule échelle de bleus.** `--color-brand` … `--color-brand-900`. Le `#1B3A6B`
-  de la charte est le primaire ; les degrés autour de lui servent à bâtir l'interface
-  en nuances de bleu plutôt qu'en « un bleu + des gris ». Contrastes mesurés sur le
-  fond de page `#ebf0f7` : `brand` 9,84:1, `brand-700` 9,82:1, `brand-500` 4,88:1 —
-  tous utilisables pour du texte ; `brand-400` 3,03:1 est réservé au décor.
-- **Textes bleutés plutôt que gris neutres** : `--color-ink` (#22334D),
-  `--color-ink-muted` (#41556E), `--color-ink-soft` (#566274). Le secondaire monte
-  ainsi de 5,4:1 à 6,67:1 sur le fond de page.
-- **Couleur d'action distincte (R.10).** La charte interdit le bleu institutionnel en
-  fond de bouton : `--color-action` (#2d3748, anthracite) porte l'action sans
-  concurrencer l'échelle de bleus. Blanc sur anthracite 11,99:1 ; sur le survol
-  `--color-action-hover` 14,63:1. Sur un aplat bleu, anthracite et bleu ne diffèrent
-  que de 1,06:1 : la classe `.bouton-action-sur-bleu` ajoute alors
-  `--color-action-contour` (blanc) pour redonner sa forme au bouton — 11,27:1 contre
-  le bleu, au-delà des 3:1 exigés pour un élément non textuel.
+- **Une seule échelle sarcelle.** `--color-brand` … `--color-brand-900` partent du
+  primaire `#0F766E` et construisent les états, surfaces et actions de l’interface.
+- **Textes neutres teintés de vert** : `--color-ink`, `--color-ink-muted` et
+  `--color-ink-soft` maintiennent la cohérence de la palette et un contraste lisible.
+- **Actions alignées sur le primaire.** `--color-action` reprend `#0F766E` et
+  `--color-action-hover` utilise la nuance plus sombre `#115E59`.
 - **Ombres « neumorphiques » nommées** : `shadow-raised-2xs` … `shadow-raised-3xl` et
   `shadow-pressed-xs` / `-sm` / `-brand`. Aucun composant ne doit réintroduire de
   valeur hexadécimale ni de chaîne d'ombre en dur.
 - **`@theme inline` écrase `--color-accent`** avec le gris de shadcn : c'est pourquoi
   la marque vit sous le préfixe `brand-` et non `accent-`.
 
-## Charte graphique (R.10)
+## Identité graphique neutre
 
-- **Marianne et Spectral auto-hébergées.** Marianne est le caractère propre de l'État,
-  distribué avec le DSFR (Licence Ouverte 2.0) et absent de Google Fonts. Les fichiers
-  sont dans `public/fonts` : pas de requête vers un domaine tiers sur les pages
-  publiques. `font-display: swap` garde le texte lisible pendant le chargement.
-- **Bloc-marque** (`src/components/layout/bloc-marque.tsx`) : un seul composant, réutilisé
-  partout, qui porte lui-même sa zone de protection (`p-4`) et son fond opaque. Il n'a
-  pas de variante transparente — la faute « bloc-marque sur une photo » est rendue
-  impossible plutôt que déconseillée.
+La police Geist et le vert sarcelle sont déclarés une seule fois dans les tokens.
+Le header utilise uniquement le composant texte `ProductName`.
 
 ## Accessibilité (RGAA AA, R.7)
 
 - **Le bloc `:focus-visible` est hors `@layer`.** Les utilitaires Tailwind vivent dans la
   couche `utilities`, et plusieurs composants y posent `outline-none`. Une règle non
   couchée l'emporte sur toute règle couchée : l'indicateur de focus ne peut donc pas
-  être supprimé par mégarde. L'anneau `#1b3a6b` donne 9,84:1 sur `#ebf0f7`, là où
+  être supprimé par mégarde. L'anneau reprend le primaire `#0f766e`, là où
   l'ancien `--ring` à 50 % plafonnait à 1,54:1.
 - **`:has(> iframe):focus-within`** : un iframe reçoit le focus clavier sans jamais
   matcher `:focus` — c'est le cadre qui porte l'anneau pour le compte de la vidéo.
@@ -129,6 +114,9 @@ schéma incohérent.
   servir.
 - **Recherche libre par `EXISTS`** : les compétences vivent dans une table séparée et ne
   peuvent pas être filtrées par `LIKE` sur la ligne de profil.
+- **Aucun nom dans la recherche libre** : le nom du candidat a été volontairement retiré
+  du périmètre. La recherche porte uniquement sur l’intitulé, le secteur, la ville et les
+  compétences afin qu’un patronyme ne puisse pas servir de proxy d’une origine supposée.
 - **« Possède TOUTES les compétences demandées »** : on compte les compétences distinctes
   trouvées et on exige qu'elles soient aussi nombreuses que celles demandées ; un `IN`
   simple donnerait « au moins une ».

@@ -152,7 +152,7 @@ formulaire, donc un appel direct à l'API ne le contourne pas. Voir
 | `video_provider` | text (`local` \| `peertube` \| `embed`) | NULL | — qui sait lire cet identifiant |
 | `status` | text (`pending` \| `published` \| `removed`) | NOT NULL | `'pending'` |
 | `score` | integer | NULL | — dernier score de certification obtenu |
-| `certified_at` | timestamp | NULL | — fait foi pour le badge JEB |
+| `certified_at` | timestamp | NULL | — fait foi pour l’évaluation validée |
 | `views` | integer | NOT NULL | `0` — compteur dénormalisé, **privé** (voir ci-dessous) |
 | `contact_count` | integer | NOT NULL | `0` — compteur dénormalisé |
 | `video_consent_granted` | integer (booleen) | NOT NULL | `false` — accord en cours |
