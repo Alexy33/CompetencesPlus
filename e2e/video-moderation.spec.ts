@@ -1,8 +1,8 @@
 import { expect, test, type APIRequestContext } from "@playwright/test";
 
 const PASSWORD = "demo1234";
+const ADULT_BIRTH_DATE = "1990-05-17";
 
-const CANDIDATE = "karim.vasseur@exemple.fr";
 const ADMIN = "admin@jeb.gouv.fr";
 const RECRUITER = "recruteur@exemple.fr";
 
@@ -19,6 +19,49 @@ async function contextFor(
   return context;
 }
 
+/**
+ * Candidat fabrique par le test, consentement compris.
+ *
+ * La suite depose et supprime des videos : s'appuyer sur un profil du jeu de
+ * demonstration la rendrait dependante de l'etat de la base (consentement
+ * deja retire, video deja supprimee par une execution precedente) et
+ * detruirait au passage le temoin de non-regression.
+ */
+async function freshCandidate(
+  playwright: typeof import("@playwright/test"),
+  baseURL: string,
+): Promise<APIRequestContext> {
+  const context = await playwright.request.newContext({ baseURL });
+
+  const signUp = await context.post("/api/auth/sign-up/email", {
+    data: {
+      name: "Moderation Test",
+      email: `moderation-${Date.now()}-${Math.random().toString(16).slice(2, 8)}@exemple.fr`,
+      password: PASSWORD,
+      birthDate: ADULT_BIRTH_DATE,
+    },
+  });
+  expect(signUp.status(), "creation du candidat de test").toBe(200);
+
+  // Une fiche renseignee : les captures jointes au dossier R.2 doivent montrer
+  // un profil credible, pas un formulaire vide.
+  expect(
+    (await context.patch("/api/me/profile", {
+      data: {
+        title: "Technicien de maintenance",
+        bio: "Six ans en maintenance industrielle. Je cherche un poste en équipe, sur des installations que je peux suivre dans la durée.",
+        sector: "Industrie",
+        city: "Nantes",
+        skills: ["Rigueur", "Autonomie", "Travail en équipe"],
+      },
+    })).status(),
+  ).toBe(200);
+
+  expect((await context.post("/api/me/profile/video/consent")).status()).toBe(200);
+
+  return context;
+}
+
 async function uploadVideo(candidate: APIRequestContext) {
   const upload = await candidate.put("/api/me/profile/video", {
     headers: { "content-type": "video/mp4" },
@@ -26,7 +69,7 @@ async function uploadVideo(candidate: APIRequestContext) {
   });
   expect(upload.status(), "PUT vidéo").toBe(200);
   const profile = await upload.json();
-  return { profile, videoPath: profile.videoUrl.split("?")[0] as string };
+  return { profile, videoPath: profile.video.playback.url as string };
 }
 
 test.describe("Modération des vidéos (R.2)", () => {
@@ -36,7 +79,7 @@ test.describe("Modération des vidéos (R.2)", () => {
     request,
     browser,
   }) => {
-    const candidate = await contextFor(playwright, baseURL!, CANDIDATE);
+    const candidate = await freshCandidate(playwright, baseURL!);
     const recruiter = await contextFor(playwright, baseURL!, RECRUITER);
     const admin = await contextFor(playwright, baseURL!, ADMIN);
 
@@ -50,8 +93,17 @@ test.describe("Modération des vidéos (R.2)", () => {
     expect((await candidate.get(videoPath)).status(), "titulaire").toBe(200);
     expect((await admin.get(videoPath)).status(), "administration").toBe(200);
 
+    // Profil publié, mais vidéo encore en attente : la fiche publique existe
+    // et ne laisse rien filtrer de la vidéo.
+    expect(
+      (await admin.patch(`/api/admin/profiles/${profile.id}`, { data: { status: "published" } })).status(),
+    ).toBe(200);
+
     const publicProfile = await (await request.get(`/api/profiles/${profile.id}`)).json();
-    expect(publicProfile.videoUrl, "URL absente de la fiche publique").toBeNull();
+    expect(publicProfile.video.state, "aucune video sur la fiche publique").toBe("none");
+    expect(publicProfile.video.playback, "aucune adresse de lecture exposee").toBeNull();
+
+    expect((await request.get(videoPath)).status(), "profil publié, vidéo non validée").toBe(404);
 
     const privateContext = await browser.newContext();
     const page = await privateContext.newPage();
@@ -68,7 +120,7 @@ test.describe("Modération des vidéos (R.2)", () => {
   });
 
   test("l'administration valide : la vidéo devient publique", async ({ playwright, baseURL, request }) => {
-    const candidate = await contextFor(playwright, baseURL!, CANDIDATE);
+    const candidate = await freshCandidate(playwright, baseURL!);
     const admin = await contextFor(playwright, baseURL!, ADMIN);
 
     const { profile, videoPath } = await uploadVideo(candidate);
@@ -83,6 +135,14 @@ test.describe("Modération des vidéos (R.2)", () => {
     expect(row.decidedBy, "auteur de la décision").toBeTruthy();
     expect(row.decidedAt, "date de la décision").toBeTruthy();
 
+    // Une vidéo validée sur un profil encore en attente reste privée : les
+    // deux modérations sont distinctes.
+    expect((await request.get(videoPath)).status(), "profil pas encore publié").toBe(404);
+
+    expect(
+      (await admin.patch(`/api/admin/profiles/${profile.id}`, { data: { status: "published" } })).status(),
+    ).toBe(200);
+
     expect((await request.get(videoPath)).status(), "vidéo validée, visiteur anonyme").toBe(200);
 
     await candidate.delete("/api/me/profile/video");
@@ -90,7 +150,7 @@ test.describe("Modération des vidéos (R.2)", () => {
   });
 
   test("un refus exige un motif, l'enregistre et le montre au candidat", async ({ playwright, baseURL, request }) => {
-    const candidate = await contextFor(playwright, baseURL!, CANDIDATE);
+    const candidate = await freshCandidate(playwright, baseURL!);
     const admin = await contextFor(playwright, baseURL!, ADMIN);
 
     const { profile, videoPath } = await uploadVideo(candidate);
@@ -125,7 +185,7 @@ test.describe("Modération des vidéos (R.2)", () => {
   test("la file de modération est réservée à l'administration", async ({ playwright, baseURL, request }) => {
     expect((await request.get("/api/admin/videos")).status(), "anonyme").toBe(401);
 
-    const candidate = await contextFor(playwright, baseURL!, CANDIDATE);
+    const candidate = await freshCandidate(playwright, baseURL!);
     expect((await candidate.get("/api/admin/videos")).status(), "candidat").toBe(403);
     await candidate.dispose();
 

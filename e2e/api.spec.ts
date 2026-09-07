@@ -257,29 +257,30 @@ test.describe("Consentement video (R.3)", () => {
     expect(Number.isNaN(Date.parse(granted.grantedAt))).toBe(false);
     expect(granted.revokedAt).toBeNull();
 
-    expect((await context.put("/api/me/profile/video", {
+    const uploaded = await context.put("/api/me/profile/video", {
       headers: { "Content-Type": "video/mp4" },
       data: payload,
-    })).status()).toBe(200);
-    expect((await context.get(`/api/videos/${profileId}`)).status()).toBe(200);
+    });
+    expect(uploaded.status()).toBe(200);
 
-    await context.delete("/api/me/profile/video/consent");
+    // L'adresse de lecture vient du fournisseur : elle porte un identifiant
+    // opaque, jamais l'identifiant du profil ni un chemin de fichier.
+    const withVideo = await uploaded.json();
+    expect(withVideo.video.state).toBe("ready");
+    expect(withVideo.video.provider).toBe("local");
+    const videoPath = withVideo.video.playback.url as string;
+    expect(videoPath).toMatch(/^\/api\/videos\/[0-9a-f]{32}$/);
+    expect(videoPath).not.toContain(profileId);
+
+    expect((await context.get(videoPath)).status()).toBe(200);
+    expect((await context.get(`/api/videos/${profileId}`)).status(), "identifiant de profil").toBe(404);
+
+    // Le lien tiers est un troisieme fournisseur, eteint par defaut : meme
+    // avec un consentement en cours, il est refuse.
     const lienRefuse = await context.patch("/api/me/profile", {
       data: { videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" },
     });
-    expect(lienRefuse.status()).toBe(403);
-
-    expect((await context.patch("/api/me/profile", { data: { videoUrl: null } })).status()).toBe(200);
-
-    await context.post("/api/me/profile/video/consent");
-    expect((await context.patch("/api/me/profile", {
-      data: { videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" },
-    })).status()).toBe(200);
-
-    expect((await context.put("/api/me/profile/video", {
-      headers: { "Content-Type": "video/mp4" },
-      data: payload,
-    })).status()).toBe(200);
+    expect(lienRefuse.status(), "hebergement tiers desactive").toBe(403);
 
     const revoked = await (await context.delete("/api/me/profile/video/consent")).json();
     expect(revoked.granted).toBe(false);
@@ -288,11 +289,20 @@ test.describe("Consentement video (R.3)", () => {
     expect(revoked.grantedAt).toBe(granted.grantedAt);
     expect(revoked.version).toBe(granted.version);
 
-    expect((await context.get(`/api/videos/${profileId}`)).status()).toBe(404);
+    // Le retrait passe par VideoProvider.delete() : les octets ont disparu,
+    // l'adresse de lecture ne rend plus rien.
+    expect((await context.get(videoPath)).status(), "octets supprimes").toBe(404);
 
     const after = await (await context.get("/api/me/profile")).json();
     expect(after.id).toBe(profileId);
-    expect(after.videoUrl).toBeNull();
+    expect(after.video.state).toBe("none");
+    expect(after.video.playback).toBeNull();
+
+    // Sans consentement, plus rien ne peut etre depose.
+    expect((await context.put("/api/me/profile/video", {
+      headers: { "Content-Type": "video/mp4" },
+      data: payload,
+    })).status()).toBe(403);
 
     await context.dispose();
   });
