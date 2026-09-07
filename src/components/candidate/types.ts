@@ -12,6 +12,7 @@ export interface CertificationSummary {
   currentQuestionnaireVersion: number;
   /** Certification obtenue sous une version anterieure : a repasser. */
   outdated: boolean;
+  catchUp: boolean;
   pendingQuestionIds: string[];
 }
 

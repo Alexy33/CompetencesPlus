@@ -113,6 +113,8 @@ export interface CertificationState {
    * obtenu reste affiche aux recruteurs en attendant.
    */
   outdated: boolean;
+  /** Vrai si la tentative en cours est un rattrapage de certification. */
+  catchUp: boolean;
   /**
    * Rattrapage en cours : identifiants des questions restant a repondre.
    * Vide pour une passation ordinaire, ou tout le questionnaire est pose.
@@ -136,10 +138,11 @@ export async function certificationState(userId: string): Promise<CertificationS
 
   const current = questionnaireVersion();
 
-  // Une tentative en cours dont certaines reponses sont deja reportees est un
-  // rattrapage : seules les questions sans reponse restent a poser.
+  // Rattrapage en cours : seules les questions sans reponse restent a poser.
+  // On se fie au marqueur de la tentative, pas au nombre de reponses reportees
+  // — une version peut avoir modifie TOUTES les questions.
   const pendingQuestionIds =
-    attempt?.status === "in_progress" && Object.keys(answers).length > 0
+    attempt?.status === "in_progress" && attempt.catchUp
       ? questions.filter((question) => answers[question.id] === undefined).map((q) => q.id)
       : [];
 
@@ -150,6 +153,7 @@ export async function certificationState(userId: string): Promise<CertificationS
     questionCount: questions.length,
     questionnaireVersion: version,
     currentQuestionnaireVersion: current,
+    catchUp: attempt?.status === "in_progress" && attempt.catchUp,
     pendingQuestionIds,
     // Seule une tentative DEJA SOUMISE peut etre perimee : une tentative en
     // cours reste legitimement sur sa version jusqu'a sa validation.
@@ -279,6 +283,7 @@ export async function openCatchUp(userId: string): Promise<CatchUp | null> {
       userId,
       status: "in_progress",
       questionnaireVersion: current,
+      catchUp: true,
     })
     .returning();
 

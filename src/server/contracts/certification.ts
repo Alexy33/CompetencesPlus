@@ -72,6 +72,9 @@ export const CertificationStateSchema = named(
       description:
         "Vrai si la certification obtenue porte sur une version anterieure : le candidat doit repasser le questionnaire. Le badge deja acquis reste visible des recruteurs.",
     }),
+    catchUp: z
+      .boolean()
+      .meta({ description: "Vrai si la tentative en cours est un rattrapage de certification." }),
     pendingQuestionIds: z.array(z.string()).meta({
       description:
         "Rattrapage : questions restant a repondre. Les autres reponses ont ete reportees depuis la tentative precedente. Vide pour une passation ordinaire.",

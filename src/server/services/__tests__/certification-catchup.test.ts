@@ -97,22 +97,24 @@ describe("rattrapage — questions a reposer", () => {
     expect(catchUp?.toVersion).toBe(2);
   });
 
-  it("ne repose PAS une question dont seul l'enonce a change", async () => {
+  it("repose une question dont l'enonce a change", async () => {
     await createUser("amina");
     await certifyInV1("amina");
 
     const questionnaire = await import("../questionnaire");
     const certification = await import("../certification");
 
+    // Une reecriture d'enonce est indissociable d'une simple coquille :
+    // dans le doute, la question est reposee.
     questionnaire.publishQuestionnaire([
-      { ...q("q1"), text: "Enonce reformule, memes reponses" },
+      { ...q("q1"), text: "Enonce entierement reecrit" },
       q("q2"),
       q("q3"),
     ]);
 
     const catchUp = await certification.openCatchUp("amina");
-    expect(catchUp?.questionIds).toEqual([]);
-    expect(catchUp?.carriedOver).toBe(3);
+    expect(catchUp?.questionIds).toEqual(["q1"]);
+    expect(catchUp?.carriedOver).toBe(2);
   });
 
   it("repose une question nouvelle", async () => {
@@ -338,12 +340,9 @@ describe("rattrapage sans question a reposer", () => {
     const questionnaire = await import("../questionnaire");
     const certification = await import("../certification");
 
-    // Seul un enonce change : rien a reposer.
-    questionnaire.publishQuestionnaire([
-      { ...q("q1"), text: "Enonce reformule" },
-      q("q2"),
-      q("q3"),
-    ]);
+    // Une question modifiee est retiree du questionnaire : plus rien a reposer
+    // pour le candidat, ses autres reponses restent valables.
+    questionnaire.publishQuestionnaire([q("q1"), q("q2")]);
 
     const catchUp = await certification.openCatchUp("amina");
     expect(catchUp?.questionIds).toEqual([]);
@@ -353,6 +352,7 @@ describe("rattrapage sans question a reposer", () => {
     expect(pending.status).toBe("in_progress");
     expect(pending.pendingQuestionIds).toEqual([]);
     expect(pending.answered).toBe(pending.questionCount);
+    expect(pending.questionCount).toBe(2);
 
     const result = await certification.submitAttempt("amina");
     expect(result.questionnaireVersion).toBe(2);
@@ -382,7 +382,7 @@ async function restartRoute(userId: string) {
   }
 
   const state = await certification.certificationState(userId);
-  if (state.pendingQuestionIds.length > 0) return state;
+  if (state.catchUp) return state;
 
   const existing = await certification.currentAttempt(userId);
   const current = questionnaireVersion();
@@ -452,5 +452,129 @@ describe("bouton « Repasser » sur une certification perimee", () => {
     expect(again.questionnaireVersion).toBe(2);
     expect(again.answered).toBe(2);
     expect(again.pendingQuestionIds).toEqual(["q2"]);
+  });
+});
+
+describe("rattrapage cumulant plusieurs versions", () => {
+  it("repose toutes les questions modifiees depuis la version du candidat", async () => {
+    await createUser("amina");
+    await certifyInV1("amina");
+
+    const questionnaire = await import("../questionnaire");
+    const certification = await import("../certification");
+
+    // v2 : q2 change. Le candidat ne fait PAS son rattrapage.
+    questionnaire.publishQuestionnaire([
+      q("q1"),
+      q("q2", 2, [opt("q2-o1", 0), opt("q2-o2", 1), opt("q2-o3", 5)]),
+      q("q3"),
+    ]);
+
+    // v3 : q1 change a son tour.
+    questionnaire.publishQuestionnaire([
+      q("q1", 2, [opt("q1-o1", 0), opt("q1-o2", 1), opt("q1-o3", 4)]),
+      q("q2", 2, [opt("q2-o1", 0), opt("q2-o2", 1), opt("q2-o3", 5)]),
+      q("q3"),
+    ]);
+
+    const catchUp = await certification.openCatchUp("amina");
+
+    // Les deux modifications sont cumulees en une seule passation : le diff
+    // est calcule de v1 a v3, sans repasser par les versions intermediaires.
+    expect(catchUp?.fromVersion).toBe(1);
+    expect(catchUp?.toVersion).toBe(3);
+    expect(catchUp?.questionIds).toEqual(["q1", "q2"]);
+    expect(catchUp?.carriedOver).toBe(1);
+
+    const state = await certification.certificationState("amina");
+    expect(state.pendingQuestionIds).toEqual(["q1", "q2"]);
+    expect(state.answers).toEqual({ q3: "q3-o2" });
+  });
+
+  it("ne repose qu'une fois une question modifiee a plusieurs reprises", async () => {
+    await createUser("amina");
+    await certifyInV1("amina");
+
+    const questionnaire = await import("../questionnaire");
+    const certification = await import("../certification");
+
+    // q2 change en v2, puis encore en v3.
+    questionnaire.publishQuestionnaire([
+      q("q1"),
+      q("q2", 2, [opt("q2-o1", 0), opt("q2-o2", 3)]),
+      q("q3"),
+    ]);
+    questionnaire.publishQuestionnaire([
+      q("q1"),
+      q("q2", 4, [opt("q2-o1", 0), opt("q2-o2", 8)]),
+      q("q3"),
+    ]);
+
+    const catchUp = await certification.openCatchUp("amina");
+    expect(catchUp?.questionIds).toEqual(["q2"]);
+    expect(catchUp?.carriedOver).toBe(2);
+  });
+
+  it("une question modifiee puis revenue a son etat d'origine n'est pas reposee", async () => {
+    await createUser("amina");
+    await certifyInV1("amina");
+
+    const questionnaire = await import("../questionnaire");
+    const certification = await import("../certification");
+
+    // q2 change en v2...
+    questionnaire.publishQuestionnaire([
+      q("q1"),
+      { ...q("q2", 5, [opt("q2-o1", 0), opt("q2-o2", 9)]), text: "Enonce provisoire" },
+      q("q3"),
+    ]);
+    // ...puis retrouve exactement son etat initial en v3.
+    questionnaire.publishQuestionnaire([q("q1"), q("q2"), q("q3")]);
+
+    // Le candidat n'a jamais vu la v2 : pour lui, rien n'a change.
+    const catchUp = await certification.openCatchUp("amina");
+    expect(catchUp?.questionIds).toEqual([]);
+    expect(catchUp?.carriedOver).toBe(3);
+  });
+});
+
+describe("publication melangeant enonces et reponses", () => {
+  it("repose les questions dont l'enonce a change ET celles dont les reponses ont change", async () => {
+    await createUser("amina");
+    await certifyInV1("amina");
+
+    const questionnaire = await import("../questionnaire");
+    const certification = await import("../certification");
+
+    // Cas reel : deux enonces reecrits, une question dont les reponses changent.
+    questionnaire.publishQuestionnaire([
+      { ...q("q1"), text: "1" },
+      { ...q("q2"), text: "2" },
+      q("q3", 2, [opt("q3-o1", 0), opt("q3-o2", 1), opt("q3-o3", 6)]),
+    ]);
+
+    const catchUp = await certification.openCatchUp("amina");
+
+    // Les trois sont reposees, pas seulement celle aux reponses modifiees.
+    expect(catchUp?.questionIds).toEqual(["q1", "q2", "q3"]);
+    expect(catchUp?.carriedOver).toBe(0);
+
+    const state = await certification.certificationState("amina");
+    expect(state.pendingQuestionIds).toEqual(["q1", "q2", "q3"]);
+  });
+
+  it("laisse intactes les questions vraiment inchangees", async () => {
+    await createUser("amina");
+    await certifyInV1("amina");
+
+    const questionnaire = await import("../questionnaire");
+    const certification = await import("../certification");
+
+    questionnaire.publishQuestionnaire([{ ...q("q1"), text: "Reecrite" }, q("q2"), q("q3")]);
+
+    const catchUp = await certification.openCatchUp("amina");
+    expect(catchUp?.questionIds).toEqual(["q1"]);
+    // q2 et q3 gardent la reponse du candidat.
+    expect(catchUp?.carriedOver).toBe(2);
   });
 });

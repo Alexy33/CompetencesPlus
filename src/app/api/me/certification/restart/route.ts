@@ -37,7 +37,7 @@ export const { POST } = defineRoute({
     // Rattrapage deja ouvert : on ne le vide pas. Effacer les reponses
     // reportees obligerait le candidat a tout refaire, ce que le rattrapage
     // existe justement pour eviter.
-    if (state.pendingQuestionIds.length > 0) return state;
+    if (state.catchUp) return state;
 
     const existing = await currentAttempt(session.user.id);
     const current = questionnaireVersion();

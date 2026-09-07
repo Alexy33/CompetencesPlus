@@ -76,7 +76,7 @@ export function useCertification(
 
     // Rattrapage ouvert : la liste des questions posees change (seules celles
     // qui ont evolue). Elle est calculee cote serveur, donc on recharge.
-    if (next.pendingQuestionIds.length > 0) {
+    if (next.catchUp) {
       window.location.reload();
       return;
     }

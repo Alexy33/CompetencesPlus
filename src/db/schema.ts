@@ -218,6 +218,12 @@ export const certificationAttempt = sqliteTable("certification_attempt", {
   // Figee a la creation : une tentative v1 reste v1 apres le passage a v2.
   questionnaireVersion: integer("questionnaire_version").notNull(),
 
+  // Rattrapage : tentative ouverte pour une mise a jour de certification, ou
+  // seules les questions modifiees sont reposees. Marque explicitement, et non
+  // deduit des reponses reportees : une version peut tout modifier a la fois,
+  // auquel cas aucune reponse n'est reportee.
+  catchUp: integer("catch_up", { mode: "boolean" }).notNull().default(false),
+
   score: integer("score"),
   passed: integer("passed", { mode: "boolean" }),
   submittedAt: integer("submitted_at", { mode: "timestamp" }),

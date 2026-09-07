@@ -318,16 +318,19 @@ export function publishQuestionnaire(questions: unknown): Questionnaire {
 }
 
 /**
- * Signature du BAREME d'une question : ce qui, en changeant, rend une reponse
- * anterieure caduque. L'enonce n'en fait volontairement pas partie — corriger
- * une faute de frappe ne doit pas obliger tous les candidats a repondre a
- * nouveau. Seuls comptent les reponses proposees, leurs points et le poids.
+ * Signature d'une question : ce qui, en changeant, rend caduque une reponse
+ * donnee sous une version anterieure.
+ *
+ * L'enonce EN FAIT PARTIE. On ne peut pas distinguer une coquille corrigee
+ * d'une question entierement reecrite, et conserver la reponse a une question
+ * dont le sens a change est bien plus grave que reposer une question pour une
+ * virgule. Des qu'une question bouge, elle est reposee.
  */
 function scoringSignature(question: QuestionnaireQuestion): string {
   const options = question.options
     .map((option) => `${option.id}:${option.value}:${option.label}`)
     .join("|");
-  return `${question.type}#${question.weight}#${options}`;
+  return `${question.type}#${question.weight}#${question.text}#${options}`;
 }
 
 /**

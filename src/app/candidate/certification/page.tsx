@@ -28,8 +28,8 @@ export default async function CertificationPage() {
   // ouverte par un chargement precedent.
   const catchUpComplete =
     state.status === "in_progress" &&
+    state.catchUp &&
     state.pendingQuestionIds.length === 0 &&
-    state.answered > 0 &&
     state.answered === state.questionCount;
 
   if (catchUpComplete) {

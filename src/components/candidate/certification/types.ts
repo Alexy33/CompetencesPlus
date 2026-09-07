@@ -20,6 +20,7 @@ export interface CertificationState {
   currentQuestionnaireVersion: number;
   outdated: boolean;
   /** Rattrapage : questions restant a repondre. Vide sinon. */
+  catchUp: boolean;
   pendingQuestionIds: string[];
 }
 

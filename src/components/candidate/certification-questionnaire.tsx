@@ -32,7 +32,7 @@ export function CertificationQuestionnaire({
 }) {
   const certification = useCertification(initialQuestions, initialState);
   // Rattrapage : le candidat ne repond qu'aux questions qui ont change.
-  const catchingUp = initialState.pendingQuestionIds.length > 0;
+  const catchingUp = initialState.catchUp;
 
   if (initialQuestions.length === 0) return <UnavailableNotice />;
 
