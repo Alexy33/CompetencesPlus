@@ -66,7 +66,7 @@ export function CatalogueFilters({
         />
       </FilterGroup>
 
-      <FilterGroup label="Certification JEB">
+      <FilterGroup label="Évaluation validée">
         <ToggleFilter
           active={filters.certifiedOnly}
           offLabel="Tous"
