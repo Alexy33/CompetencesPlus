@@ -15,7 +15,7 @@ export interface ModeratedProfile {
   id: string;
   name: string;
   title: string;
-  videoUrl: string | null;
+  hasVideo: boolean;
   status: ProfileStatus;
   createdAt: string;
 }

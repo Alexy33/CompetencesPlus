@@ -82,7 +82,7 @@ export default async function ProfilePage({
 
           <div className="mt-8 grid items-start gap-8 xl:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.75fr)] xl:gap-10">
             <div>
-              <ProfileVideo videoUrl={profile.videoUrl} name={profile.name} />
+              <ProfileVideo video={profile.video} name={profile.name} />
 
               <div className="mt-5 flex flex-wrap items-center gap-2 font-mono text-[11px] font-semibold uppercase tracking-wider">
                 <span className="rounded-full bg-brand-200 px-3 py-1.5 text-brand-800">{profile.city}</span>

@@ -35,7 +35,7 @@ function ModerationRow({
         </div>
         <p className="mt-1 text-sm text-ink-soft">{profile.title}</p>
         <p className="mt-2 text-xs text-ink-muted">
-          {profile.videoUrl ? "Vidéo renseignée" : "Aucune vidéo"}
+          {profile.hasVideo ? "Vidéo renseignée" : "Aucune vidéo"}
         </p>
       </div>
 
