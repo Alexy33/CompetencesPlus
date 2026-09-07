@@ -144,11 +144,33 @@ Quand l'hébergeur d'une vidéo n'est pas joignable — ou n'est pas en service 
 ce déploiement — la fiche profil **reste servie** et le lecteur est remplacé par
 un message. Aucun 500 ne peut sortir de là : `describeVideo()` ne lève jamais.
 
-Pour le provoquer :
+### Basculer d'un hébergeur à l'autre
+
+Deux commandes symétriques, et une troisième qui dit où on en est :
 
 ```bash
-make video-degraded          # équivaut à VIDEO_PROVIDER=peertube docker compose up
+make video-degraded   # hébergeur ministériel factice — indisponible
+make video-local      # hébergement du dispositif — état nominal
+make video-etat       # quel hébergeur, quelle fiche ouvrir, ce qu'on doit y voir
 ```
+
+Chacune attend que l'application réponde, puis affiche **l'URL d'une fiche
+réellement démonstrative** et le résultat attendu. Elle prévient aussi quand
+l'état de la base ne permet pas d'observer la bascule — typiquement, plus
+aucune fiche publiée ne porte de vidéo validée :
+
+```
+  Hebergeur actif : peertube
+  A ouvrir       : http://localhost:3000/profils/efd93871-…
+
+  Attendu : la fiche s affiche INTACTE, le lecteur remplace par
+            « La video est temporairement indisponible. »
+```
+
+C'est le piège de cette démonstration : une vidéo en attente de modération est
+masquée **avant** que l'hébergeur ne soit consulté. La fiche affiche alors
+« Aucune présentation vidéo », et non le message d'indisponibilité — ce qui
+donne l'impression, à tort, que le mode dégradé ne marche pas.
 
 Puis ouvrir une fiche portant une vidéo. Capture :
 `captures/video-fournisseur/02-mode-degrade-peertube.png`.
