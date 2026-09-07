@@ -5,7 +5,9 @@ export type ApiErrorCode =
   | "not_found"
   | "conflict"
   | "unprocessable"
-  | "internal";
+  | "internal"
+  /** Dependance externe muette (hebergeur video). Le dispositif, lui, repond. */
+  | "unavailable";
 
 const STATUS_BY_CODE: Record<ApiErrorCode, number> = {
   bad_request: 400,
@@ -15,6 +17,7 @@ const STATUS_BY_CODE: Record<ApiErrorCode, number> = {
   conflict: 409,
   unprocessable: 422,
   internal: 500,
+  unavailable: 503,
 };
 
 export interface ApiErrorDetail {
@@ -63,5 +66,8 @@ export class ApiError extends Error {
   }
   static unprocessable(message: string, details?: ApiErrorDetail[]) {
     return new ApiError("unprocessable", message, details);
+  }
+  static unavailable(message: string) {
+    return new ApiError("unavailable", message);
   }
 }
