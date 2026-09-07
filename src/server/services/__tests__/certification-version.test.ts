@@ -110,7 +110,7 @@ describe("questionnaire — calcul du score par version", () => {
     const v1Questions = certification.questionsOf(1);
     expect(v1Questions.map((q) => q.id)).toEqual(["q1", "q2"]);
 
-    const perfectV1 = certification.computeScore(v1Questions, { q1: 1, q2: 1 });
+    const perfectV1 = certification.computeScore(v1Questions, { q1: "q1-o2", q2: "q2-o2" });
     expect(perfectV1).toBe(100);
 
     await deployV2();
@@ -120,11 +120,11 @@ describe("questionnaire — calcul du score par version", () => {
     const afterDeploy = certification.questionsOf(1);
     expect(afterDeploy.map((q) => q.id)).toEqual(["q1", "q2"]);
     expect(afterDeploy.map((q) => q.weight)).toEqual([2, 3]);
-    expect(certification.computeScore(afterDeploy, { q1: 1, q2: 1 })).toBe(perfectV1);
+    expect(certification.computeScore(afterDeploy, { q1: "q1-o2", q2: "q2-o2" })).toBe(perfectV1);
 
     // Le bareme v2 est bien different : sans le figement, le score changerait.
     const v2Questions = certification.questionsOf(2);
     expect(v2Questions.map((q) => q.id)).toEqual(["q1", "q3"]);
-    expect(certification.computeScore(v2Questions, { q1: 1, q2: 1 })).not.toBe(perfectV1);
+    expect(certification.computeScore(v2Questions, { q1: "q1-o2", q2: "q2-o2" })).not.toBe(perfectV1);
   });
 });

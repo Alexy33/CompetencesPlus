@@ -17,6 +17,7 @@ import "@/app/api/me/certification/route";
 import "@/app/api/me/certification/answers/route";
 import "@/app/api/me/certification/submit/route";
 import "@/app/api/me/certification/restart/route";
+import "@/app/api/me/certification/catch-up/route";
 
 import "@/app/api/me/favorites/route";
 import "@/app/api/me/favorites/[profileId]/route";
@@ -31,5 +32,4 @@ import "@/app/api/admin/profiles/[id]/route";
 import "@/app/api/admin/videos/route";
 import "@/app/api/admin/videos/[id]/route";
 import "@/app/api/admin/questions/route";
-import "@/app/api/admin/questions/[id]/route";
 import "@/app/api/admin/settings/route";

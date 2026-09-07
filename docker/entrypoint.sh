@@ -32,6 +32,13 @@ if [ ! -e "$DB_PATH" ] || [ "$(node -e "const D=require('better-sqlite3'); const
   cp ./seed.db "$DB_PATH"
 fi
 
+# Versions du questionnaire publiees depuis l'administration. Le dossier doit
+# vivre sur le volume : l'image est en lecture seule et serait de toute facon
+# ecrasee au redeploiement.
+QUESTIONNAIRE_PUBLISH_DIR="${QUESTIONNAIRE_DIR:-$DB_DIR/certification}"
+mkdir -p "$QUESTIONNAIRE_PUBLISH_DIR"
+echo "[entrypoint] questionnaires publies : ${QUESTIONNAIRE_PUBLISH_DIR}"
+
 if [ "${RUN_MIGRATIONS_ON_BOOT}" = "true" ] && [ -f "./scripts/migrate.mjs" ]; then
   echo "[entrypoint] execution des migrations Drizzle..."
   node ./scripts/migrate.mjs

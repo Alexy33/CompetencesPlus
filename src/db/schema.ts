@@ -237,7 +237,11 @@ export const certificationAnswer = sqliteTable(
     // reponses d'une tentative doivent survivre au passage a une version
     // ulterieure qui ne contiendrait plus cette question.
     questionId: text("question_id").notNull(),
-    value: integer("value").notNull(),
+
+    // Option choisie, telle qu'identifiee dans questions.vN.json. On stocke le
+    // CHOIX, pas les points : le bareme appartient au questionnaire, et une
+    // reponse doit rester interpretable meme si les points changent.
+    optionId: text("option_id").notNull(),
   },
   (table) => [primaryKey({ columns: [table.attemptId, table.questionId] })],
 );

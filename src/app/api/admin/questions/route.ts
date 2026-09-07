@@ -1,37 +1,44 @@
 import { z } from "zod";
 import { defineRoute } from "@/server/openapi/routes";
-import { AUTH_RESPONSES, errorResponse } from "@/server/contracts/common";
+import { AUTH_RESPONSES, VALIDATION_RESPONSE, errorResponse } from "@/server/contracts/common";
 import { AdminQuestionSchema } from "@/server/contracts/certification";
-import { CreateQuestionBody } from "@/server/contracts/admin";
+import { PublishQuestionnaireBody } from "@/server/contracts/admin";
 import { ApiError } from "@/server/http";
 import { named } from "@/server/openapi/schemas";
 import { loadQuestions } from "@/server/services/certification";
-import { questionnaireVersion } from "@/server/services/questionnaire";
+import {
+  QuestionnaireError,
+  listVersions,
+  publishQuestionnaire,
+  questionnaireVersion,
+} from "@/server/services/questionnaire";
 
 export const dynamic = "force-dynamic";
 
-const AdminQuestionListSchema = named(
-  "AdminQuestionList",
+const AdminQuestionnaireSchema = named(
+  "AdminQuestionnaire",
   z.object({
     version: z.number().int().meta({ description: "Version du questionnaire en vigueur." }),
+    versions: z
+      .array(z.number().int())
+      .meta({ description: "Toutes les versions publiees, de la plus ancienne a la plus recente." }),
     items: z.array(AdminQuestionSchema),
   }),
 );
 
 /**
- * Le questionnaire n'est plus modifiable a chaud : il est versionne dans Git
- * (certification/questions.vN.json). Editer le bareme en base laisserait les
- * tentatives en cours sans reference stable et ferait diverger deux copies du
- * questionnaire.
+ * Le questionnaire evolue par PUBLICATION d'une nouvelle version, jamais par
+ * modification d'une version existante : une tentative deja notee doit rester
+ * rejouable a l'identique.
  */
-const READ_ONLY =
-  "Le questionnaire est versionne dans le depot (certification/questions.vN.json). " +
-  "Pour le faire evoluer, publiez une nouvelle version du fichier puis redeployez : " +
-  "les tentatives deja ouvertes conservent leur version.";
-
-export const READ_ONLY_RESPONSE = errorResponse(
-  "Le questionnaire est en lecture seule : il est versionne dans le depot.",
-  { error: { code: "conflict", message: READ_ONLY } },
+export const PUBLISH_CONFLICT = errorResponse(
+  "Publication impossible : questionnaire refuse par la validation, ou dossier non inscriptible.",
+  {
+    error: {
+      code: "conflict",
+      message: "Questionnaire de certification invalide.\n\nQuestion « q3 » (« weight ») :\nInvalid input: expected number, received undefined.",
+    },
+  },
 );
 
 export const { GET } = defineRoute({
@@ -43,25 +50,52 @@ export const { GET } = defineRoute({
     "Vue complete du bareme en vigueur, ponderations et points par reponse compris, avec sa version.",
   access: "admin",
   responses: {
-    "200": { description: "Questions dans l'ordre du questionnaire.", schema: AdminQuestionListSchema },
+    "200": {
+      description: "Questions dans l'ordre du questionnaire.",
+      schema: AdminQuestionnaireSchema,
+    },
     ...AUTH_RESPONSES,
   },
-  handler: () => ({ version: questionnaireVersion(), items: loadQuestions() }),
+  handler: () => ({
+    version: questionnaireVersion(),
+    versions: listVersions(),
+    items: loadQuestions(),
+  }),
 });
 
-export const { POST } = defineRoute({
-  method: "POST",
+export const { PUT } = defineRoute({
+  method: "PUT",
   path: "/api/admin/questions",
   tags: ["Administration"],
-  summary: "Ajouter une question (indisponible)",
-  description: READ_ONLY,
+  summary: "Publier une nouvelle version du questionnaire",
+  description:
+    "Enregistre le questionnaire fourni sous une version NOUVELLE (la plus haute + 1). " +
+    "Les versions deja publiees ne sont jamais modifiees : les tentatives ouvertes ou " +
+    "deja notees conservent leur bareme d'origine. La nouvelle version entre en vigueur " +
+    "pour les tentatives ouvertes ensuite.",
+  successStatus: 201,
   access: "admin",
-  body: CreateQuestionBody,
+  body: PublishQuestionnaireBody,
   responses: {
-    "409": READ_ONLY_RESPONSE,
+    "201": { description: "Nouvelle version publiee.", schema: AdminQuestionnaireSchema },
+    ...VALIDATION_RESPONSE,
     ...AUTH_RESPONSES,
+    "409": PUBLISH_CONFLICT,
   },
-  handler: () => {
-    throw ApiError.conflict(READ_ONLY);
+  handler: ({ body }) => {
+    try {
+      publishQuestionnaire(body.questions);
+    } catch (error) {
+      // Message de validation destine a l'administrateur : il nomme la
+      // question fautive.
+      if (error instanceof QuestionnaireError) throw ApiError.conflict(error.message);
+      throw error;
+    }
+
+    return {
+      version: questionnaireVersion(),
+      versions: listVersions(),
+      items: loadQuestions(),
+    };
   },
 });

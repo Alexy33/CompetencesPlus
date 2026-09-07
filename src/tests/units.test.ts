@@ -85,7 +85,7 @@ describe("back — computeScore (bareme de la certification)", () => {
   });
 
   it("rend 100 quand toutes les meilleures reponses sont choisies", () => {
-    expect(computeScore([question("a", 1, [0, 1, 2])], { a: 2 })).toBe(100);
+    expect(computeScore([question("a", 1, [0, 1, 2])], { a: "a-2" })).toBe(100);
   });
 
   it("rend 0 sans aucune reponse", () => {

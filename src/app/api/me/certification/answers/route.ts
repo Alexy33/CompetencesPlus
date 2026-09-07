@@ -19,7 +19,7 @@ export const { PUT } = defineRoute({
   body: SaveAnswersBody,
   responses: {
     "200": { description: "Reponses enregistrees, etat mis a jour.", schema: CertificationStateSchema },
-    "400": errorResponse("Corps invalide : `answers` absent, ou une valeur non entiere.", {
+    "400": errorResponse("Corps invalide : `answers` absent, ou une valeur non textuelle.", {
       error: {
         code: "bad_request",
         message: "Parametres invalides (body).",
@@ -30,7 +30,7 @@ export const { PUT } = defineRoute({
     }),
     ...AUTH_RESPONSES,
     "422": errorResponse(
-      "Corps valide, mais une cle ne designe aucune question, ou une valeur ne figure dans aucune option de la question visee.",
+      "Corps valide, mais une cle ne designe aucune question, ou l'option choisie ne figure pas parmi celles de la question visee.",
       {
         error: {
           code: "unprocessable",
@@ -53,21 +53,21 @@ export const { PUT } = defineRoute({
     const questions = questionsOf(attempt.questionnaireVersion);
     const allowed = new Map(questions.map((item) => [item.id, item]));
 
-    for (const [questionId, value] of Object.entries(body.answers)) {
+    for (const [questionId, optionId] of Object.entries(body.answers)) {
       const item = allowed.get(questionId);
       if (!item) throw ApiError.unprocessable(`Question inconnue : ${questionId}.`);
-      if (!item.options.some((option) => option.value === value)) {
+      if (!item.options.some((option) => option.id === optionId)) {
         throw ApiError.unprocessable(
-          `La valeur ${value} ne correspond a aucune reponse de la question ${questionId}.`,
+          `La reponse ${optionId} ne figure pas parmi les options de la question ${questionId}.`,
         );
       }
 
       await db
         .insert(certificationAnswer)
-        .values({ attemptId: attempt.id, questionId, value })
+        .values({ attemptId: attempt.id, questionId, optionId })
         .onConflictDoUpdate({
           target: [certificationAnswer.attemptId, certificationAnswer.questionId],
-          set: { value },
+          set: { optionId },
         });
     }
 

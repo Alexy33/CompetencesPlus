@@ -84,6 +84,13 @@ export function AdminDashboard() {
             <QuestionEditor
               questions={admin.questions}
               version={admin.questionnaireVersion}
+              dirty={admin.questionsDirty}
+              publishing={admin.publishing}
+              onPatch={admin.patchQuestion}
+              onAdd={admin.addQuestion}
+              onDelete={admin.removeQuestion}
+              onPublish={admin.publishQuestionnaire}
+              onReset={admin.resetQuestions}
             />
           ) : null}
         </>

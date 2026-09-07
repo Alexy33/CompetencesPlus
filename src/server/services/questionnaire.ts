@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from "node:fs";
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { z } from "zod";
 import { QUESTIONNAIRE_FILE } from "@/lib/vocabulary";
@@ -11,16 +11,42 @@ import {
 /**
  * Chargement du questionnaire de certification.
  *
- * Le fichier `certification/questions.vN.json` est LA source de verite du
- * bareme : libelles, ponderations et points par reponse. Il est versionne
- * dans Git, pas en base — seule la version retenue par chaque tentative est
- * stockee (certification_attempt.questionnaire_version).
+ * Le fichier `questions.vN.json` est LA source de verite du bareme : libelles,
+ * ponderations et points par reponse. Seule la version retenue par chaque
+ * tentative est stockee en base (certification_attempt.questionnaire_version).
+ *
+ * Les fichiers sont cherches dans DEUX dossiers :
+ *
+ *  1. `certification/` du depot — versions livrees avec le code, suivies par
+ *     Git. En production ce dossier est DANS l'image, donc en lecture seule.
+ *  2. le dossier de donnees (`<dir de la base>/certification`, surchargeable
+ *     par QUESTIONNAIRE_DIR) — versions publiees depuis l'administration.
+ *     C'est le seul emplacement inscriptible et persistant : le conteneur de
+ *     production tourne en `read_only`, seul le volume /data accepte
+ *     l'ecriture et survit a un redeploiement.
+ *
+ * A version egale, le dossier de donnees l'emporte. La version en vigueur est
+ * toujours la plus elevee des deux.
  *
  * Un questionnaire invalide fait echouer le chargement : il n'est jamais
  * charge partiellement, et aucun sous-ensemble valide n'est retenu.
  */
 
-export const QUESTIONNAIRE_DIR = path.join(process.cwd(), "certification");
+/** Versions livrees avec le code, suivies par Git. */
+export const BUNDLED_QUESTIONNAIRE_DIR = path.join(process.cwd(), "certification");
+
+/**
+ * Dossier inscriptible ou l'administration publie les nouvelles versions.
+ * Meme convention que les videos : derive du repertoire de la base, qui est
+ * le volume persistant, et surchargeable par variable d'environnement.
+ */
+export function questionnaireDataDir(): string {
+  const custom = process.env.QUESTIONNAIRE_DIR?.trim();
+  if (custom) return path.resolve(custom);
+
+  const dbPath = (process.env.DATABASE_URL ?? "file:./local.db").replace(/^file:/, "");
+  return path.resolve(path.dirname(dbPath), "certification");
+}
 
 export class QuestionnaireError extends Error {
   constructor(message: string) {
@@ -117,36 +143,60 @@ export function readQuestionnaireFile(filePath: string): Questionnaire {
 
 const FILE_PATTERN = /^questions\.v(\d+)\.json$/;
 
+/** Dossiers fouilles, du moins prioritaire au plus prioritaire. */
+function searchDirs(): string[] {
+  const data = questionnaireDataDir();
+  return data === BUNDLED_QUESTIONNAIRE_DIR
+    ? [BUNDLED_QUESTIONNAIRE_DIR]
+    : [BUNDLED_QUESTIONNAIRE_DIR, data];
+}
+
+/** Versions disponibles, avec le chemin retenu pour chacune. */
+function availableVersions(): Map<number, string> {
+  const found = new Map<number, string>();
+
+  for (const dir of searchDirs()) {
+    let entries: string[];
+
+    try {
+      entries = readdirSync(dir);
+    } catch {
+      // Un dossier absent n'est pas une erreur : le dossier de donnees
+      // n'existe que si l'administration a deja publie une version.
+      continue;
+    }
+
+    for (const entry of entries) {
+      const match = FILE_PATTERN.exec(entry);
+      // Dossiers parcourus dans l'ordre de priorite : le dernier ecrase.
+      if (match) found.set(Number(match[1]), path.join(dir, entry));
+    }
+  }
+
+  return found;
+}
+
 /**
- * Version la plus elevee presente dans `certification/`.
+ * Version la plus elevee disponible.
  *
- * Publier `questions.v2.json` suffit donc a faire entrer v2 en vigueur, sans
+ * Publier `questions.v2.json` suffit a faire entrer v2 en vigueur, sans
  * toucher au code. Les fichiers des versions anterieures restent en place :
  * ils servent aux tentatives ouvertes sous ces versions.
  */
-function latestVersion(): number {
-  let entries: string[];
-
-  try {
-    entries = readdirSync(QUESTIONNAIRE_DIR);
-  } catch (error) {
+function latestVersion(available: Map<number, string>): number {
+  if (available.size === 0) {
     throw invalid(
-      `Dossier illisible : ${QUESTIONNAIRE_DIR}\n${error instanceof Error ? error.message : String(error)}`,
+      `Aucun questionnaire trouve (attendu : ${QUESTIONNAIRE_FILE} ou une version ulterieure) ` +
+        `dans ${searchDirs().join(" ni ")}.`,
     );
   }
 
-  const versions = entries
-    .map((entry) => FILE_PATTERN.exec(entry)?.[1])
-    .filter((match): match is string => match !== undefined)
-    .map(Number);
+  return Math.max(...available.keys());
+}
 
-  if (versions.length === 0) {
-    throw invalid(
-      `Aucun questionnaire dans ${QUESTIONNAIRE_DIR} (attendu : ${QUESTIONNAIRE_FILE} ou une version ulterieure).`,
-    );
-  }
-
-  return Math.max(...versions);
+/** Versions publiees, de la plus ancienne a la plus recente. */
+export function listVersions(): number[] {
+  return [...availableVersions().keys()].sort((a, b) => a - b);
 }
 
 let cached: Questionnaire | null = null;
@@ -160,8 +210,9 @@ let cached: Questionnaire | null = null;
 export function getQuestionnaire(): Questionnaire {
   if (cached) return cached;
 
-  const version = latestVersion();
-  const file = path.join(QUESTIONNAIRE_DIR, `questions.v${version}.json`);
+  const available = availableVersions();
+  const version = latestVersion(available);
+  const file = available.get(version)!;
   const loaded = readQuestionnaireFile(file);
 
   // La version declaree fait foi, mais elle doit s'accorder au nom du fichier :
@@ -198,7 +249,14 @@ export function getQuestionnaireVersion(version: number): Questionnaire {
   const known = byVersion.get(version);
   if (known) return known;
 
-  const file = path.join(QUESTIONNAIRE_DIR, `questions.v${version}.json`);
+  const file = availableVersions().get(version);
+  if (!file) {
+    throw invalid(
+      `Version ${version} introuvable dans ${searchDirs().join(" ni ")}. ` +
+        "Le fichier d'une version utilisee par des tentatives ne doit jamais etre supprime.",
+    );
+  }
+
   const loaded = readQuestionnaireFile(file);
 
   if (loaded.version !== version) {
@@ -209,6 +267,83 @@ export function getQuestionnaireVersion(version: number): Questionnaire {
 
   byVersion.set(version, loaded);
   return loaded;
+}
+
+/**
+ * Publie un questionnaire comme NOUVELLE version.
+ *
+ * C'est le seul moyen de faire evoluer le bareme depuis l'application. Le
+ * contenu est valide avant ecriture, puis ecrit sous un numero strictement
+ * superieur a toutes les versions existantes.
+ *
+ * Les fichiers deja publies ne sont JAMAIS modifies : une tentative notee
+ * sous v1 doit pouvoir etre rejouee a l'identique indefiniment. C'est ce qui
+ * donne son sens a certification_attempt.questionnaire_version.
+ */
+export function publishQuestionnaire(questions: unknown): Questionnaire {
+  const available = availableVersions();
+  const version = available.size === 0 ? 1 : Math.max(...available.keys()) + 1;
+
+  // Valide AVANT d'ecrire : un fichier invalide ne doit jamais toucher le disque.
+  const candidate = parseQuestionnaire(
+    { version, questions },
+    `questions.v${version}.json (publication)`,
+  );
+
+  const dir = questionnaireDataDir();
+
+  try {
+    mkdirSync(dir, { recursive: true });
+  } catch (error) {
+    throw invalid(
+      `Dossier de publication inaccessible : ${dir}\n${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+
+  const file = path.join(dir, `questions.v${version}.json`);
+
+  // Ecriture exclusive : si le fichier existe deja, on n'ecrase pas une
+  // version publiee — on echoue.
+  try {
+    writeFileSync(file, `${JSON.stringify(candidate, null, 2)}\n`, { encoding: "utf8", flag: "wx" });
+  } catch (error) {
+    throw invalid(
+      `Publication impossible : ${file}\n${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+
+  // La version en vigueur change : le cache doit repartir du disque.
+  cached = null;
+  return candidate;
+}
+
+/**
+ * Signature du BAREME d'une question : ce qui, en changeant, rend une reponse
+ * anterieure caduque. L'enonce n'en fait volontairement pas partie — corriger
+ * une faute de frappe ne doit pas obliger tous les candidats a repondre a
+ * nouveau. Seuls comptent les reponses proposees, leurs points et le poids.
+ */
+function scoringSignature(question: QuestionnaireQuestion): string {
+  const options = question.options
+    .map((option) => `${option.id}:${option.value}:${option.label}`)
+    .join("|");
+  return `${question.type}#${question.weight}#${options}`;
+}
+
+/**
+ * Questions a reposer pour passer de `from` a `to`.
+ *
+ * Une question est a reposer si elle est nouvelle, ou si son bareme a change.
+ * Les autres gardent la reponse deja donnee par le candidat.
+ */
+export function questionsToReanswer(from: number, to: number): string[] {
+  const previous = new Map(
+    getQuestionnaireVersion(from).questions.map((q) => [q.id, scoringSignature(q)]),
+  );
+
+  return getQuestionnaireVersion(to)
+    .questions.filter((question) => previous.get(question.id) !== scoringSignature(question))
+    .map((question) => question.id);
 }
 
 /** Vide les caches. Reservee aux tests. */

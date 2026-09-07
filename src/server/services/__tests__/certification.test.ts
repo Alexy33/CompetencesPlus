@@ -13,7 +13,7 @@ const question = (id: string, weight: number, values: number[]): LoadedQuestion 
 describe("computeScore", () => {
   it("rend 100 quand toutes les meilleures reponses sont choisies", () => {
     const questions = [question("a", 3, [0, 1, 2, 3]), question("b", 2, [0, 1, 2])];
-    expect(computeScore(questions, { a: 3, b: 2 })).toBe(100);
+    expect(computeScore(questions, { a: "a-3", b: "b-2" })).toBe(100);
   });
 
   it("rend 0 quand aucune reponse n'est donnee", () => {
@@ -23,13 +23,13 @@ describe("computeScore", () => {
   it("compte les questions sans reponse dans le maximum", () => {
 
     const questions = [question("a", 1, [0, 1]), question("b", 1, [0, 1])];
-    expect(computeScore(questions, { a: 1 })).toBe(50);
+    expect(computeScore(questions, { a: "a-1" })).toBe(50);
   });
 
   it("fait peser la ponderation sur le resultat", () => {
 
     const questions = [question("a", 4, [0, 1]), question("b", 1, [0, 1])];
-    expect(computeScore(questions, { a: 1, b: 0 })).toBe(80);
+    expect(computeScore(questions, { a: "a-1", b: "b-0" })).toBe(80);
   });
 
   it("ne divise pas par zero sur un questionnaire vide", () => {
@@ -38,6 +38,6 @@ describe("computeScore", () => {
 
   it("ignore une reponse dont la question n'existe plus", () => {
     const questions = [question("a", 1, [0, 1])];
-    expect(computeScore(questions, { a: 1, disparue: 5 })).toBe(100);
+    expect(computeScore(questions, { a: "a-1", disparue: "zzz" })).toBe(100);
   });
 });
