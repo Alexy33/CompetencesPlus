@@ -2,7 +2,7 @@
   "name": "profilsactifs",
   "version": "0.1.0",
   "private": true,
-  "description": "ProfilsActifs - JEB/DNI/2026-003 - valorisation video et certification des competences",
+  "description": "ProfilsActifs - valorisation video et evaluation des competences",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

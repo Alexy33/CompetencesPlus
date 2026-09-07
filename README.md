@@ -1,6 +1,6 @@
 # ProfilsActifs — socle technique
 
-Demonstrateur pour le Ministere du Job et Bonheur (JEB/DNI/2026-003).
+Démonstrateur technique de valorisation des profils professionnels.
 
 Ce depot contient **le backend complet et sa documentation interactive**. L'API
 couvre le perimetre de la maquette fonctionnelle (catalogue, certification,
@@ -173,7 +173,7 @@ Crees par `npm run db:seed`, mot de passe `demo` :
 | --- | --- |
 | `amina@exemple.fr` | `candidate` — profil publie et certifie |
 | `recruteur@exemple.fr` | `recruiter` |
-| `admin@jeb.gouv.fr` | `admin` |
+| `admin@exemple.fr` | `admin` |
 
 Le seed installe aussi 14 profils (dont 2 en attente de moderation) et les 12
 questions de certification, pour que le catalogue et la doc ne soient pas vides.

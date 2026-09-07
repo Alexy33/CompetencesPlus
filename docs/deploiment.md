@@ -8,7 +8,7 @@ L'application peut être hébergée sur un serveur Linux disposant de Docker, pa
 
 * un serveur dédié ou une machine virtuelle ;
 * un VPS hébergé chez un prestataire ;
-* une infrastructure interne au ministère.
+* une infrastructure interne à l’organisation exploitante.
 
 Le projet fournit déjà une image Docker de production ainsi qu'un fichier `docker-compose.yml`.
 
