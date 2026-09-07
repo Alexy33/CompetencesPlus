@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { integer, primaryKey, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
+import { index, integer, primaryKey, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
 import {
   CITIES,
   CONTACT_STATUSES,
@@ -7,6 +7,7 @@ import {
   SECTORS,
   SKILLS,
   USER_ROLES,
+  VIDEO_PROVIDERS,
   VIDEO_STATUSES,
   mutable,
 } from "@/lib/vocabulary";
@@ -89,52 +90,62 @@ export const verification = sqliteTable("verification", {
     .default(sql`(unixepoch())`),
 });
 
-export const profile = sqliteTable("profile", {
-  id: text("id").primaryKey(),
-  userId: text("user_id")
-    .notNull()
-    .unique()
-    .references(() => user.id, { onDelete: "cascade" }),
+export const profile = sqliteTable(
+  "profile",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .unique()
+      .references(() => user.id, { onDelete: "cascade" }),
 
-  title: text("title").notNull().default(""),
-  sector: text("sector", { enum: mutable(SECTORS) }).notNull(),
-  city: text("city", { enum: mutable(CITIES) }).notNull(),
-  bio: text("bio").notNull().default(""),
+    title: text("title").notNull().default(""),
+    sector: text("sector", { enum: mutable(SECTORS) }).notNull(),
+    city: text("city", { enum: mutable(CITIES) }).notNull(),
+    bio: text("bio").notNull().default(""),
 
-  videoUrl: text("video_url"),
+    /**
+     * Reference de la video : un identifiant OPAQUE et le nom de l'hebergeur qui
+     * le comprend. Jamais un chemin de fichier — l'emplacement physique est un
+     * detail interne du fournisseur (cf. src/server/video/).
+     */
+    videoId: text("video_id"),
+    videoProvider: text("video_provider", { enum: mutable(VIDEO_PROVIDERS) }),
 
-  videoConsentGranted: integer("video_consent_granted", { mode: "boolean" })
-    .notNull()
-    .default(false),
-  videoConsentAt: integer("video_consent_at", { mode: "timestamp" }),
-  videoConsentVersion: text("video_consent_version"),
-  videoConsentRevokedAt: integer("video_consent_revoked_at", { mode: "timestamp" }),
+    videoConsentGranted: integer("video_consent_granted", { mode: "boolean" })
+      .notNull()
+      .default(false),
+    videoConsentAt: integer("video_consent_at", { mode: "timestamp" }),
+    videoConsentVersion: text("video_consent_version"),
+    videoConsentRevokedAt: integer("video_consent_revoked_at", { mode: "timestamp" }),
 
-  videoStatus: text("video_status", { enum: mutable(VIDEO_STATUSES) })
-    .notNull()
-    .default("pending"),
-  videoReviewReason: text("video_review_reason"),
+    videoStatus: text("video_status", { enum: mutable(VIDEO_STATUSES) })
+      .notNull()
+      .default("pending"),
+    videoReviewReason: text("video_review_reason"),
 
-  videoReviewedBy: text("video_reviewed_by").references(() => user.id, { onDelete: "set null" }),
-  videoReviewedAt: integer("video_reviewed_at", { mode: "timestamp" }),
+    videoReviewedBy: text("video_reviewed_by").references(() => user.id, { onDelete: "set null" }),
+    videoReviewedAt: integer("video_reviewed_at", { mode: "timestamp" }),
 
-  status: text("status", { enum: mutable(PROFILE_STATUSES) })
-    .notNull()
-    .default("pending"),
+    status: text("status", { enum: mutable(PROFILE_STATUSES) })
+      .notNull()
+      .default("pending"),
 
-  score: integer("score"),
-  certifiedAt: integer("certified_at", { mode: "timestamp" }),
+    score: integer("score"),
+    certifiedAt: integer("certified_at", { mode: "timestamp" }),
 
-  views: integer("views").notNull().default(0),
-  contactCount: integer("contact_count").notNull().default(0),
+    views: integer("views").notNull().default(0),
+    contactCount: integer("contact_count").notNull().default(0),
 
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .notNull()
-    .default(sql`(unixepoch())`),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
-    .notNull()
-    .default(sql`(unixepoch())`),
-});
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+    updatedAt: integer("updated_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (table) => [index("profile_video_id_idx").on(table.videoId)],
+);
 
 export const profileSkill = sqliteTable(
   "profile_skill",
