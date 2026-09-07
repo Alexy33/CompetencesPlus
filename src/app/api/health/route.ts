@@ -5,8 +5,6 @@ import { named } from "@/server/openapi/schemas";
 import { defineRoute } from "@/server/openapi/routes";
 import { errorResponse } from "@/server/contracts/common";
 
-// Cible du HEALTHCHECK Docker. Doit etre dynamique : une route mise en cache
-// repondrait 200 meme base morte, ce qui rend le healthcheck inutile.
 export const dynamic = "force-dynamic";
 
 const HealthSchema = named(
@@ -31,11 +29,10 @@ export const { GET } = defineRoute({
   },
   handler: () => {
     try {
-      // Requete la moins chere qui prouve que le fichier SQLite est bien ouvert.
+
       db.get(sql`SELECT 1`);
     } catch (error) {
-      // 503 et non 500 : la sonde doit dire « indisponible, reessayez », c'est
-      // ce que la politique de redemarrage de Docker attend.
+
       return Response.json(
         {
           error: {

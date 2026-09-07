@@ -115,4 +115,4 @@ ainsi, plutôt que de laisser entendre un contrôle documentaire qui n'existe pa
 | `src/components/auth/register-form.tsx` | Champ, blocage client, mention 16–18 |
 | `src/server/services/profiles.ts` | Exclusion du catalogue, masquage vidéo |
 | `src/app/api/videos/[id]/route.ts` | Refus de la vidéo d'un mineur |
-| `src/db/seed.ts` | Dates de naissance du jeu de démonstration |
+| `src/db/seed/profiles.fixture.ts` | Dates de naissance du jeu de démonstration |

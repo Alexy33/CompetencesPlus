@@ -8,14 +8,7 @@ import {
   latestAllowedBirthDate,
 } from "@/lib/age";
 
-/**
- * Verification de l'age (R.1).
- *
- * Tous les cas sont ancres sur une date de reference FIXE : un test qui
- * dependrait de `new Date()` passerait aujourd'hui et echouerait le jour d'un
- * anniversaire, ce qui est exactement le bug qu'on veut exclure.
- */
-const REFERENCE = new Date(2026, 8, 3); // 3 septembre 2026
+const REFERENCE = new Date(2026, 8, 3);
 
 describe("ageOn", () => {
   it("compte les annees revolues", () => {
@@ -23,7 +16,7 @@ describe("ageOn", () => {
   });
 
   it("ne compte pas l'annee en cours avant l'anniversaire", () => {
-    // Anniversaire le lendemain de la reference : encore 15 ans.
+
     expect(ageOn("2010-09-04", REFERENCE)).toBe(15);
   });
 
@@ -56,7 +49,7 @@ describe("ageOn", () => {
   });
 
   it("rend null sur un jour qui n'existe pas", () => {
-    // Sans ce garde-fou, Date glisse au 2 mars et renvoie un age plausible.
+
     expect(ageOn("2010-02-30", REFERENCE)).toBeNull();
     expect(ageOn("2010-13-01", REFERENCE)).toBeNull();
   });
@@ -99,18 +92,17 @@ describe("isAllowedToRegister", () => {
 
 describe("isMinor", () => {
   it("reconnait la tranche 16-18 ans", () => {
-    expect(isMinor("2010-09-03", REFERENCE)).toBe(true); // 16 ans
-    expect(isMinor("2009-01-01", REFERENCE)).toBe(true); // 17 ans
+    expect(isMinor("2010-09-03", REFERENCE)).toBe(true);
+    expect(isMinor("2009-01-01", REFERENCE)).toBe(true);
   });
 
   it("ne compte pas un majeur", () => {
-    expect(isMinor("2008-09-03", REFERENCE)).toBe(false); // 18 ans pile
+    expect(isMinor("2008-09-03", REFERENCE)).toBe(false);
     expect(isMinor("1990-01-01", REFERENCE)).toBe(false);
   });
 
   it("ne presume pas mineur un compte sans date", () => {
-    // Comptes anterieurs a l'exigence : on ne peut rien en deduire, et le
-    // blocage a l'inscription garantit qu'aucun compte NOUVEAU n'est dans ce cas.
+
     expect(isMinor(null, REFERENCE)).toBe(false);
   });
 });

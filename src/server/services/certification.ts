@@ -9,15 +9,6 @@ import {
 } from "@/db/schema";
 import { getSettings } from "./settings";
 
-/**
- * Questionnaire de certification (CDC 2.2).
- *
- * Le bareme n'est pas uniforme : chaque question porte une ponderation (1-5) et
- * chaque reponse une valeur en points. Le score sur 100 est donc le rapport
- * entre les points obtenus et le maximum atteignable, et non une moyenne de
- * bonnes reponses.
- */
-
 export interface LoadedQuestion {
   id: string;
   text: string;
@@ -50,7 +41,6 @@ export async function loadQuestions(): Promise<LoadedQuestion[]> {
   }));
 }
 
-/** Tentative courante : celle en cours, sinon la derniere soumise. */
 export async function currentAttempt(userId: string) {
   const [inProgress] = await db
     .select()
@@ -70,7 +60,6 @@ export async function currentAttempt(userId: string) {
   return last ?? null;
 }
 
-/** Tentative en cours, creee a la volee si le candidat commence maintenant. */
 export async function openAttempt(userId: string) {
   const existing = await currentAttempt(userId);
   if (existing && existing.status === "in_progress") return existing;
@@ -122,12 +111,6 @@ export async function certificationState(userId: string): Promise<CertificationS
   };
 }
 
-/**
- * Score sur 100 : points obtenus / points atteignables.
- *
- * Une question sans reponse compte zero point mais reste dans le maximum :
- * abandonner en cours de route ne peut pas gonfler le score.
- */
 export function computeScore(
   questions: LoadedQuestion[],
   answers: Record<string, number>,
@@ -154,12 +137,6 @@ export interface SubmitResult {
   certified: boolean;
 }
 
-/**
- * Cloture la tentative et met le profil a jour.
- *
- * Echouer ne retire PAS une certification deja obtenue : le badge reste acquis
- * tant que le candidat ne l'a pas repasse avec succes ou qu'il n'expire pas.
- */
 export async function submitAttempt(userId: string): Promise<SubmitResult> {
   const attempt = await openAttempt(userId);
   const [questions, settings, answers] = await Promise.all([

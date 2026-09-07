@@ -3,13 +3,6 @@ import { db } from "@/db";
 import { setting } from "@/db/schema";
 import { DEFAULT_CERTIFICATION_THRESHOLD, DEFAULT_PAGE_SIZE } from "@/lib/vocabulary";
 
-/**
- * Reglages du dispositif, avec repli sur les valeurs par defaut.
- *
- * La table peut etre vide (base fraiche, seed non joue) : l'API doit repondre
- * quand meme. Les defauts vivent dans `vocabulary.ts`, pas ici.
- */
-
 export interface Settings {
   certificationThreshold: number;
   catalogPageSize: number;

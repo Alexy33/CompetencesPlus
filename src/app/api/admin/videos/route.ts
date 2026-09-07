@@ -15,8 +15,6 @@ const VideoModerationQueueSchema = named(
   z.object({ items: z.array(VideoModerationRowSchema) }),
 );
 
-// Le decideur est le meme table `user` que le titulaire : sans alias, la
-// jointure se refermerait sur elle-meme et rendrait le nom du candidat.
 const moderator = alias(user, "moderator");
 
 export const { GET } = defineRoute({
@@ -43,17 +41,12 @@ export const { GET } = defineRoute({
       .from(profile)
       .innerJoin(user, eq(user.id, profile.userId))
       .leftJoin(moderator, eq(moderator.id, profile.videoReviewedBy))
-      // Un profil sans video n'a rien a moderer : il encombrerait la file sans
-      // qu'aucune decision ne soit possible.
       .where(
         and(
           isNotNull(profile.videoUrl),
           query.status ? eq(profile.videoStatus, query.status) : undefined,
         ),
       )
-      // Les videos en attente d'abord : c'est ce que l'ecran doit traiter.
-      // L'ordre est explicite et non alphabetique — « pending » ne se trouve ni
-      // en tete ni en queue d'un tri sur la chaine.
       .orderBy(
         sql`case ${profile.videoStatus} when 'pending' then 0 when 'rejected' then 1 else 2 end`,
         desc(profile.updatedAt),

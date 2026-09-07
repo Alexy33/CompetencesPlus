@@ -3,7 +3,6 @@ import { named } from "../openapi/schemas";
 import { MAX_PAGE_SIZE } from "@/lib/vocabulary";
 import { ProfileStatusSchema, VideoStatusSchema } from "./common";
 
-/** Tableau de bord global du dispositif (CDC 2.1). */
 export const AdminStatsSchema = named(
   "AdminStats",
   z.object({
@@ -19,7 +18,6 @@ export const AdminStatsSchema = named(
   }),
 );
 
-/** Ligne de la file de moderation. */
 export const ModerationRowSchema = named(
   "ModerationRow",
   z.object({
@@ -39,14 +37,6 @@ export const ModerateProfileBody = named(
   }),
 );
 
-/* --- Moderation des videos (R.2) ----------------------------------------- */
-
-/**
- * Ligne de la file de moderation des videos.
- *
- * Porte l'URL de la video : c'est la seule route qui la sert avant validation,
- * puisque c'est precisement celle qui sert a decider.
- */
 export const VideoModerationRowSchema = named(
   "VideoModerationRow",
   z.object({
@@ -63,14 +53,6 @@ export const VideoModerationRowSchema = named(
   }),
 );
 
-/**
- * Decision de moderation.
- *
- * `reason` obligatoire au refus et refuse a la validation : un refus sans motif
- * ne serait pas communicable au candidat, et un motif accroche a une validation
- * laisserait croire a une reserve la ou il n'y en a pas. La regle est portee
- * par le contrat, donc appliquee a l'entree et visible dans la documentation.
- */
 export const DecideVideoBody = named(
   "DecideVideoInput",
   z
@@ -87,8 +69,6 @@ export const DecideVideoBody = named(
       message: "Une validation ne porte pas de motif.",
     }),
 );
-
-/* --- Gestion des questions ----------------------------------------------- */
 
 const OptionInput = z.object({
   label: z.string().trim().min(1).max(300),
@@ -119,8 +99,6 @@ export const UpdateQuestionBody = named(
   }),
 );
 
-/* --- Reglages ------------------------------------------------------------ */
-
 export const SettingsSchema = named(
   "Settings",
   z.object({
@@ -142,8 +120,6 @@ export const UpdateSettingsBody = named(
     catalogPageSize: z.number().int().min(1).max(MAX_PAGE_SIZE).optional(),
   }),
 );
-
-/* --- Conservation des donnees (R.5) -------------------------------------- */
 
 export const RetentionPolicySchema = named(
   "RetentionPolicy",

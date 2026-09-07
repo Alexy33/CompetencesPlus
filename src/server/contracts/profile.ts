@@ -11,13 +11,6 @@ import {
   pageOf,
 } from "./common";
 
-/**
- * Etat du consentement a la diffusion video (R.3).
- *
- * Rattache au seul `MyProfile` : c'est une donnee personnelle du titulaire, pas
- * un attribut public de la fiche. Un recruteur n'a pas a savoir a quelle date
- * quelqu'un a accepte quoi.
- */
 export const VideoConsentSchema = named(
   "VideoConsent",
   z.object({
@@ -34,7 +27,6 @@ export const VideoConsentSchema = named(
   }),
 );
 
-/** Texte en vigueur et sa version, pour que le client affiche ce qu'il fait accepter. */
 export const VideoConsentNoticeSchema = named(
   "VideoConsentNotice",
   z.object({
@@ -44,14 +36,6 @@ export const VideoConsentNoticeSchema = named(
   }),
 );
 
-/**
- * Etat de moderation de la video (R.2), tel que le voit son titulaire.
- *
- * Rattache au seul `MyProfile`, comme le consentement : le motif d'un refus est
- * une correspondance entre l'administration et le candidat, pas un attribut
- * public de la fiche. Un recruteur n'a pas a savoir ce qui a ete reproche a une
- * video — il ne voit que celles qui sont validees.
- */
 export const VideoModerationSchema = named(
   "VideoModeration",
   z.object({
@@ -68,13 +52,6 @@ export const VideoModerationSchema = named(
   }),
 );
 
-/**
- * Carte de profil telle qu'elle apparait dans le catalogue.
- *
- * Volontairement plus pauvre que `Profile` : la liste n'a besoin ni de la
- * biographie ni de la video, et les servir a chaque page couterait de la bande
- * passante pour rien.
- */
 export const ProfileCardSchema = named(
   "ProfileCard",
   z.object({
@@ -90,7 +67,6 @@ export const ProfileCardSchema = named(
   }),
 );
 
-/** Profil public complet, tel que servi sur la fiche d'un candidat. */
 export const ProfileSchema = named(
   "Profile",
   ProfileCardSchema.extend({
@@ -103,14 +79,6 @@ export const ProfileSchema = named(
   }),
 );
 
-/**
- * Profil vu par son proprietaire.
- *
- * Le profil public plus le compteur de vues : le candidat suit son audience,
- * mais ce compteur ne quitte pas son espace. Il n'apparait ni dans `Profile`,
- * ni dans `ProfileCard`, ni dans un export, ni dans une vue recruteur — on ne
- * publie pas un classement de personnes par audience.
- */
 export const MyProfileSchema = named(
   "MyProfile",
   ProfileSchema.extend({
@@ -123,8 +91,6 @@ export const MyProfileSchema = named(
 );
 
 export const ProfilePageSchema = pageOf("ProfilePage", ProfileCardSchema);
-
-/* --- Requetes ------------------------------------------------------------ */
 
 export const CatalogQuery = PaginationQuery.extend({
   q: z
@@ -146,13 +112,6 @@ export const CatalogQuery = PaginationQuery.extend({
     }),
 });
 
-/**
- * Mise a jour du profil par son titulaire.
- *
- * Tous les champs sont optionnels : le front envoie ce que l'utilisateur a
- * modifie, pas le profil entier. Ni `status`, ni `score`, ni les compteurs ne
- * figurent ici — ils ne se modifient pas depuis l'espace candidat.
- */
 export const UpdateMyProfileBody = named(
   "UpdateProfileInput",
   z.object({

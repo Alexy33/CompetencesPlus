@@ -10,22 +10,6 @@ import { createCompany, isSirenTaken } from "@/server/services/companies";
 
 export const dynamic = "force-dynamic";
 
-/**
- * Inscription, un role a la fois (CDC 3.1).
- *
- * Pourquoi une route maison plutot que `POST /api/auth/sign-up/email` en direct
- * depuis le navigateur : un recruteur ne se resume pas a un compte. Il declare
- * une entreprise, et cette declaration doit etre validee et ecrite dans la
- * MEME requete que la creation du compte. Deux appels successifs depuis le
- * client laisseraient exister un recruteur sans entreprise des que le second
- * echoue — c'est-a-dire quelqu'un qui contacte des candidats sans qu'on sache
- * au nom de qui.
- *
- * La creation du compte elle-meme reste deleguee a better-auth
- * (`auth.api.signUpEmail`) : le hachage du mot de passe, la session et le
- * controle d'age du hook `before` ne sont pas reecrits ici.
- */
-
 const CONFLICT_RESPONSE = {
   "409": errorResponse("Adresse e-mail ou SIREN deja utilise.", {
     error: { code: "conflict", message: "Un compte existe deja avec cette adresse e-mail." },
@@ -56,8 +40,7 @@ export const { POST } = defineRoute({
     ...CONFLICT_RESPONSE,
   },
   handler: async ({ body, request }) => {
-    // Le SIREN est verifie AVANT la creation du compte : sinon la contrainte
-    // d'unicite refuserait l'entreprise apres que l'utilisateur existe deja.
+
     if (body.role === "recruiter" && (await isSirenTaken(body.company.siren))) {
       throw ApiError.conflict(
         "Ce SIREN est deja declare par un autre compte. Rapprochez-vous de la personne qui gere l'espace de votre entreprise.",
@@ -74,15 +57,12 @@ export const { POST } = defineRoute({
           birthDate: body.birthDate,
         },
         headers: request.headers,
-        // Sans cela, better-auth rend l'utilisateur mais les en-tetes
-        // `Set-Cookie` restent dans son contexte : le compte serait cree sans
-        // que la session s'ouvre.
+
         asResponse: false,
       });
       created = { id: result.user.id, email: result.user.email };
     } catch (error) {
-      // better-auth leve une APIError pour un e-mail deja pris. On ne recopie
-      // pas son message tel quel : il est en anglais et parle de « user ».
+
       const status = (error as { statusCode?: number }).statusCode;
       if (status === 400 || status === 422) {
         const message = (error as { body?: { message?: string } }).body?.message ?? "";
@@ -98,21 +78,10 @@ export const { POST } = defineRoute({
       return { id: created.id, email: created.email, role: "candidate" as const };
     }
 
-    /**
-     * Passage en recruteur, apres coup et non a la creation.
-     *
-     * `role` est declare `input: false` cote better-auth : aucun appelant ne
-     * peut se promouvoir par `POST /api/auth/sign-up/email`. C'est voulu, et
-     * cela vaut aussi pour nous — d'ou la mise a jour explicite ici, une fois
-     * l'entreprise acceptee. Le hook de creation a fabrique un profil candidat
-     * en chemin : il est supprime, un recruteur n'en a pas.
-     */
     try {
       await createCompany(created.id, body.company);
     } catch (error) {
-      // L'entreprise est la raison d'etre du compte recruteur : si elle n'entre
-      // pas, le compte ne doit pas rester. On efface ce qu'on vient de creer
-      // plutot que de laisser un recruteur anonyme.
+
       await db.delete(user).where(eq(user.id, created.id));
       throw error;
     }

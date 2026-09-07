@@ -1,30 +1,10 @@
 import { expect, test } from "@playwright/test";
 
-/**
- * Inscription multi-roles (CDC 3.1).
- *
- * Ce que ces tests etablissent :
- *
- * 1. un compte se cree en demandeur d'emploi OU en recruteur ;
- * 2. un recruteur declare son entreprise dans la MEME requete — sans elle,
- *    l'inscription est refusee et aucun compte n'est cree ;
- * 3. le SIREN est controle (cle de Luhn) et unique dans le dispositif ;
- * 4. l'inscription publique ne permet pas de se faire administrateur.
- */
-
 const PASSWORD = "demo1234";
 const ADULT = "1990-05-17";
 
-/** Adresse unique par execution : la base de demonstration n'est pas remise a zero entre deux passages. */
 const unique = (prefix: string) => `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2, 8)}@exemple.fr`;
 
-/**
- * SIREN valides au sens de Luhn, generes a la volee.
- *
- * Une constante serait rejouee au second passage des tests et tomberait sur la
- * contrainte d'unicite : le test echouerait pour une raison qui n'est pas celle
- * qu'il verifie.
- */
 function makeSiren(): string {
   for (;;) {
     const base = Array.from({ length: 9 }, () => Math.floor(Math.random() * 10)).join("");
@@ -62,13 +42,9 @@ test.describe("Inscription multi-roles", () => {
     expect(response.status(), "creation du compte").toBe(201);
     expect((await response.json()).role).toBe("candidate");
 
-    // La session est ouverte par l'inscription elle-meme : le profil est
-    // lisible sans repasser par la page de connexion. C'est ce qui permet au
-    // formulaire de rediriger directement vers l'espace du nouveau compte.
     const mine = await context.get("/api/me/profile");
     expect(mine.status(), "profil cree a l'inscription").toBe(200);
 
-    // Un candidat n'a pas d'entreprise : la route lui est fermee par son role.
     expect((await context.get("/api/me/company")).status()).toBe(403);
 
     await context.dispose();
@@ -86,8 +62,7 @@ test.describe("Inscription multi-roles", () => {
         email,
         password: PASSWORD,
         birthDate: ADULT,
-        // Saisi avec des espaces, comme sur un Kbis : la normalisation est
-        // faite par le serveur, pas exigee de la personne.
+
         company: { ...companyOf(`${siren.slice(0, 3)} ${siren.slice(3, 6)} ${siren.slice(6)}`) },
       },
     });
@@ -102,12 +77,9 @@ test.describe("Inscription multi-roles", () => {
     expect(stored.position).toBe("Responsable du recrutement");
     expect(stored.city).toBe("Nantes");
 
-    // Le role est bien recruteur : les routes candidat lui sont fermees, celles
-    // du recruteur ouvertes.
     expect((await context.get("/api/me/profile")).status()).toBe(403);
     expect((await context.get("/api/me/favorites")).status()).toBe(200);
 
-    // Il peut corriger sa fiche entreprise.
     const patched = await context.patch("/api/me/company", {
       data: { position: "Directeur des ressources humaines" },
     });
@@ -126,7 +98,6 @@ test.describe("Inscription multi-roles", () => {
     });
     expect(response.status()).toBe(400);
 
-    // Le compte ne doit pas exister : la connexion echoue.
     const login = await context.post("/api/auth/sign-in/email", { data: { email, password: PASSWORD } });
     expect(login.status(), "aucun compte cree").not.toBe(200);
 
@@ -182,8 +153,6 @@ test.describe("Inscription multi-roles", () => {
 
     await page.goto("/register");
 
-    // Le choix du role commande le formulaire : les champs entreprise
-    // n'existent pas tant que « Recruteur » n'est pas selectionne.
     await expect(page.getByLabel("SIREN")).toHaveCount(0);
     await page.getByRole("radio", { name: /Recruteur/ }).click();
     await expect(page.getByLabel("SIREN")).toBeVisible();
@@ -203,8 +172,6 @@ test.describe("Inscription multi-roles", () => {
 
     await page.getByRole("button", { name: "Créer le compte recruteur" }).click();
 
-    // Redirection vers l'espace recruteur, et non l'espace demandeur : le role
-    // choisi commande aussi la suite du parcours.
     await page.waitForURL("**/recruiter", { timeout: 20000 });
     await expect(page.getByRole("heading", { name: "Mon entreprise" })).toBeVisible();
     await expect(page.getByText("Fonderie de la Loire")).toBeVisible();

@@ -1,14 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { computeScore, type LoadedQuestion } from "../certification";
 
-/**
- * Bareme de la certification.
- *
- * Seule logique metier reellement calculatoire du backend : elle decide qui
- * obtient le badge JEB, donc elle est testee sur ses cas limites plutot que sur
- * un exemple heureux.
- */
-
 const question = (id: string, weight: number, values: number[]): LoadedQuestion => ({
   id,
   text: id,
@@ -28,14 +20,13 @@ describe("computeScore", () => {
   });
 
   it("compte les questions sans reponse dans le maximum", () => {
-    // Une seule question sur deux repondue parfaitement : abandonner en cours
-    // de route ne doit pas gonfler le score.
+
     const questions = [question("a", 1, [0, 1]), question("b", 1, [0, 1])];
     expect(computeScore(questions, { a: 1 })).toBe(50);
   });
 
   it("fait peser la ponderation sur le resultat", () => {
-    // « a » pese 4 fois plus que « b » : reussir « a » seul doit valoir 80 %.
+
     const questions = [question("a", 4, [0, 1]), question("b", 1, [0, 1])];
     expect(computeScore(questions, { a: 1, b: 0 })).toBe(80);
   });

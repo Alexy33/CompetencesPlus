@@ -3,14 +3,6 @@ import { db } from "@/db";
 import { company } from "@/db/schema";
 import type { Sector } from "@/lib/vocabulary";
 
-/**
- * Entreprise d'un compte recruteur (CDC 3.1).
- *
- * Tout ce qui sort d'ici est deja au format servi par l'API (dates en ISO,
- * champs facultatifs a `null` et non `undefined`) : deux routes qui exposent
- * une entreprise ne peuvent pas diverger.
- */
-
 export interface CompanyView {
   id: string;
   name: string;
@@ -62,14 +54,6 @@ export async function findCompanyByUserId(userId: string): Promise<CompanyView |
   return row ? toView(row) : null;
 }
 
-/**
- * Le SIREN est-il deja declare par un AUTRE compte ?
- *
- * Verifie avant la creation du compte : la contrainte d'unicite de la base
- * suffirait a refuser l'ecriture, mais elle interviendrait apres la creation de
- * l'utilisateur — on aurait alors un compte a supprimer pour rattraper une
- * erreur previsible.
- */
 export async function isSirenTaken(siren: string, exceptUserId?: string): Promise<boolean> {
   const rows = await db
     .select({ id: company.id })

@@ -3,7 +3,6 @@ import { named } from "../openapi/schemas";
 import { ContactStatusSchema } from "./common";
 import { ProfileCardSchema } from "./profile";
 
-/** Ligne de suivi d'un candidat contacte, cote recruteur. */
 export const ContactSchema = named(
   "Contact",
   z.object({
@@ -38,7 +37,6 @@ export const UpdateContactBody = named(
   }),
 );
 
-/** Compteurs du tableau de bord recruteur. */
 export const RecruiterStatsSchema = named(
   "RecruiterStats",
   z.object({
@@ -47,8 +45,6 @@ export const RecruiterStatsSchema = named(
     interviewsPlanned: z.number().int(),
   }),
 );
-
-/* --- Notifications ------------------------------------------------------- */
 
 export const NotificationSchema = named(
   "Notification",

@@ -6,14 +6,6 @@ import { findCompanyByUserId, isSirenTaken, updateCompany } from "@/server/servi
 
 export const dynamic = "force-dynamic";
 
-/**
- * L'entreprise du recruteur connecte.
- *
- * Reservee au role `recruiter` : c'est une donnee de son espace, pas une fiche
- * publique. Un candidat n'a pas a lire le SIREN ni l'adresse d'une entreprise
- * par cette route ; ce qu'il voit d'un recruteur passe par la prise de contact.
- */
-
 const COMPANY_NOT_FOUND = {
   "404": {
     ...NOT_FOUND_RESPONSE["404"],

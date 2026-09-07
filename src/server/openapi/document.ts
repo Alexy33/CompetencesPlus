@@ -38,8 +38,6 @@ export function buildOpenApiDocument() {
     entry[route.method.toLowerCase()] = operationOf(route);
   }
 
-  // Les routes better-auth sont servies par un catch-all : on les decrit a la
-  // main pour que le front voie l'ensemble de la surface au meme endroit.
   for (const [path, operations] of Object.entries(authPaths)) {
     paths[path] = { ...(paths[path] ?? {}), ...operations };
   }

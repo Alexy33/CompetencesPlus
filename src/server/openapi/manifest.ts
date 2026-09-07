@@ -1,15 +1,3 @@
-/**
- * Import de tous les modules de route.
- *
- * Next.js charge chaque `route.ts` a la demande : sans cet import explicite,
- * `/api/openapi` ne verrait que les routes deja visitees et la documentation
- * serait incomplete de facon imprevisible. Importer un module suffit a
- * enregistrer sa definition (effet de bord de `defineRoute`).
- *
- * TOUT NOUVEAU FICHIER DE ROUTE DOIT ETRE AJOUTE ICI. Le test
- * `src/server/openapi/__tests__/manifest.test.ts` echoue si on l'oublie.
- */
-
 import "@/app/api/health/route";
 import "@/app/api/reference/route";
 import "@/app/api/stats/route";

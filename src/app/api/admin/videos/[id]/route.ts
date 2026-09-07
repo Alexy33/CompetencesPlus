@@ -48,8 +48,7 @@ export const { PATCH } = defineRoute({
       .limit(1);
 
     if (!target) throw ApiError.notFound("Ce profil n'existe pas.");
-    // Moderer une video absente n'a pas de sens : la decision porterait sur
-    // rien et serait heritee par le prochain fichier depose.
+
     if (!target.videoUrl) throw ApiError.notFound("Ce profil ne porte aucune video.");
 
     await decideVideoModeration(params.id, body.decision, session.user.id, body.reason ?? null);

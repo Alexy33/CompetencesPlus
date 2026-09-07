@@ -1,12 +1,6 @@
 import { z } from "zod";
 import { named } from "../openapi/schemas";
 
-/**
- * Question telle qu'elle est servie au candidat.
- *
- * La ponderation n'y figure PAS : connaitre le poids d'une question aiderait a
- * optimiser ses reponses. Elle n'apparait que dans la vue administration.
- */
 export const QuestionSchema = named(
   "Question",
   z.object({
@@ -22,7 +16,6 @@ export const QuestionSchema = named(
   }),
 );
 
-/** Meme question, vue administration : ponderation et bareme visibles. */
 export const AdminQuestionSchema = named(
   "AdminQuestion",
   QuestionSchema.extend({
@@ -48,12 +41,6 @@ export const QuestionnaireSchema = named(
   }),
 );
 
-/**
- * Etat de la certification du candidat connecte.
- *
- * Une seule route donne tout ce dont l'ecran a besoin : ou en est la tentative,
- * quelles reponses sont deja enregistrees, et le resultat s'il existe.
- */
 export const CertificationStateSchema = named(
   "CertificationState",
   z.object({
@@ -72,12 +59,6 @@ export const CertificationStateSchema = named(
   }),
 );
 
-/**
- * Enregistrement des reponses.
- *
- * Envoye a chaque question plutot qu'a la fin : la maquette conserve la
- * progression si le candidat quitte le questionnaire en cours de route.
- */
 export const SaveAnswersBody = named(
   "SaveAnswersInput",
   z.object({

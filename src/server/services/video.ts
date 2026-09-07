@@ -65,15 +65,6 @@ export interface StoredVideo {
   extension: string;
 }
 
-/**
- * Refuse toute mise en diffusion sans accord en cours.
- *
- * Le consentement porte sur la DIFFUSION, pas sur le mode d'hebergement. Un
- * lien YouTube ou Vimeo expose l'image et la voix exactement comme un fichier
- * depose chez nous : le fait que l'octet vive ailleurs ne change rien pour la
- * personne filmee. Les deux chemins passent donc par la meme garde, et c'est
- * pour cela qu'elle est exportee plutot que recopiee dans chaque route.
- */
 export async function assertVideoConsent(profileId: string): Promise<void> {
   const consent = await readVideoConsent(profileId);
   if (!consent?.granted) throw new MissingVideoConsentError();
@@ -84,8 +75,7 @@ export async function saveProfileVideo(
   extension: string,
   body: ReadableStream<Uint8Array>,
 ): Promise<StoredVideo> {
-  // Rien n'entre en stockage sans accord en cours : un fichier depose avant le
-  // consentement serait deja un hebergement non couvert, meme bref.
+
   await assertVideoConsent(profileId);
 
   const dir = await ensureDir();
@@ -128,8 +118,6 @@ export async function saveProfileVideo(
 
   await rename(partPath, finalPath);
 
-  // Un fichier neuf n'herite jamais de la decision prise sur celui qu'il
-  // remplace : il repart en attente de moderation (R.2).
   await resetVideoModeration(profileId);
 
   return { path: finalPath, bytes, extension };
@@ -163,26 +151,14 @@ export async function deleteProfileVideo(profileId: string): Promise<void> {
         .filter((name) => name.startsWith(`${profileId}.`))
         .map((name) => rm(join(/*turbopackIgnore: true*/ dir, name), { force: true })),
     );
-  } catch {
-    /* dossier absent */
-  }
+  } catch {}
 }
-
-/* --------------------------------------------------------------------------
- * Consentement a la diffusion (R.3)
- *
- * Le consentement vit ici et non dans un service separe : il porte sur le
- * fichier, et son retrait doit supprimer ce fichier. Les tenir a distance l'un
- * de l'autre laisserait exister le cas ou l'accord est retire en base pendant
- * que la video reste sur le disque, qui est precisement ce qu'il faut rendre
- * impossible.
- * ----------------------------------------------------------------------- */
 
 export interface VideoConsent {
   granted: boolean;
-  /** Date de l'accord en cours, ou du dernier accord donne s'il a ete retire. */
+
   grantedAt: Date | null;
-  /** Version du texte effectivement acceptee, telle qu'enregistree. */
+
   version: string | null;
   revokedAt: Date | null;
 }
@@ -202,15 +178,6 @@ export async function readVideoConsent(profileId: string): Promise<VideoConsent 
   return row ?? null;
 }
 
-/**
- * Enregistre un accord sur le texte en vigueur.
- *
- * La version est prise de `VIDEO_CONSENT_VERSION` et non fournie par
- * l'appelant : c'est le serveur qui sait quel texte il a affiche, et un client
- * ne doit pas pouvoir declarer un accord sur une redaction qui n'est plus la
- * sienne. `revokedAt` est remis a null : un nouvel accord ouvre une periode
- * nouvelle, l'ancien retrait n'a plus a la borner.
- */
 export async function grantVideoConsent(profileId: string): Promise<VideoConsent> {
   const now = new Date();
   await db
@@ -224,29 +191,10 @@ export async function grantVideoConsent(profileId: string): Promise<VideoConsent
     })
     .where(eq(profile.id, profileId));
 
-  // Relu depuis la base et non renvoye de memoire : SQLite stocke des secondes
-  // entieres, et un appelant qui comparerait la valeur rendue a celle relue plus
-  // tard trouverait deux horodatages differents pour le meme accord.
   const stored = await readVideoConsent(profileId);
   return stored ?? { granted: true, grantedAt: now, version: VIDEO_CONSENT_VERSION, revokedAt: null };
 }
 
-/**
- * Retire le consentement et supprime physiquement la video.
- *
- * La suppression passe par `deleteProfileVideo`, le service deja utilise a la
- * suppression d'un profil par l'administration : un seul chemin d'effacement,
- * donc un seul endroit ou se tromper. Le retrait n'est pas un masquage — le
- * profil reste, seul le fichier disparait, avec l'URL qui y menait.
- *
- * L'ordre compte : le fichier part d'abord. Si l'ecriture en base echouait
- * apres coup, on aurait un consentement encore marque valide pour une video qui
- * n'existe plus, ce qui se corrige ; l'inverse laisserait le fichier sur le
- * disque sans accord pour le couvrir, ce qui est la faute a eviter.
- *
- * `videoConsentAt` et `videoConsentVersion` sont conserves : ils disent ce qui
- * avait ete accepte et quand, et c'est ce qui rend le registre auditable.
- */
 export async function revokeVideoConsent(profileId: string): Promise<VideoConsent> {
   await deleteProfileVideo(profileId);
 
@@ -257,8 +205,7 @@ export async function revokeVideoConsent(profileId: string): Promise<VideoConsen
       videoConsentGranted: false,
       videoConsentRevokedAt: now,
       videoUrl: null,
-      // Le fichier vient d'etre efface : la decision de moderation n'a plus
-      // d'objet, la conserver ferait etat d'une video validee qui n'existe pas.
+
       videoStatus: "pending",
       videoReviewReason: null,
       videoReviewedBy: null,
@@ -271,20 +218,11 @@ export async function revokeVideoConsent(profileId: string): Promise<VideoConsen
   return after ?? { granted: false, grantedAt: null, version: null, revokedAt: now };
 }
 
-/* --------------------------------------------------------------------------
- * Moderation de la video avant publication (R.2)
- *
- * Meme raison qu'au-dessus pour loger cela ici : la moderation porte sur le
- * fichier. Un depot repasse la video en `pending` dans la MEME operation que
- * l'ecriture disque, sinon il existerait un instant ou un fichier neuf porte
- * encore la validation de celui qu'il remplace.
- * ----------------------------------------------------------------------- */
-
 export interface VideoModeration {
   status: VideoStatus;
-  /** Motif de la decision. Montre au candidat en cas de refus. */
+
   reason: string | null;
-  /** Identifiant de l'administrateur qui a decide. */
+
   decidedBy: string | null;
   decidedAt: Date | null;
 }
@@ -304,14 +242,6 @@ export async function readVideoModeration(profileId: string): Promise<VideoModer
   return row ?? null;
 }
 
-/**
- * Remet la video en attente de moderation.
- *
- * Appele a chaque fois que le contenu change : upload, suppression, ou
- * remplacement du lien externe. La decision precedente est EFFACEE et non
- * conservee — elle portait sur un autre fichier, la garder afficherait au
- * candidat le motif d'un refus qui ne concerne plus rien.
- */
 export async function resetVideoModeration(profileId: string): Promise<void> {
   await db
     .update(profile)
@@ -325,13 +255,6 @@ export async function resetVideoModeration(profileId: string): Promise<void> {
     .where(eq(profile.id, profileId));
 }
 
-/**
- * Enregistre une decision de moderation.
- *
- * Les quatre colonnes sont ecrites ensemble : statut, motif, auteur et date.
- * Un refus sans motif n'est pas acceptable — le candidat doit pouvoir savoir ce
- * qu'on lui reproche — et c'est le contrat de route qui l'impose a l'entree.
- */
 export async function decideVideoModeration(
   profileId: string,
   decision: Exclude<VideoStatus, "pending">,

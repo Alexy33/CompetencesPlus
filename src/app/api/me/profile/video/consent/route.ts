@@ -14,7 +14,6 @@ const PROFILE_NOT_FOUND = {
   }),
 } as const;
 
-/** Le titulaire, ou 404 : le consentement ne se lit et ne s'ecrit que sur son propre profil. */
 async function ownProfileId(userId: string): Promise<string> {
   const owned = await findProfileByUserId(userId);
   if (!owned) throw ApiError.notFound("Aucun profil rattache a ce compte.");

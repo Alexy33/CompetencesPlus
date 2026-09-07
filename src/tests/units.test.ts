@@ -6,8 +6,6 @@ import { buttonVariants } from "@/components/ui/button";
 import { extensionForMime } from "@/server/services/video";
 import { computeScore, type LoadedQuestion } from "@/server/services/certification";
 
-//FRONTEND
-
 describe("front — cn (fusion de classes Tailwind)", () => {
   it("concatene les classes", () => {
     expect(cn("px-2", "py-1")).toBe("px-2 py-1");
@@ -41,8 +39,6 @@ describe("front — buttonVariants (variantes du bouton)", () => {
     expect(buttonVariants({ className: "ma-classe" })).toContain("ma-classe");
   });
 });
-
-//BACKEND
 
 describe("back — extensionForMime (upload video)", () => {
   it("associe un type MIME connu a son extension", () => {

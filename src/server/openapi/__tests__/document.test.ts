@@ -4,18 +4,8 @@ import { describe, expect, it } from "vitest";
 import { buildOpenApiDocument } from "../document";
 import { registeredRoutes } from "../routes";
 
-/**
- * Garde-fous de la specification.
- *
- * Ces tests ne verifient pas le metier : ils verifient que la documentation ne
- * peut pas mentir. C'est le seul endroit ou une erreur passerait inapercue,
- * puisqu'une route oubliee au manifeste continue de fonctionner — elle
- * disparait simplement de Scalar, et le front ne sait pas qu'elle existe.
- */
-
 const API_DIR = join(process.cwd(), "src/app/api");
 
-/** Routes servies par une bibliotheque ou qui servent la doc elle-meme. */
 const NOT_IN_MANIFEST = [
   "auth/[...all]/route.ts",
   "openapi/route.ts",

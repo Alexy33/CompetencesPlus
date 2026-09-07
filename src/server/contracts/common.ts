@@ -13,13 +13,6 @@ import {
 } from "@/lib/vocabulary";
 import { named } from "../openapi/schemas";
 
-/* --------------------------------------------------------------------------
- * Vocabulaires
- *
- * Nommes pour apparaitre une seule fois dans `components.schemas` : le front
- * peut generer un type `Sector` plutot que recopier sept chaines.
- * ----------------------------------------------------------------------- */
-
 export const SectorSchema = named("Sector", z.enum(mutable(SECTORS)));
 export const CitySchema = named("City", z.enum(mutable(CITIES)));
 export const SkillSchema = named("Skill", z.enum(mutable(SKILLS)));
@@ -39,10 +32,6 @@ export const VideoStatusSchema = named(
 );
 export const ContactStatusSchema = named("ContactStatus", z.enum(mutable(CONTACT_STATUSES)));
 export const UserRoleSchema = named("UserRole", z.enum(mutable(USER_ROLES)));
-
-/* --------------------------------------------------------------------------
- * Erreurs
- * ----------------------------------------------------------------------- */
 
 export const ApiErrorSchema = named(
   "ApiError",
@@ -68,7 +57,6 @@ export const ApiErrorSchema = named(
     .meta({ description: "Forme unique de toutes les reponses d'erreur de l'API." }),
 );
 
-/** Reponses d'erreur reutilisables dans les definitions de route. */
 export const errorResponse = (description: string, example?: unknown) => ({
   description,
   schema: ApiErrorSchema,
@@ -103,16 +91,6 @@ export const NOT_FOUND_RESPONSE = {
   "404": errorResponse("Ressource introuvable.", ERROR_BODY.notFound),
 } as const;
 
-/* --------------------------------------------------------------------------
- * Pagination
- * ----------------------------------------------------------------------- */
-
-/**
- * `pageSize` est plafonne a 20 : le cahier des charges (3.4) interdit au
- * catalogue de servir davantage de profils d'un coup. La borne est ici, dans le
- * contrat, pour qu'elle apparaisse dans la documentation et soit refusee a
- * l'entree plutot que corrigee en silence.
- */
 export const PaginationQuery = z.object({
   page: z.coerce.number().int().min(1).default(1).meta({ description: "Numero de page, a partir de 1." }),
   pageSize: z.coerce
@@ -134,7 +112,6 @@ export const PageMetaSchema = named(
   }),
 );
 
-/** Construit le schema d'une page de resultats pour un type d'element donne. */
 export function pageOf<T extends z.ZodType>(id: string, item: T) {
   return named(
     id,
@@ -145,14 +122,9 @@ export function pageOf<T extends z.ZodType>(id: string, item: T) {
   );
 }
 
-/** Booleen de query string : `?certified=true`. */
 export const QueryBoolean = z
   .enum(["true", "false"])
   .transform((value) => value === "true");
-
-/* --------------------------------------------------------------------------
- * Divers
- * ----------------------------------------------------------------------- */
 
 export const OkSchema = named(
   "Ok",
@@ -163,12 +135,6 @@ export const IdParam = z.object({
   id: z.string().min(1).meta({ description: "Identifiant de la ressource." }),
 });
 
-/**
- * Utilisateur porte par la session better-auth.
- *
- * Decrit ici pour que `/api/auth/*` puisse y faire reference : c'est la charge
- * utile que le front recoit a la connexion et sur `get-session`.
- */
 export const SessionUserSchema = named(
   "SessionUser",
   z.object({

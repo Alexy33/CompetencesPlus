@@ -34,7 +34,7 @@ describe("isValidSiren", () => {
   it("refuse une cle de Luhn fausse", () => {
     expect(isValidSiren("123456789")).toBe(false);
     expect(isValidSiren("999999999")).toBe(false);
-    // Un seul chiffre change suffit a invalider.
+
     expect(isValidSiren("552100553")).toBe(false);
   });
 

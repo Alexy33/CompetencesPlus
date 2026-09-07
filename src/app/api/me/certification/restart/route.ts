@@ -24,8 +24,7 @@ export const { POST } = defineRoute({
     const existing = await currentAttempt(session.user.id);
 
     if (existing && existing.status === "in_progress") {
-      // Tentative deja ouverte : on la vide plutot que d'en creer une seconde,
-      // sans quoi `currentAttempt` aurait deux candidates a departager.
+
       await db
         .delete(certificationAnswer)
         .where(eq(certificationAnswer.attemptId, existing.id));

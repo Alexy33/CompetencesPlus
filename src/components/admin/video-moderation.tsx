@@ -27,19 +27,11 @@ const LABEL: Record<VideoStatus, string> = {
 };
 
 const TONE: Record<VideoStatus, string> = {
-  pending: "bg-[#fff0d9] text-[#8a5208]",
-  approved: "bg-[#dff7e9] text-[#17603a]",
-  rejected: "bg-[#ffe8ef] text-[#8a3f5b]",
+  pending: "bg-warning text-warning-fg",
+  approved: "bg-success text-success-fg",
+  rejected: "bg-danger text-danger-fg",
 };
 
-/**
- * File de moderation des videos (R.2).
- *
- * L'administration voit la video AVANT qu'elle soit diffusable : c'est le seul
- * endroit du dispositif ou une video `pending` est servie, et c'est ce qui rend
- * la decision possible. Le motif est saisi dans la ligne meme, parce qu'un
- * refus sans motif est refuse par l'API — autant le rendre evident a l'ecran.
- */
 export function VideoModeration({
   rows,
   onDecide,
@@ -65,27 +57,27 @@ export function VideoModeration({
   }
 
   return (
-    <section className="mt-7 rounded-3xl bg-[#ebf0f7] p-6 shadow-[10px_10px_20px_#c5d1e0,-10px_-10px_20px_#ffffff] md:p-8">
+    <section className="mt-7 rounded-3xl bg-canvas p-6 shadow-raised-2xl md:p-8">
       <div className="flex items-center gap-3">
-        <span className="flex size-10 items-center justify-center rounded-xl bg-[#fff0d9] text-[#8a5208]">
+        <span className="flex size-10 items-center justify-center rounded-xl bg-warning text-warning-fg">
           <ShieldQuestion className="size-5" />
         </span>
         <div>
-          <h2 className="text-2xl font-bold uppercase text-[#2d3748]">Modération des vidéos</h2>
-          <p className="text-sm text-[#566274]">
+          <h2 className="text-2xl font-bold uppercase text-action">Modération des vidéos</h2>
+          <p className="text-sm text-ink-soft">
             Une vidéo n&apos;est diffusée qu&apos;après validation. Un refus exige un motif, communiqué au candidat.
           </p>
         </div>
       </div>
 
       {error && (
-        <p role="alert" className="mt-5 rounded-xl bg-[#ffe8ef] px-4 py-3 text-sm text-[#8a3f5b]">
+        <p role="alert" className="mt-5 rounded-xl bg-danger px-4 py-3 text-sm text-danger-fg">
           {error}
         </p>
       )}
 
       {rows.length === 0 ? (
-        <p className="mt-6 rounded-2xl bg-white p-5 text-sm text-[#566274]">
+        <p className="mt-6 rounded-2xl bg-white p-5 text-sm text-ink-soft">
           Aucune vidéo déposée pour le moment.
         </p>
       ) : (
@@ -96,32 +88,32 @@ export function VideoModeration({
 
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="font-bold text-[#2d3748]">{row.name}</h3>
+                  <h3 className="font-bold text-action">{row.name}</h3>
                   <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase ${TONE[row.videoStatus]}`}>
                     {LABEL[row.videoStatus]}
                   </span>
                 </div>
-                <p className="mt-1 text-sm text-[#566274]">{row.title}</p>
-                <p className="mt-1 font-mono text-[11px] uppercase tracking-wider text-[#566274]">
+                <p className="mt-1 text-sm text-ink-soft">{row.title}</p>
+                <p className="mt-1 font-mono text-[11px] uppercase tracking-wider text-ink-soft">
                   Déposée le {formatTimestamp(row.submittedAt)}
                 </p>
 
                 {row.decidedAt && (
-                  <div className="mt-3 rounded-xl bg-[#F5F9FE] p-3 text-xs text-[#4a5568]">
-                    <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#566274]">
+                  <div className="mt-3 rounded-xl bg-panel p-3 text-xs text-ink-muted">
+                    <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-ink-soft">
                       Décision — {row.decidedBy ?? "administrateur supprimé"}, le {formatTimestamp(row.decidedAt)}
                     </p>
                     {row.reason && <p className="mt-1">Motif : {row.reason}</p>}
                   </div>
                 )}
 
-                <label className="mt-4 block text-xs font-semibold uppercase tracking-wider text-[#566274]">
+                <label className="mt-4 block text-xs font-semibold uppercase tracking-wider text-ink-soft">
                   Motif du refus
                   <textarea
                     value={reasons[row.profileId] ?? ""}
                     onChange={(e) => setReasons((current) => ({ ...current, [row.profileId]: e.target.value }))}
                     placeholder="Ce que le candidat doit corriger."
-                    className="mt-2 min-h-20 w-full resize-y rounded-xl border border-[#1B3A6B]/20 bg-white p-3 text-sm font-normal normal-case tracking-normal text-[#2d3748] outline-none focus:border-[#1B3A6B]"
+                    className="mt-2 min-h-20 w-full resize-y rounded-xl border border-brand/20 bg-white p-3 text-sm font-normal normal-case tracking-normal text-action outline-none focus:border-brand"
                   />
                 </label>
 
@@ -130,7 +122,7 @@ export function VideoModeration({
                     type="button"
                     onClick={() => void decide(row, "approved")}
                     disabled={busy !== null || row.videoStatus === "approved"}
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#dff7e9] px-3 py-2 text-xs font-semibold text-[#17603a] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-success px-3 py-2 text-xs font-semibold text-success-fg disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {busy === row.profileId ? <Loader2 className="size-3.5 animate-spin" /> : <Check className="size-3.5" />}
                     Valider
@@ -139,7 +131,7 @@ export function VideoModeration({
                     type="button"
                     onClick={() => void decide(row, "rejected")}
                     disabled={busy !== null}
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-[#ffe8ef] px-3 py-2 text-xs font-semibold text-[#8a3f5b] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-danger px-3 py-2 text-xs font-semibold text-danger-fg disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <X className="size-3.5" /> Refuser
                   </button>

@@ -10,13 +10,6 @@ import type { VideoConsentView } from "@/server/services/profiles";
 type ConsentNotice = { version: string; text: string };
 type Props = { initialConsent: VideoConsentView; hasVideo: boolean };
 
-/**
- * Page dediee au consentement a la diffusion video (R.3).
- *
- * Le tableau de bord n'en garde qu'un resume : tout ce qui engage le candidat —
- * la redaction integrale soumise, sa version, l'horodatage, et la portee exacte
- * du retrait — vit ici, sur un ecran ou rien d'autre ne dispute l'attention.
- */
 export function ConsentManager({ initialConsent, hasVideo }: Props) {
   const [consent, setConsent] = useState(initialConsent);
   const [videoPresent, setVideoPresent] = useState(hasVideo);
@@ -24,8 +17,6 @@ export function ConsentManager({ initialConsent, hasVideo }: Props) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  // La redaction en vigueur vient du serveur : c'est la version qu'il
-  // enregistrera, jamais une copie figee dans le bundle client.
   useEffect(() => {
     void fetch("/api/me/profile/video/consent").then(async (r) => r.ok && setNotice(await r.json()));
   }, []);
@@ -44,7 +35,7 @@ export function ConsentManager({ initialConsent, hasVideo }: Props) {
       return;
     }
     setConsent(data as VideoConsentView);
-    // Le retrait efface le fichier : la page doit cesser de promettre une video.
+
     if (!granted) setVideoPresent(false);
     setMessage(granted
       ? "Consentement enregistré."
@@ -53,20 +44,20 @@ export function ConsentManager({ initialConsent, hasVideo }: Props) {
   }
 
   return (
-    <main className="min-h-screen bg-[#ebf0f7] px-6 py-10 text-[#2d3748] md:px-10">
+    <main className="min-h-screen bg-canvas px-6 py-10 text-action md:px-10">
       <div className="mx-auto max-w-3xl">
-        <Link href="/candidate" className="inline-flex items-center gap-2 text-sm font-semibold text-[#41556E] hover:text-[#1B3A6B]">
+        <Link href="/candidate" className="inline-flex items-center gap-2 text-sm font-semibold text-ink-muted hover:text-brand">
           <ArrowLeft className="size-4" />
           Retour à mon espace
         </Link>
 
         <header className="mt-6 flex items-center gap-4">
-          <span className={`flex size-14 items-center justify-center rounded-2xl ${consent.granted ? "bg-[#dff7e9] text-[#17603a]" : "bg-[#ffe8ef] text-[#8a3f5b]"}`}>
+          <span className={`flex size-14 items-center justify-center rounded-2xl ${consent.granted ? "bg-success text-success-fg" : "bg-danger text-danger-fg"}`}>
             {consent.granted ? <ShieldCheck className="size-7" /> : <ShieldOff className="size-7" />}
           </span>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-[#1B3A6B]">Consentement à la diffusion</h1>
-            <p className="mt-1 text-sm text-[#41556E]">
+            <h1 className="text-3xl font-bold tracking-tight text-brand">Consentement à la diffusion</h1>
+            <p className="mt-1 text-sm text-ink-muted">
               {consent.granted
                 ? "Votre accord est en cours : votre vidéo peut être diffusée auprès des recruteurs inscrits."
                 : "Aucun accord en cours : aucune vidéo ne peut être hébergée ni diffusée."}
@@ -74,81 +65,78 @@ export function ConsentManager({ initialConsent, hasVideo }: Props) {
           </div>
         </header>
 
-        {/* Ce qui a ete accepte, quand, sur quelle redaction. */}
-        <section className="mt-8 rounded-3xl border border-[#A8C5E0] bg-white p-6">
-          <h2 className="text-lg font-bold uppercase text-[#22334D]">État de votre accord</h2>
+        <section className="mt-8 rounded-3xl border border-brand-300 bg-white p-6">
+          <h2 className="text-lg font-bold uppercase text-ink">État de votre accord</h2>
           <dl className="mt-4 grid gap-3 sm:grid-cols-3">
-            <div className="rounded-xl bg-[#F5F9FE] p-4">
-              <dt className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#41556E]">État</dt>
-              <dd className="mt-1 text-sm font-semibold text-[#22334D]">
+            <div className="rounded-xl bg-panel p-4">
+              <dt className="font-mono text-[10px] font-semibold uppercase tracking-wider text-ink-muted">État</dt>
+              <dd className="mt-1 text-sm font-semibold text-ink">
                 {consent.granted ? "Accordé" : consent.revokedAt ? "Retiré" : "Jamais donné"}
               </dd>
             </div>
-            <div className="rounded-xl bg-[#F5F9FE] p-4">
-              <dt className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#41556E]">Accordé le</dt>
-              <dd className="mt-1 text-sm font-semibold text-[#22334D]">{formatTimestamp(consent.grantedAt)}</dd>
+            <div className="rounded-xl bg-panel p-4">
+              <dt className="font-mono text-[10px] font-semibold uppercase tracking-wider text-ink-muted">Accordé le</dt>
+              <dd className="mt-1 text-sm font-semibold text-ink">{formatTimestamp(consent.grantedAt)}</dd>
             </div>
-            <div className="rounded-xl bg-[#F5F9FE] p-4">
-              <dt className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#41556E]">Version acceptée</dt>
-              <dd className="mt-1 text-sm font-semibold text-[#22334D]">{consent.version ?? "—"}</dd>
+            <div className="rounded-xl bg-panel p-4">
+              <dt className="font-mono text-[10px] font-semibold uppercase tracking-wider text-ink-muted">Version acceptée</dt>
+              <dd className="mt-1 text-sm font-semibold text-ink">{consent.version ?? "—"}</dd>
             </div>
           </dl>
 
           {consent.revokedAt ? (
-            <p className="mt-4 rounded-xl bg-[#ffe8ef] p-3 font-mono text-[11px] uppercase tracking-wider text-[#8a3f5b]">
+            <p className="mt-4 rounded-xl bg-danger p-3 font-mono text-[11px] uppercase tracking-wider text-danger-fg">
               Retiré le {formatTimestamp(consent.revokedAt)} — vidéo supprimée du stockage
             </p>
           ) : null}
 
-          <p className="mt-4 inline-flex items-center gap-2 text-sm text-[#41556E]">
+          <p className="mt-4 inline-flex items-center gap-2 text-sm text-ink-muted">
             <FileVideo className="size-4" />
             {videoPresent ? "Une vidéo est actuellement hébergée sur votre profil." : "Aucune vidéo n’est hébergée sur votre profil."}
           </p>
         </section>
 
-        {/* La redaction integrale : c'est elle qui engage, elle est donc lue en entier. */}
-        <section className="mt-6 rounded-3xl border border-[#A8C5E0] bg-white p-6">
-          <h2 className="text-lg font-bold uppercase text-[#22334D]">Texte soumis à votre accord</h2>
+        <section className="mt-6 rounded-3xl border border-brand-300 bg-white p-6">
+          <h2 className="text-lg font-bold uppercase text-ink">Texte soumis à votre accord</h2>
           {notice ? (
             <>
-              <p className="mt-2 font-mono text-[10px] font-semibold uppercase tracking-wider text-[#41556E]">
+              <p className="mt-2 font-mono text-[10px] font-semibold uppercase tracking-wider text-ink-muted">
                 Version en vigueur : {notice.version}
               </p>
-              <blockquote className="mt-4 rounded-2xl border-l-4 border-[#1B3A6B] bg-[#F5F9FE] p-5 text-sm leading-relaxed text-[#22334D]">
+              <blockquote className="mt-4 rounded-2xl border-l-4 border-brand bg-panel p-5 text-sm leading-relaxed text-ink">
                 {notice.text}
               </blockquote>
             </>
           ) : (
-            <p className="mt-4 inline-flex items-center gap-2 text-sm text-[#41556E]">
+            <p className="mt-4 inline-flex items-center gap-2 text-sm text-ink-muted">
               <Loader2 className="size-4 animate-spin" />
               Chargement du texte en vigueur…
             </p>
           )}
 
           {consent.version && notice && consent.version !== notice.version ? (
-            <p className="mt-4 rounded-xl bg-[#FFF6E5] p-3 text-xs leading-relaxed text-[#7a5b1b]">
+            <p className="mt-4 rounded-xl bg-warning-soft p-3 text-xs leading-relaxed text-warning-ink">
               Vous avez accepté la version {consent.version}, antérieure au texte ci-dessus.
               Redonner votre consentement enregistrera la version {notice.version}.
             </p>
           ) : null}
         </section>
 
-        {/* Portee du retrait, dite avant le bouton qui l'execute. */}
-        <section className="mt-6 rounded-3xl border border-[#A8C5E0] bg-white p-6">
-          <h2 className="text-lg font-bold uppercase text-[#22334D]">Ce que change votre décision</h2>
-          <ul className="mt-4 space-y-3 text-sm leading-relaxed text-[#41556E]">
+        <section className="mt-6 rounded-3xl border border-brand-300 bg-white p-6">
+          <h2 className="text-lg font-bold uppercase text-ink">Ce que change votre décision</h2>
+          <ul className="mt-4 space-y-3 text-sm leading-relaxed text-ink-muted">
             <li className="flex gap-3">
-              <ShieldCheck className="mt-0.5 size-4 shrink-0 text-[#17603a]" />
+              <ShieldCheck className="mt-0.5 size-4 shrink-0 text-success-fg" />
               <span>
-                <strong className="text-[#22334D]">Donner votre consentement</strong> autorise l’hébergement et la
+                <strong className="text-ink">Donner votre consentement</strong> autorise l’hébergement et la
                 diffusion de votre vidéo de présentation, image et voix comprises, auprès des recruteurs inscrits.
                 La date et la version acceptée sont enregistrées.
               </span>
             </li>
             <li className="flex gap-3">
-              <Trash2 className="mt-0.5 size-4 shrink-0 text-[#8a3f5b]" />
+              <Trash2 className="mt-0.5 size-4 shrink-0 text-danger-fg" />
               <span>
-                <strong className="text-[#22334D]">Retirer votre consentement</strong> supprime définitivement le
+                <strong className="text-ink">Retirer votre consentement</strong> supprime définitivement le
                 fichier vidéo du stockage. Votre profil reste en ligne, sans vidéo. La date de l’accord et la version
                 acceptée sont conservées comme trace de ce qui avait été consenti.
               </span>
@@ -156,18 +144,18 @@ export function ConsentManager({ initialConsent, hasVideo }: Props) {
           </ul>
 
           {message ? (
-            <p className="mt-5 rounded-xl bg-[#F5F9FE] p-3 text-sm text-[#22334D]">{message}</p>
+            <p className="mt-5 rounded-xl bg-panel p-3 text-sm text-ink">{message}</p>
           ) : null}
 
           {consent.granted ? (
             <button type="button" onClick={() => void submit(false)} disabled={busy}
-              className="mt-6 inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-[#8a3f5b] px-6 text-sm font-semibold text-white hover:bg-[#6f314a] disabled:opacity-60">
+              className="mt-6 inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-danger-fg px-6 text-sm font-semibold text-white hover:bg-danger-deep disabled:opacity-60">
               {busy ? <Loader2 className="size-4 animate-spin" /> : <ShieldOff className="size-4" />}
               Retirer mon consentement et supprimer ma vidéo
             </button>
           ) : (
             <button type="button" onClick={() => void submit(true)} disabled={busy || !notice}
-              className="mt-6 inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-[#2d3748] px-6 text-sm font-semibold text-white hover:bg-[#1E293B] disabled:opacity-60">
+              className="mt-6 inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-action px-6 text-sm font-semibold text-white hover:bg-action-hover disabled:opacity-60">
               {busy ? <Loader2 className="size-4 animate-spin" /> : <ShieldCheck className="size-4" />}
               {consent.revokedAt ? "Redonner mon consentement" : "Donner mon consentement"}
             </button>

@@ -10,10 +10,10 @@ export default function LoginPage() {
   return (
     <div className="flex flex-col gap-7">
       <div className="space-y-2 text-center">
-        <h1 className="text-4xl font-semibold tracking-tight text-[#22334D]">
+        <h1 className="text-4xl font-semibold tracking-tight text-ink">
           Bon retour
         </h1>
-        <p className="text-base text-[#41556E]">
+        <p className="text-base text-ink-muted">
           Saisissez vos identifiants pour accéder à votre compte.
         </p>
       </div>

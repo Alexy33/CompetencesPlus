@@ -41,87 +41,60 @@
   font-display: swap;
 }
 
-/* ---------------------------------------------------------------------------
- * Systeme "Industry" (cf. maquette + ds/styles.css) porte dans Tailwind v4.
- * Tout est declare ici : v4 n'a plus de tailwind.config.js. Chaque entree
- * @theme genere l'utilitaire correspondant (bg-accent, text-accent-700...).
- * ------------------------------------------------------------------------ */
 @theme {
-  --color-bg: #f2f2f3;
-  --color-surface: #e9e9ea;
-  --color-text: #1d1f20;
-  --color-divider: color-mix(in srgb, #1d1f20 16%, transparent);
+  --color-canvas: #ebf0f7;
+  --color-panel: #f5f9fe;
+  --color-panel-hover: #f2f8ff;
+  --color-surface-soft: #f7fafc;
+  --color-track: #d4dee9;
 
-  /* -------------------------------------------------------------------------
-   * Echelle de bleus institutionnels.
-   *
-   * Le #1B3A6B de la charte est le primaire ; les degres autour de lui servent
-   * a batir l'interface en nuances de bleu plutot qu'en « un bleu + des gris ».
-   * La marche 600 valait #355159 (une teinte tirant vers le canard, etrangere
-   * a la gamme) : remise a #2F4A6B, elle rend la progression reguliere.
-   *
-   * Lisibilite du texte sur le fond de page #ebf0f7 :
-   *   accent (#1B3A6B) 9.84:1 · 700 9.82:1 · 500 4.88:1  -> texte
-   *   400 (#6B8CB5) 3.03:1                               -> decor / aplats seulement
-   * ---------------------------------------------------------------------- */
-  --color-accent: #1B3A6B;
-  --color-accent-100: #E8F0F8;
-  --color-accent-200: #D1DEF0;
-  --color-accent-300: #A8C5E0;
-  --color-accent-400: #6B8CB5;
-  --color-accent-500: #4A6B8A;
-  --color-accent-600: #2F4A6B;
-  --color-accent-700: #273D4F;
-  --color-accent-800: #1B2D3E;
-  --color-accent-900: #0F1D2A;
+  --color-ink: #22334d;
+  --color-ink-muted: #41556e;
+  --color-ink-soft: #566274;
 
-  /* Textes : bleutes plutot que gris neutres, pour que l'ensemble se lise
-     comme une interface bleue. Le contraste y gagne au passage — le
-     secondaire monte de 5.4:1 a 6.67:1 sur le fond de page. */
-  --color-texte: #22334D;
-  --color-texte-secondaire: #41556E;
+  --color-brand: #1b3a6b;
+  --color-brand-100: #e8f0f8;
+  --color-brand-200: #d1def0;
+  --color-brand-300: #a8c5e0;
+  --color-brand-400: #6b8cb5;
+  --color-brand-500: #4a6b8a;
+  --color-brand-600: #2f4a6b;
+  --color-brand-700: #273d4f;
+  --color-brand-800: #1b2d3e;
+  --color-brand-900: #0f1d2a;
 
-  /* -------------------------------------------------------------------------
-   * Couleur d'action secondaire (R.10).
-   *
-   * La charte interdit le bleu institutionnel en fond de bouton : il faut donc
-   * une couleur portant l'action. Anthracite #2d3748 — un neutre sombre, deja
-   * la couleur de texte du produit, choisi pour NE PAS concurrencer l'echelle
-   * de bleus : l'interface se lit comme entierement bleue, et le bouton comme
-   * un element neutre pose dessus.
-   *
-   * Mesures (memes formules que scripts/a11y-audit.mjs) :
-   *   - blanc sur anthracite ............ 11.99:1 (AA, seuil 4.5)
-   *   - blanc sur survol #1E293B ........ 14.63:1
-   *   - anthracite sur blanc ............ 11.99:1
-   *   - anthracite sur fond page ........ 10.47:1
-   *
-   * « Elle doit tenir sur fond blanc comme sur fond bleu » : sur les fonds
-   * clairs le bouton se detache seul (8.8:1 au pire, sur accent-200). Sur un
-   * aplat bleu en revanche, anthracite et bleu ne different que de 1.06:1 — le
-   * libelle blanc reste lisible mais la FORME du bouton se perdrait. D'ou
-   * `--color-action-contour`, pose en bordure des que le bouton est sur fond
-   * bleu : blanc contre bleu 11.27:1 et contre anthracite 11.99:1, soit
-   * au-dessus des 3:1 exiges pour un element non textuel, des deux cotes.
-   * La classe `.bouton-action-sur-bleu` en bas de fichier applique la variante.
-   *
-   * Remarque : aucune couleur sombre ne se detache du bleu institutionnel par
-   * elle-meme (tous les candidats mesures sont sous 1.6:1). Le contour n'est
-   * donc pas un defaut de cette teinte, il est structurel des qu'un bouton
-   * sombre est pose sur l'aplat bleu.
-   * ---------------------------------------------------------------------- */
   --color-action: #2d3748;
-  --color-action-hover: #1E293B;
+  --color-action-hover: #1e293b;
   --color-action-contour: #ffffff;
 
-  --color-neutral-100: #f5f5f8;
-  --color-neutral-200: #e7e7ea;
-  --color-neutral-300: #d4d4d7;
-  --color-neutral-800: #424244;
-  --color-neutral-900: #2b2b2d;
+  --color-success: #dff7e9;
+  --color-success-fg: #17603a;
+  --color-warning: #fff0d9;
+  --color-warning-soft: #fff6e5;
+  --color-warning-tint: #fef3c7;
+  --color-warning-fg: #8a5208;
+  --color-warning-ink: #7a5b1b;
+  --color-warning-deep: #78350f;
+  --color-danger: #ffe8ef;
+  --color-danger-fg: #8a3f5b;
+  --color-danger-deep: #6f314a;
+  --color-info: #eee7ff;
+  --color-info-fg: #65449b;
+  --color-teal: #dff3f5;
+  --color-teal-fg: #25636a;
 
-  /* Marianne pour les titres, Spectral pour le corps (R.10). Le mono reste
-     reserve aux surtitres et libelles techniques, pas au texte courant. */
+  --shadow-raised-2xs: 2px 2px 5px #c5d1e0, -2px -2px 5px #ffffff;
+  --shadow-raised-xs: 3px 3px 6px #c5d1e0, -3px -3px 6px #ffffff;
+  --shadow-raised-sm: 4px 4px 8px #c5d1e0, -4px -4px 8px #ffffff;
+  --shadow-raised-md: 5px 5px 10px #c5d1e0, -5px -5px 10px #ffffff;
+  --shadow-raised-lg: 6px 6px 12px #c5d1e0, -6px -6px 12px #ffffff;
+  --shadow-raised-xl: 8px 8px 16px #c5d1e0, -8px -8px 16px #ffffff;
+  --shadow-raised-2xl: 10px 10px 20px #c5d1e0, -10px -10px 20px #ffffff;
+  --shadow-raised-3xl: 14px 14px 28px #c5d1e0, -14px -14px 28px #ffffff;
+  --shadow-pressed-xs: inset 3px 3px 6px #c5d1e0, inset -3px -3px 6px #ffffff;
+  --shadow-pressed-sm: inset 4px 4px 8px #c5d1e0, inset -4px -4px 8px #ffffff;
+  --shadow-pressed-brand: inset 3px 3px 6px #273d4f, inset -3px -3px 6px #4a6b8a;
+
   --font-heading: "Marianne", system-ui, sans-serif;
   --font-body: "Spectral", Georgia, serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
@@ -129,8 +102,6 @@
 
 @layer base {
   body {
-    background: var(--color-bg);
-    color: var(--color-text);
     font-family: var(--font-body);
     @apply bg-background text-foreground;
   }
@@ -146,7 +117,7 @@
   }
 
   ::selection {
-    background: var(--color-accent-200);
+    background: var(--color-brand-200);
   }
   * {
     @apply border-border outline-ring/50;

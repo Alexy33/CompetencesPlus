@@ -27,9 +27,7 @@ export const { GET } = defineRoute({
       },
     ),
   },
-  // Le catalogue reste consultable sans compte (CDC 2.1), mais les profils de
-  // mineurs n'y figurent que pour un recruteur connecte ou l'administration
-  // (R.1) : d'ou la lecture de session sur une route pourtant publique.
+
   handler: async ({ query, request }) => {
     const session = await auth.api.getSession({ headers: request.headers });
     return searchCatalog({ ...query, viewer: catalogViewerOf(session) });

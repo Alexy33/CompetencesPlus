@@ -1,11 +1,3 @@
-/**
- * Modele d'erreur unique de l'API.
- *
- * Toute reponse non-2xx sort d'ici, avec la meme forme JSON. Le front n'a donc
- * qu'un seul cas a coder, et la specification n'a qu'un seul schema d'erreur a
- * documenter (`ApiError`).
- */
-
 export type ApiErrorCode =
   | "bad_request"
   | "unauthorized"
@@ -25,18 +17,12 @@ const STATUS_BY_CODE: Record<ApiErrorCode, number> = {
   internal: 500,
 };
 
-/** Detail de validation, aligne sur la forme des `issues` de Zod. */
 export interface ApiErrorDetail {
-  /** Chemin du champ fautif, ex. `body.title` ou `query.page`. */
+
   path: string;
   message: string;
 }
 
-/**
- * Erreur metier levee depuis un handler. Le wrapper de route la transforme en
- * reponse JSON : c'est le SEUL moyen de renvoyer une erreur, pour qu'aucune
- * route ne puisse inventer sa propre forme.
- */
 export class ApiError extends Error {
   readonly code: ApiErrorCode;
   readonly status: number;

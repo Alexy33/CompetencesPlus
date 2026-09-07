@@ -20,11 +20,6 @@ const PROFILE_NOT_FOUND = {
   }),
 } as const;
 
-/**
- * Ce 403 remplace celui d'`AUTH_RESPONSES` sur cette route, et doit donc en
- * couvrir les deux causes : il se spread APRES lui. Documenter le seul cas du
- * role laisserait la specification muette sur le refus le plus probable ici.
- */
 const CONSENT_REQUIRED = {
   "403": errorResponse("Role insuffisant, ou diffusion video sans consentement en cours.", {
     error: {
@@ -86,7 +81,6 @@ export const { PATCH } = defineRoute({
     const owned = await findProfileByUserId(session.user.id);
     if (!owned) throw ApiError.notFound("Aucun profil rattache a ce compte.");
 
-    // Le nom appartient au compte, pas au profil : il vit dans la table `user`.
     if (body.name !== undefined) {
       await db
         .update(user)
@@ -94,11 +88,6 @@ export const { PATCH } = defineRoute({
         .where(eq(user.id, session.user.id));
     }
 
-    // Poser un lien video, c'est mettre en diffusion : meme garde que l'envoi
-    // d'un fichier (R.3). Sans cette verification, un lien YouTube contournait
-    // le consentement — l'octet vit ailleurs, mais l'image et la voix diffusees
-    // sont les memes. Retirer le lien (`null`) reste toujours permis : on ne
-    // demande pas d'accord pour cesser de diffuser.
     if (typeof body.videoUrl === "string" && body.videoUrl.trim() !== "") {
       try {
         await assertVideoConsent(owned.id);
@@ -118,10 +107,6 @@ export const { PATCH } = defineRoute({
 
     if (skills) await replaceSkills(owned.id, skills);
 
-    // Changer le lien de la video, c'est changer la video : la nouvelle repasse
-    // en attente de moderation (R.2). Compare a la valeur courante pour qu'un
-    // enregistrement du profil qui renvoie le meme lien n'annule pas une
-    // validation deja obtenue.
     if (body.videoUrl !== undefined && body.videoUrl !== owned.videoUrl) {
       await resetVideoModeration(owned.id);
     }
