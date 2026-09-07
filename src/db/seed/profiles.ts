@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { profile, profileSkill } from "@/db/schema";
 import { VIDEO_CONSENT_VERSION } from "@/lib/vocabulary";
+import type { StoredVideo } from "@/server/video/provider";
 import { createAccount } from "./accounts";
 import { generateDemoVideo } from "./demo-video";
 import { SEED_PROFILES, type SeedProfile } from "./profiles.fixture";
@@ -23,17 +24,17 @@ async function seedOne(item: SeedProfile): Promise<boolean> {
   const userId = await createAccount(item.name, item.email, "candidate", item.birthDate);
   const profileId = await ownedProfileId(userId);
 
-  let videoUrl: string | null = null;
+  let stored: StoredVideo | null = null;
   let videoFailed = false;
 
-  if (profileId && item.videoUrl) {
-    videoUrl = await generateDemoVideo(profileId, item.name, item.title).catch(() => {
+  if (profileId && item.hasVideo) {
+    stored = await generateDemoVideo(item.name, item.title).catch(() => {
       videoFailed = true;
       return null;
     });
   }
 
-  const consentAt = videoUrl ? new Date(Date.now() - CONSENT_BACKDATE_MS) : null;
+  const consentAt = stored ? new Date(Date.now() - CONSENT_BACKDATE_MS) : null;
 
   await db
     .update(profile)
@@ -42,7 +43,8 @@ async function seedOne(item: SeedProfile): Promise<boolean> {
       sector: item.sector,
       city: item.city,
       bio: item.bio,
-      videoUrl,
+      videoId: stored?.videoId ?? null,
+      videoProvider: stored?.provider ?? null,
       status: item.status,
       score: item.score > 0 ? item.score : null,
       certifiedAt: item.score > 0 ? new Date() : null,

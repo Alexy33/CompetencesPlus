@@ -37,7 +37,7 @@ export async function seedVideoModeration(adminId: string): Promise<void> {
     .set({ videoStatus: "approved", videoReviewedBy: adminId, videoReviewedAt: decidedAt })
     .where(
       and(
-        isNotNull(profile.videoUrl),
+        isNotNull(profile.videoId),
         eq(profile.videoStatus, "pending"),
         waitingUserId ? ne(profile.userId, waitingUserId) : undefined,
       ),
