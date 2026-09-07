@@ -31,10 +31,10 @@ export async function generateMetadata({
   const { id } = await params;
   const profile = await loadPublishedProfile(id);
 
-  if (!profile) return { title: "Profil introuvable — ProfilsActifs" };
+  if (!profile) return { title: "Profil introuvable" };
 
   return {
-    title: `${profile.name} — ${profile.title} | ProfilsActifs`,
+    title: `${profile.name} — ${profile.title}`,
     description: profile.bio.slice(0, 160),
   };
 }
@@ -124,7 +124,7 @@ export default async function ProfilePage({
                   <div className="flex items-center gap-2">
                     <BadgeCheck aria-hidden="true" className="size-5 stroke-[2]" />
                     <span className="font-mono text-[10.5px] font-bold uppercase tracking-[0.16em] text-white/80">
-                      Certification officielle
+                      Évaluation validée
                     </span>
                   </div>
                   <p className="mt-4 text-6xl font-bold leading-none tracking-tight">
@@ -132,14 +132,13 @@ export default async function ProfilePage({
                     <span className="text-2xl font-bold text-white/70"> / 100</span>
                   </p>
                   <p className="mt-3 text-sm leading-relaxed text-white/80">
-                    Badge Aptitudes professionnelles JEB — délivré par la Direction
-                    Numérique et Innovation. Seuil : {settings.certificationThreshold}/100.
+                    Évaluation des aptitudes professionnelles. Seuil : {settings.certificationThreshold}/100.
                   </p>
                 </div>
               ) : (
                 <div className="rounded-3xl bg-canvas p-7 shadow-raised-xl">
                   <span className="font-mono text-xs font-bold uppercase tracking-wider text-ink-muted">
-                    Certification JEB
+                    Évaluation professionnelle
                   </span>
                   <p className="mt-5 text-lg font-bold uppercase tracking-tight text-ink">
                     Non certifié

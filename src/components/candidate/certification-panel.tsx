@@ -32,7 +32,7 @@ export function CertificationPanel({
 
   return (
     <Surface tone="raised">
-      <SurfaceHeading title="Certification JEB" icon={<BadgeCheck className="size-5" />} />
+      <SurfaceHeading title="Évaluation professionnelle" icon={<BadgeCheck className="size-5" />} />
 
       <p className="mt-5 text-4xl font-extrabold text-brand">
         {score ?? "—"}

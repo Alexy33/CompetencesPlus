@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PublicNotice } from "@/components/layout/public-notice";
 
 export const metadata = {
-  title: "CGU — ProfilsActifs",
+  title: "CGU",
   description: "Conditions Générales d'Utilisation de ProfilsActifs",
 };
 
@@ -28,7 +29,7 @@ export default function CGUPage() {
             Conditions Générales d'Utilisation
           </h1>
           <p className="mt-2 text-lg text-ink-soft">
-            ProfilsActifs — Ministère du Job et Bonheur
+            ProfilsActifs
           </p>
           <hr className="my-8 border-action/10" />
 
@@ -258,6 +259,7 @@ export default function CGUPage() {
           </div>
         </div>
       </article>
+      <PublicNotice />
     </main>
   );
 }

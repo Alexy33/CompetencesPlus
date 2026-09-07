@@ -59,7 +59,7 @@ export function CertificationQuestionnaire({
       <header className="mt-8 flex items-end justify-between gap-5">
         <div>
           <p className="font-mono text-xs font-semibold uppercase tracking-wider text-ink-soft">
-            Certification professionnelle JEB
+            Évaluation professionnelle
           </p>
           {catchingUp ? (
             <>

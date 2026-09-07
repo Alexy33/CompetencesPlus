@@ -8,7 +8,7 @@ import { findProfileByUserId } from "@/server/services/profiles";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Consentement à la diffusion — ProfilsActifs",
+  title: "Consentement à la diffusion",
   description: "Donner ou retirer votre consentement à la diffusion de votre vidéo de présentation.",
 };
 
