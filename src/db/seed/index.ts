@@ -1,10 +1,10 @@
 import { db } from "@/db";
 import { setting } from "@/db/schema";
 import { DEFAULT_CERTIFICATION_THRESHOLD, DEFAULT_PAGE_SIZE } from "@/lib/vocabulary";
+import { getQuestionnaire } from "@/server/services/questionnaire";
 import { createAccount, DEMO_PASSWORD } from "./accounts";
 import { seedRecruiterCompany } from "./company";
 import { seedProfiles } from "./profiles";
-import { seedQuestions } from "./questions";
 import { seedRecruiterActivity } from "./recruiter-activity";
 import { resetDomain } from "./reset";
 import { seedVideoModeration } from "./video-moderation";
@@ -23,11 +23,13 @@ async function seedSettings() {
 }
 
 async function seed() {
+  // Charge et valide le questionnaire avant toute ecriture : un fichier
+  // invalide doit faire echouer le seed, pas produire une base a moitie
+  // peuplee.
+  const questionnaire = getQuestionnaire();
+
   console.log("[seed] nettoyage…");
   await resetDomain();
-
-  console.log("[seed] questions…");
-  const questionCount = await seedQuestions();
 
   console.log("[seed] réglages…");
   await seedSettings();
@@ -63,7 +65,10 @@ async function seed() {
     );
   }
 
-  console.log(`[seed] terminé — ${profiles.count} profils, ${questionCount} questions.`);
+  console.log(
+    `[seed] terminé — ${profiles.count} profils, ` +
+      `questionnaire v${questionnaire.version} (${questionnaire.questions.length} questions).`,
+  );
   console.log(`[seed] comptes de démonstration (mot de passe « ${DEMO_PASSWORD} ») :`);
   for (const account of DEMO_ACCOUNTS) {
     console.log(`  ${account.email.padEnd(22)}${account.role}`);

@@ -4,6 +4,7 @@ import { computeScore, type LoadedQuestion } from "../certification";
 const question = (id: string, weight: number, values: number[]): LoadedQuestion => ({
   id,
   text: id,
+  type: "single_choice",
   weight,
   position: 0,
   options: values.map((value, index) => ({ id: `${id}-${index}`, label: `${value}`, value })),

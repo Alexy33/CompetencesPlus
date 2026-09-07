@@ -4,7 +4,7 @@ import { ApiError } from "@/server/http";
 import { defineRoute } from "@/server/openapi/routes";
 import { AUTH_RESPONSES, errorResponse } from "@/server/contracts/common";
 import { CertificationStateSchema, SaveAnswersBody } from "@/server/contracts/certification";
-import { certificationState, loadQuestions, openAttempt } from "@/server/services/certification";
+import { certificationState, openAttempt, questionsOf } from "@/server/services/certification";
 
 export const dynamic = "force-dynamic";
 
@@ -47,7 +47,10 @@ export const { PUT } = defineRoute({
       );
     }
 
-    const questions = await loadQuestions();
+    // Les reponses sont validees contre le questionnaire de la tentative,
+    // pas contre le questionnaire en vigueur : une tentative ouverte sous v1
+    // continue d'accepter exactement les reponses de v1.
+    const questions = questionsOf(attempt.questionnaireVersion);
     const allowed = new Map(questions.map((item) => [item.id, item]));
 
     for (const [questionId, value] of Object.entries(body.answers)) {

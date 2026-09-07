@@ -1,11 +1,13 @@
 import { z } from "zod";
 import { named } from "../openapi/schemas";
+import { QuestionTypeSchema } from "./questionnaire";
 
 export const QuestionSchema = named(
   "Question",
   z.object({
     id: z.string(),
     text: z.string(),
+    type: QuestionTypeSchema,
     position: z.number().int(),
     options: z.array(
       z.object({
@@ -33,6 +35,10 @@ export const AdminQuestionSchema = named(
 export const QuestionnaireSchema = named(
   "Questionnaire",
   z.object({
+    version: z
+      .number()
+      .int()
+      .meta({ description: "Version du questionnaire, declaree dans le fichier versionne." }),
     questions: z.array(QuestionSchema),
     threshold: z
       .number()
@@ -52,6 +58,10 @@ export const CertificationStateSchema = named(
       .meta({ description: "Reponses enregistrees, indexees par identifiant de question." }),
     answered: z.number().int(),
     questionCount: z.number().int(),
+    questionnaireVersion: z.number().int().meta({
+      description:
+        "Version du questionnaire de la tentative. Figee a son ouverture : une tentative n'est jamais rejouee sous une version ulterieure.",
+    }),
     threshold: z.number().int(),
     score: z.number().int().nullable(),
     passed: z.boolean().nullable(),
@@ -75,5 +85,9 @@ export const CertificationResultSchema = named(
     threshold: z.number().int(),
     passed: z.boolean(),
     certified: z.boolean().meta({ description: "Etat de certification du profil apres calcul." }),
+    questionnaireVersion: z
+      .number()
+      .int()
+      .meta({ description: "Version du questionnaire ayant servi au calcul." }),
   }),
 );

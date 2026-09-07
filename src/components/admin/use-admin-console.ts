@@ -16,10 +16,16 @@ interface Collection<T> {
   items: T[];
 }
 
+/** Le questionnaire est servi avec la version du fichier en vigueur. */
+interface VersionedCollection<T> extends Collection<T> {
+  version: number;
+}
+
 export function useAdminConsole() {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [profiles, setProfiles] = useState<ModeratedProfile[]>([]);
   const [questions, setQuestions] = useState<EditableQuestion[]>([]);
+  const [questionnaireVersion, setQuestionnaireVersion] = useState<number | null>(null);
   const [settings, setSettings] = useState<PlatformSettings | null>(null);
   const [videos, setVideos] = useState<VideoRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,14 +36,17 @@ export function useAdminConsole() {
     const [nextStats, profilePage, questionPage, nextSettings, videoPage] = await Promise.all([
       apiLoad<AdminStats>("/api/admin/stats"),
       apiLoad<Collection<ModeratedProfile>>("/api/admin/profiles"),
-      apiLoad<Collection<EditableQuestion>>("/api/admin/questions"),
+      apiLoad<VersionedCollection<EditableQuestion>>("/api/admin/questions"),
       apiLoad<PlatformSettings>("/api/admin/settings"),
       apiLoad<Collection<VideoRow>>("/api/admin/videos"),
     ]);
 
     if (nextStats) setStats(nextStats);
     if (profilePage) setProfiles(profilePage.items);
-    if (questionPage) setQuestions(questionPage.items);
+    if (questionPage) {
+      setQuestions(questionPage.items);
+      setQuestionnaireVersion(questionPage.version);
+    }
     if (nextSettings) setSettings(nextSettings);
     if (videoPage) setVideos(videoPage.items);
     setLoading(false);
@@ -83,23 +92,6 @@ export function useAdminConsole() {
     setMessage("Réglages enregistrés.");
   }
 
-  async function saveQuestion(question: EditableQuestion) {
-    const result = await apiSend("PATCH", `/api/admin/questions/${question.id}`, {
-      text: question.text,
-      weight: question.weight,
-    });
-    setMessage(result.ok ? "Question enregistrée." : result.message);
-  }
-
-  async function deleteQuestion(id: string) {
-    const result = await apiSend("DELETE", `/api/admin/questions/${id}`);
-    if (!result.ok) return setMessage(result.message);
-
-    setQuestions((rows) => rows.filter((row) => row.id !== id));
-    setMessage("Question supprimée.");
-    void reload();
-  }
-
   async function decideVideo(
     profileId: string,
     decision: "approved" | "rejected",
@@ -122,14 +114,11 @@ export function useAdminConsole() {
     void reload();
   }
 
-  function patchQuestion(id: string, patch: Partial<EditableQuestion>) {
-    setQuestions((rows) => rows.map((row) => (row.id === id ? { ...row, ...patch } : row)));
-  }
-
   return {
     stats,
     profiles,
     questions,
+    questionnaireVersion,
     settings,
     videos,
     loading,
@@ -140,8 +129,5 @@ export function useAdminConsole() {
     decideVideo,
     deleteProfile,
     saveSettings,
-    saveQuestion,
-    deleteQuestion,
-    patchQuestion,
   };
 }

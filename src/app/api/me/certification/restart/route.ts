@@ -5,6 +5,7 @@ import { defineRoute } from "@/server/openapi/routes";
 import { AUTH_RESPONSES } from "@/server/contracts/common";
 import { CertificationStateSchema } from "@/server/contracts/certification";
 import { certificationState, currentAttempt } from "@/server/services/certification";
+import { questionnaireVersion } from "@/server/services/questionnaire";
 
 export const dynamic = "force-dynamic";
 
@@ -29,9 +30,13 @@ export const { POST } = defineRoute({
         .delete(certificationAnswer)
         .where(eq(certificationAnswer.attemptId, existing.id));
     } else {
-      await db
-        .insert(certificationAttempt)
-        .values({ id: crypto.randomUUID(), userId: session.user.id, status: "in_progress" });
+      await db.insert(certificationAttempt).values({
+        id: crypto.randomUUID(),
+        userId: session.user.id,
+        status: "in_progress",
+        // Une nouvelle tentative repart sur le questionnaire en vigueur.
+        questionnaireVersion: questionnaireVersion(),
+      });
     }
 
     return certificationState(session.user.id);
