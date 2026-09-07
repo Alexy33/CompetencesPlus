@@ -75,9 +75,10 @@ jobs:
           cp -r public .next/standalone/public
           cp -r drizzle .next/standalone/drizzle
           cp ci.db .next/standalone/ci.db
-          # Les videos de demonstration sont servies depuis le disque : sans ce
-          # dossier, les fiches publiques s'ouvrent sans lecteur.
-          cp -r uploads .next/standalone/uploads
+          # Les videos de demonstration vivent HORS du repertoire web, dans le
+          # stockage de l'hebergeur local : sans ce dossier, les fiches
+          # publiques s'ouvrent sans lecteur.
+          cp -r videos .next/standalone/videos
       # Garde-fou : un artefact qui s'ouvre sur une base vide donne une
       # demonstration ou aucune connexion ne marche. On le detecte ici, pas
       # devant la camera.
@@ -95,7 +96,7 @@ jobs:
             process.exit(1);
           }
           "
-          videos=$(ls .next/standalone/uploads/*.mp4 2>/dev/null | wc -l)
+          videos=$(find .next/standalone/videos -name '*.mp4' 2>/dev/null | wc -l)
           echo "videos: $videos"
           if [ "$videos" -lt 5 ]; then
             echo "::error::Videos de demonstration manquantes dans l artefact"
