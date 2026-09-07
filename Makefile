@@ -1,6 +1,6 @@
 # Raccourcis pour l'equipe. `make` seul affiche l'aide.
 .DEFAULT_GOAL := help
-.PHONY: help dev prod build stop clean logs shell migrate seed openapi test backup video
+.PHONY: help dev prod build stop clean logs shell migrate seed openapi test backup video video-migrate video-degraded
 
 help: ## Affiche cette aide
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk -F':.*?## ' '{printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
@@ -31,6 +31,13 @@ migrate: ## Genere une migration Drizzle depuis le schema
 
 seed: ## Remplit la base avec le jeu de demonstration (destructif)
 	docker compose --profile dev exec web-dev npm run db:seed
+
+video-migrate: ## Range les videos existantes dans le stockage du fournisseur (rejouable)
+	docker compose --profile dev exec web-dev npm run video:migrate
+
+video-degraded: ## Relance en mode degrade (hebergeur ministeriel factice, indisponible)
+	VIDEO_PROVIDER=peertube docker compose --profile dev up -d --force-recreate web-dev
+	@echo "VIDEO_PROVIDER=peertube — ouvrez une fiche profil : elle reste intacte, sans lecteur."
 
 openapi: ## Exporte la specification dans ./openapi.json
 	docker compose --profile dev exec web-dev npm run openapi:export
