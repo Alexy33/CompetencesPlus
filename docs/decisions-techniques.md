@@ -183,7 +183,7 @@ exister aucune autre copie de ces listes dans le dépôt. Les libellés affiché
   de naissance traverse la vraie inscription, donc le même blocage des moins de 16 ans.
 - `demo-video.ts` génère un clip local avec ffmpeg, explicitement marqué comme une
   démonstration : les liens YouTube/Vimeo du jeu d'essai sont fictifs et afficheraient
-  « cette vidéo n'existe pas ». Sans ffmpeg, `videoUrl` reste `null` et la fiche affiche
+  « cette vidéo n'existe pas ». Sans ffmpeg, aucune référence n'est écrite et la fiche affiche
   « Aucune présentation vidéo ».
 - `video-moderation.ts` couvre les trois états (en attente, refusée avec motif, validées) :
   sans cela l'écran d'administration est vide et la restriction d'accès indémontrable.

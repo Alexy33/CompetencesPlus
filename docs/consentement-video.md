@@ -58,8 +58,8 @@ est `assertVideoConsent`, et **les deux chemins y passent** :
 
 | Chemin | Route | Gardé par |
 | --- | --- | --- |
-| Fichier déposé chez nous | `PUT /api/me/profile/video` | `saveProfileVideo` |
-| Lien YouTube / Vimeo | `PATCH /api/me/profile` (`videoUrl`) | le handler, avant écriture |
+| Fichier déposé chez nous | `PUT /api/me/profile/video` | `storeProfileVideo` |
+| Lien YouTube / Vimeo | `PATCH /api/me/profile` (`videoUrl`) | `setProfileVideoLink` |
 
 Le consentement porte sur la **diffusion**, pas sur le mode d'hébergement : un
 lien externe expose l'image et la voix exactement comme un fichier déposé, et le
@@ -77,6 +77,11 @@ consentement pour *cesser* de diffuser.
 | `POST` | `/api/me/profile/video/consent` | accord horodaté sur la version en vigueur |
 | `DELETE` | `/api/me/profile/video/consent` | retrait **et** suppression physique du fichier |
 
+Le retrait et la suppression volontaire d'une vidéo empruntent **le même**
+chemin : `deleteProfileVideo()`, qui délègue à `VideoProvider.delete()`. Il
+n'existe aucun autre code capable d'effacer un fichier vidéo dans le dépôt — cf.
+[`video-fournisseurs.md`](video-fournisseurs.md).
+
 L'état du consentement figure dans le seul schéma `MyProfile` : c'est une donnée
 personnelle du titulaire, pas un attribut public de la fiche. Un recruteur n'a
 pas à savoir à quelle date quelqu'un a accepté quoi — même raisonnement que pour
@@ -85,7 +90,9 @@ le compteur de vues (voir `docs/reponse-r4-compteurs.md`).
 ## Vérification
 
 Parcours joué sur un compte de test dédié (`test-r3@exemple.fr`), stockage
-`/data/uploads` dans le conteneur de développement.
+`/data/uploads` dans le conteneur de développement (depuis la bascule vers
+l'abstraction `VideoProvider`, le stockage local est `/data/videos` — cf.
+[`video.md`](video.md)).
 
 | # | Capture | Ce qu'elle montre |
 | --- | --- | --- |
