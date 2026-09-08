@@ -20,7 +20,8 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "openapi:export": "tsx scripts/export-openapi.ts",
-    "a11y": "node scripts/a11y-audit.mjs"
+    "a11y": "node scripts/a11y-audit.mjs",
+    "certification:migrate": "tsx scripts/certification-migration.ts"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",

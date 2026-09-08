@@ -1,0 +1,565 @@
+{
+  "version": 2,
+  "questions": [
+    {
+      "id": "q1",
+      "text": "Une consigne reçue le matin est contredite par une autre l'après-midi. Que faites-vous ?",
+      "type": "single_choice",
+      "weight": 3,
+      "options": [
+        {
+          "id": "q1-o1",
+          "label": "J'applique la dernière reçue sans commentaire",
+          "value": 0
+        },
+        {
+          "id": "q1-o2",
+          "label": "J'applique la première, elle était officielle",
+          "value": 1
+        },
+        {
+          "id": "q1-o3",
+          "label": "Je demande un arbitrage écrit avant d'agir",
+          "value": 2
+        },
+        {
+          "id": "q1-o4",
+          "label": "Je remonte la contradiction et propose une solution",
+          "value": 3
+        }
+      ]
+    },
+    {
+      "id": "q2",
+      "text": "Vous devez expliquer un dossier technique à quelqu'un qui n'y connaît rien.",
+      "type": "single_choice",
+      "weight": 3,
+      "options": [
+        {
+          "id": "q2-o1",
+          "label": "Je transmets le document tel quel",
+          "value": 0
+        },
+        {
+          "id": "q2-o2",
+          "label": "Je renvoie vers un collègue plus compétent",
+          "value": 1
+        },
+        {
+          "id": "q2-o3",
+          "label": "Je résume à l'oral en évitant le jargon",
+          "value": 2
+        },
+        {
+          "id": "q2-o4",
+          "label": "Je pars de son besoin et j'illustre par un cas concret",
+          "value": 3
+        }
+      ]
+    },
+    {
+      "id": "q3",
+      "text": "Comment organisez-vous une journée où tout est urgent ?",
+      "type": "single_choice",
+      "weight": 2,
+      "options": [
+        {
+          "id": "q3-o1",
+          "label": "J'attends que quelqu'un tranche",
+          "value": 0
+        },
+        {
+          "id": "q3-o2",
+          "label": "Dans l'ordre d'arrivée des demandes",
+          "value": 1
+        },
+        {
+          "id": "q3-o3",
+          "label": "Je traite d'abord le plus rapide",
+          "value": 2
+        },
+        {
+          "id": "q3-o4",
+          "label": "Je hiérarchise par impact et j'annonce les délais",
+          "value": 3
+        }
+      ]
+    },
+    {
+      "id": "q4",
+      "text": "Un membre de l'équipe ne tient pas ses engagements depuis deux semaines.",
+      "type": "single_choice",
+      "weight": 3,
+      "options": [
+        {
+          "id": "q4-o1",
+          "label": "Je compense en silence",
+          "value": 0
+        },
+        {
+          "id": "q4-o2",
+          "label": "Je réorganise ma part pour ne plus en dépendre",
+          "value": 1
+        },
+        {
+          "id": "q4-o3",
+          "label": "Je le signale directement à la hiérarchie",
+          "value": 2
+        },
+        {
+          "id": "q4-o4",
+          "label": "Je lui en parle en direct avant d'escalader",
+          "value": 3
+        }
+      ]
+    },
+    {
+      "id": "q5",
+      "text": "On vous confie un outil que vous n'avez jamais utilisé, sans formation.",
+      "type": "single_choice",
+      "weight": 2,
+      "options": [
+        {
+          "id": "q5-o1",
+          "label": "J'attends une formation officielle",
+          "value": 0
+        },
+        {
+          "id": "q5-o2",
+          "label": "Je refuse tant que le cadre n'est pas posé",
+          "value": 1
+        },
+        {
+          "id": "q5-o3",
+          "label": "Je teste seul et je note mes questions",
+          "value": 2
+        },
+        {
+          "id": "q5-o4",
+          "label": "Je cherche la documentation et un référent interne",
+          "value": 3
+        }
+      ]
+    },
+    {
+      "id": "q6",
+      "text": "Face à un client mécontent dont la demande est hors périmètre :",
+      "type": "single_choice",
+      "weight": 2,
+      "options": [
+        {
+          "id": "q6-o1",
+          "label": "J'accepte pour éviter le conflit",
+          "value": 0
+        },
+        {
+          "id": "q6-o2",
+          "label": "Je rappelle les règles et je clos",
+          "value": 1
+        },
+        {
+          "id": "q6-o3",
+          "label": "Je transfère à un supérieur",
+          "value": 2
+        },
+        {
+          "id": "q6-o4",
+          "label": "Je reformule son besoin et propose une alternative",
+          "value": 3
+        }
+      ]
+    },
+    {
+      "id": "q7",
+      "text": "Vous repérez une erreur dans un travail déjà validé par votre responsable.",
+      "type": "single_choice",
+      "weight": 3,
+      "options": [
+        {
+          "id": "q7-o1",
+          "label": "J'attends que quelqu'un s'en aperçoive",
+          "value": 0
+        },
+        {
+          "id": "q7-o2",
+          "label": "Je laisse, ce n'est plus mon sujet",
+          "value": 1
+        },
+        {
+          "id": "q7-o3",
+          "label": "Je corrige discrètement",
+          "value": 2
+        },
+        {
+          "id": "q7-o4",
+          "label": "Je signale avec la correction proposée",
+          "value": 3
+        }
+      ]
+    },
+    {
+      "id": "q8",
+      "text": "Votre poste évolue et vos missions changent à 50 %.",
+      "type": "single_choice",
+      "weight": 2,
+      "options": [
+        {
+          "id": "q8-o1",
+          "label": "Je demande un retour à l'ancien périmètre",
+          "value": 0
+        },
+        {
+          "id": "q8-o2",
+          "label": "J'attends de voir si ça tient dans le temps",
+          "value": 1
+        },
+        {
+          "id": "q8-o3",
+          "label": "Je m'adapte en observant les collègues",
+          "value": 2
+        },
+        {
+          "id": "q8-o4",
+          "label": "Je fais le point sur mes écarts de compétences et je me forme",
+          "value": 3
+        }
+      ]
+    },
+    {
+      "id": "q9",
+      "text": "Comment rendez-vous compte de votre activité ?",
+      "type": "single_choice",
+      "weight": 2,
+      "options": [
+        {
+          "id": "q9-o1",
+          "label": "Seulement quand on me le demande",
+          "value": 0
+        },
+        {
+          "id": "q9-o2",
+          "label": "Je préfère montrer le résultat final",
+          "value": 1
+        },
+        {
+          "id": "q9-o3",
+          "label": "Un point oral en fin de semaine",
+          "value": 2
+        },
+        {
+          "id": "q9-o4",
+          "label": "Un suivi écrit régulier et partagé",
+          "value": 3
+        }
+      ]
+    },
+    {
+      "id": "q10",
+      "text": "Un imprévu fait tomber la moitié de votre planning.",
+      "type": "single_choice",
+      "weight": 3,
+      "options": [
+        {
+          "id": "q10-o1",
+          "label": "J'applique le planning quand même",
+          "value": 0
+        },
+        {
+          "id": "q10-o2",
+          "label": "Je repousse tout d'une journée",
+          "value": 1
+        },
+        {
+          "id": "q10-o3",
+          "label": "Je fais des heures supplémentaires",
+          "value": 2
+        },
+        {
+          "id": "q10-o4",
+          "label": "Je préviens les personnes concernées et je repriorise",
+          "value": 3
+        }
+      ]
+    },
+    {
+      "id": "q11",
+      "text": "Que faites-vous d'un retour critique sur votre travail ?",
+      "type": "single_choice",
+      "weight": 2,
+      "options": [
+        {
+          "id": "q11-o1",
+          "label": "Je le prends comme une attaque",
+          "value": 0
+        },
+        {
+          "id": "q11-o2",
+          "label": "Je l'accepte sans discuter",
+          "value": 1
+        },
+        {
+          "id": "q11-o3",
+          "label": "Je le compare à d'autres retours avant de conclure",
+          "value": 2
+        },
+        {
+          "id": "q11-o4",
+          "label": "Je l'écoute et je demande des exemples précis",
+          "value": 3
+        }
+      ]
+    },
+    {
+      "id": "q12",
+      "text": "Vous entrez dans une équipe déjà constituée.",
+      "type": "single_choice",
+      "weight": 2,
+      "options": [
+        {
+          "id": "q12-o1",
+          "label": "J'attends qu'on vienne vers moi",
+          "value": 0
+        },
+        {
+          "id": "q12-o2",
+          "label": "J'impose vite ma méthode",
+          "value": 1
+        },
+        {
+          "id": "q12-o3",
+          "label": "J'observe les usages avant de proposer",
+          "value": 2
+        },
+        {
+          "id": "q12-o4",
+          "label": "Je demande un référent et je me rends utile rapidement",
+          "value": 3
+        }
+      ]
+    },
+    {
+      "id": "q13",
+      "text": "Trois travaux doivent être rendus le même jour et vous ne pourrez pas tout terminer.",
+      "type": "single_choice",
+      "weight": 2,
+      "options": [
+        {
+          "id": "q13-o1",
+          "label": "Je commence par le plus rapide et j'aviserai ensuite",
+          "value": 0
+        },
+        {
+          "id": "q13-o2",
+          "label": "Je préviens le dernier jour que tout ne sera pas prêt",
+          "value": 1
+        },
+        {
+          "id": "q13-o3",
+          "label": "Je traite dans l'ordre où on me les a confiés",
+          "value": 2
+        },
+        {
+          "id": "q13-o4",
+          "label": "Je préviens dès maintenant et je propose un ordre de rendu",
+          "value": 3
+        }
+      ]
+    },
+    {
+      "id": "q14",
+      "text": "Un outil que vous utilisez tous les jours est remplacé du jour au lendemain.",
+      "type": "single_choice",
+      "weight": 2,
+      "options": [
+        {
+          "id": "q14-o1",
+          "label": "J'attends que l'ancien outil revienne",
+          "value": 0
+        },
+        {
+          "id": "q14-o2",
+          "label": "Je poursuis mes anciennes méthodes en parallèle",
+          "value": 1
+        },
+        {
+          "id": "q14-o3",
+          "label": "Je me forme seul dès que j'ai un moment",
+          "value": 2
+        },
+        {
+          "id": "q14-o4",
+          "label": "Je repère mes usages critiques et je les teste en priorité sur le nouvel outil",
+          "value": 3
+        }
+      ]
+    },
+    {
+      "id": "q15",
+      "text": "Un collègue s'attribue devant le responsable un travail que vous avez réalisé.",
+      "type": "single_choice",
+      "weight": 3,
+      "options": [
+        {
+          "id": "q15-o1",
+          "label": "Je le dis devant toute l'équipe",
+          "value": 0
+        },
+        {
+          "id": "q15-o2",
+          "label": "Je laisse passer, ce n'est pas important",
+          "value": 1
+        },
+        {
+          "id": "q15-o3",
+          "label": "J'en parle directement au responsable",
+          "value": 2
+        },
+        {
+          "id": "q15-o4",
+          "label": "Je lui en parle en tête-à-tête, puis je rétablis les faits si c'est nécessaire",
+          "value": 3
+        }
+      ]
+    },
+    {
+      "id": "q16",
+      "text": "Votre responsable est absent une semaine et une décision doit être prise.",
+      "type": "single_choice",
+      "weight": 2,
+      "options": [
+        {
+          "id": "q16-o1",
+          "label": "J'attends son retour",
+          "value": 0
+        },
+        {
+          "id": "q16-o2",
+          "label": "Je décide seul sans en informer personne",
+          "value": 1
+        },
+        {
+          "id": "q16-o3",
+          "label": "Je demande à un collègue de décider à ma place",
+          "value": 2
+        },
+        {
+          "id": "q16-o4",
+          "label": "Je décide dans mon périmètre, je documente et je l'informe à son retour",
+          "value": 3
+        }
+      ]
+    },
+    {
+      "id": "q17",
+      "text": "Vous découvrez que vous avez transmis un chiffre faux la semaine dernière.",
+      "type": "single_choice",
+      "weight": 3,
+      "options": [
+        {
+          "id": "q17-o1",
+          "label": "Je ne dis rien, personne ne l'a remarqué",
+          "value": 0
+        },
+        {
+          "id": "q17-o2",
+          "label": "J'attends qu'on m'en parle",
+          "value": 1
+        },
+        {
+          "id": "q17-o3",
+          "label": "Je corrige dans mes documents sans prévenir",
+          "value": 2
+        },
+        {
+          "id": "q17-o4",
+          "label": "Je signale l'erreur, j'en indique la portée et j'envoie la correction",
+          "value": 3
+        }
+      ]
+    },
+    {
+      "id": "q18",
+      "text": "Avant de rendre un travail, que vérifiez-vous ?",
+      "type": "single_choice",
+      "weight": 2,
+      "options": [
+        {
+          "id": "q18-o1",
+          "label": "Rien, si je l'ai fait sérieusement",
+          "value": 0
+        },
+        {
+          "id": "q18-o2",
+          "label": "L'orthographe et la mise en forme",
+          "value": 1
+        },
+        {
+          "id": "q18-o3",
+          "label": "Je relis rapidement l'ensemble",
+          "value": 2
+        },
+        {
+          "id": "q18-o4",
+          "label": "Je reprends la demande initiale point par point et je vérifie chaque élément",
+          "value": 3
+        }
+      ]
+    },
+    {
+      "id": "q19",
+      "text": "Un client vous demande un engagement que vous n'êtes pas certain de pouvoir tenir.",
+      "type": "single_choice",
+      "weight": 3,
+      "options": [
+        {
+          "id": "q19-o1",
+          "label": "Je promets, pour ne pas le perdre",
+          "value": 0
+        },
+        {
+          "id": "q19-o2",
+          "label": "Je refuse immédiatement",
+          "value": 1
+        },
+        {
+          "id": "q19-o3",
+          "label": "Je réponds que je ne sais pas et j'en reste là",
+          "value": 2
+        },
+        {
+          "id": "q19-o4",
+          "label": "Je m'engage sur ce que je maîtrise et je donne une date pour le reste",
+          "value": 3
+        }
+      ]
+    },
+    {
+      "id": "q20",
+      "text": "Une tâche dont dépend la suite du projet prend deux jours de retard.",
+      "type": "single_choice",
+      "weight": 3,
+      "options": [
+        {
+          "id": "q20-o1",
+          "label": "J'attends de voir si le retard se rattrape",
+          "value": 0
+        },
+        {
+          "id": "q20-o2",
+          "label": "Je préviens à la fin du projet",
+          "value": 1
+        },
+        {
+          "id": "q20-o3",
+          "label": "Je décale toutes les échéances d'autant",
+          "value": 2
+        },
+        {
+          "id": "q20-o4",
+          "label": "Je préviens les personnes concernées et je réorganise ce qui peut avancer sans elle",
+          "value": 3
+        }
+      ]
+    }
+  ]
+}
