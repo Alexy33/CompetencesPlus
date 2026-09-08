@@ -40,7 +40,7 @@ export function CompanyFieldset({
         label="SIREN"
         value={company.siren}
         onChange={(event) => onChange("siren", event.target.value)}
-        placeholder="552 100 554"
+        placeholder="800 000 002"
         inputMode="numeric"
         disabled={loading}
         required
@@ -49,10 +49,15 @@ export function CompanyFieldset({
         hint={
           <>
             Neuf chiffres, tels qu&apos;ils figurent à l&apos;annuaire des entreprises. Les espaces
-            sont acceptés.
+            sont acceptés. Le dernier chiffre est une clé de contrôle : un numéro inventé sera
+            refusé, même s&apos;il comporte bien neuf chiffres.
           </>
         }
-        error={sirenInvalid ? "Ce SIREN est invalide : vérifiez les neuf chiffres saisis." : null}
+        error={
+          sirenInvalid
+            ? "Ce numéro ne passe pas la clé de contrôle du SIREN. Vérifiez-le sur l'annuaire des entreprises : ce n'est pas une question de longueur."
+            : null
+        }
       />
 
       <AuthField

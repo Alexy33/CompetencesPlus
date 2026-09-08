@@ -40,7 +40,10 @@ export function useRegistration() {
     }
     if (declaredAge === null) return "Indiquez une date de naissance valide.";
     if (role === "recruiter" && !isValidSiren(company.siren)) {
-      return "Le SIREN de l'entreprise est invalide : neuf chiffres attendus.";
+      return (
+        "Le SIREN de l'entreprise ne passe pas sa clé de contrôle. " +
+        "Neuf chiffres ne suffisent pas : le numéro doit exister à l'annuaire des entreprises."
+      );
     }
     return null;
   }
