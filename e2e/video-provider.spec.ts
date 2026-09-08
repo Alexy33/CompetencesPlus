@@ -151,7 +151,7 @@ test.describe("Non-régression — parcours vidéo complet", () => {
 
     const admin = await playwright.request.newContext({ baseURL });
     await admin.post("/api/auth/sign-in/email", {
-      data: { email: "admin@jeb.gouv.fr", password: PASSWORD },
+      data: { email: "admin@exemple.fr", password: PASSWORD },
     });
 
     expect((await admin.delete(`/api/admin/profiles/${profileId}`)).status()).toBe(200);
