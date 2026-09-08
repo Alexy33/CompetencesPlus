@@ -1,22 +1,50 @@
 "use client";
 
-import { ProductName } from "@/components/layout/product-name";
-import { PublicNotice } from "@/components/layout/public-notice";
+import { useEffect } from "react";
+import { RotateCcw } from "lucide-react";
 
-export default function GlobalError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
+import "./globals.css";
+import { Action, ActionLink } from "@/components/common/action";
+import { ErrorPageShell } from "@/components/layout/error-page-shell";
+
+export default function GlobalError({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
+  useEffect(() => {
+    console.error("[app] erreur de mise en page racine :", error);
+  }, [error]);
+
   return (
     <html lang="fr">
-      <body>
-        <main className="flex min-h-screen flex-col bg-canvas text-ink">
-          <header className="flex h-20 items-center px-6 md:px-10"><ProductName /></header>
-          <section className="flex flex-1 flex-col items-center justify-center px-6 text-center">
-            <p className="font-mono text-sm font-bold uppercase tracking-widest text-brand">Erreur 500</p>
-            <h1 className="mt-4 text-4xl font-bold">Une erreur est survenue</h1>
-            <p className="mt-3 max-w-md text-ink-muted">Le service rencontre un problème temporaire.</p>
-            <button type="button" onClick={reset} className="bouton-action mt-8">Réessayer</button>
-          </section>
-          <PublicNotice />
-        </main>
+      <body className="min-h-screen antialiased">
+        <title>Erreur du service — ProfilsActifs</title>
+
+        <ErrorPageShell
+          code="500"
+          title="Le service a rencontré une erreur"
+          description="Une erreur inattendue est survenue de notre côté. Vous pouvez réessayer : si elle persiste, revenez dans quelques instants."
+          actions={
+            <>
+              <Action size="lg" className="rounded-2xl" onClick={() => reset()}>
+                <RotateCcw aria-hidden="true" className="size-4" />
+                Réessayer
+              </Action>
+              <ActionLink href="/" tone="outline" size="lg" className="rounded-2xl">
+                Retour à l&apos;accueil
+              </ActionLink>
+            </>
+          }
+        >
+          {error.digest ? (
+            <p className="mt-8 font-mono text-xs uppercase tracking-wider text-ink-soft">
+              Référence de l&apos;incident : {error.digest}
+            </p>
+          ) : null}
+        </ErrorPageShell>
       </body>
     </html>
   );

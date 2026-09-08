@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import { MentionDroits } from "@/components/layout/mention-droits";
 import { getCurrentSession } from "@/lib/auth-session";
 
 export default async function CandidateLayout({
@@ -17,5 +18,10 @@ export default async function CandidateLayout({
     redirect("/");
   }
 
-  return children;
+  return (
+    <>
+      <MentionDroits className="relative z-50 lg:pl-64" />
+      {children}
+    </>
+  );
 }
