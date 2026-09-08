@@ -4,7 +4,7 @@
  * L'application ne connait jamais le systeme de fichiers, ni PeerTube, ni
  * YouTube : elle connait ce contrat. Chaque implementation garde pour elle
  * l'emplacement physique des octets, le nom des fichiers et le protocole de
- * lecture. Ajouter l'instance ministerielle = ajouter une classe ici, pas
+ * lecture. Ajouter l'instance PeerTube = ajouter une classe ici, pas
  * reecrire les routes.
  */
 

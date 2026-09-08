@@ -1,7 +1,7 @@
 # Hébergement vidéo — l'interface, et ce qui changera le jour de PeerTube
 
 > Demi-page demandée par le cabinet (courriel du vendredi 16 h 20) : pourquoi
-> ces méthodes-là, et ce qu'on ferait autrement quand l'instance ministérielle
+> ces méthodes-là, et ce qu'on ferait autrement quand l'instance PeerTube
 > existera. Le détail d'exploitation est dans [`video.md`](video.md).
 
 ## Pourquoi ces quatre méthodes

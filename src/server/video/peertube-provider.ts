@@ -8,7 +8,7 @@ import {
 } from "./provider";
 
 /**
- * Instance video souveraine du Ministere — pas encore provisionnee.
+ * Instance video PeerTube — pas encore provisionnee.
  *
  * Cette implementation n'appelle aucune API PeerTube : elle n'existe pas
  * encore. Son role est double :

@@ -141,7 +141,7 @@ describe("brancher un hebergeur de plus", () => {
       }
       async playbackUrl(videoId: string) {
         return videoId === "distant-42"
-          ? { kind: "embed" as const, url: "https://video.exemple.gouv.fr/w/distant-42" }
+          ? { kind: "embed" as const, url: "https://video.example.org/w/distant-42" }
           : null;
       }
       async delete() {
@@ -161,7 +161,7 @@ describe("brancher un hebergeur de plus", () => {
     expect((await provider.status(stored.videoId)).state).toBe("ready");
     expect(await provider.playbackUrl(stored.videoId)).toEqual({
       kind: "embed",
-      url: "https://video.exemple.gouv.fr/w/distant-42",
+      url: "https://video.example.org/w/distant-42",
     });
     expect(await provider.delete(stored.videoId)).toBe(true);
 

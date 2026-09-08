@@ -22,7 +22,7 @@ Application
     ↓  (video_id, video_provider)
 VideoProvider              src/server/video/provider.ts
     ├── LocalVideoProvider      disque, hors du répertoire web
-    ├── FakePeerTubeProvider    instance ministérielle — non provisionnée
+    ├── FakePeerTubeProvider    instance PeerTube — non provisionnée
     └── ExternalEmbedProvider   YouTube / Vimeo — éteint par défaut
 ```
 
@@ -78,7 +78,7 @@ Rien ne vit sous `public/`.
 Toute la lecture passe par `status()`. Pour l'hébergement local, une vidéo est
 `ready` dès le `rename`, sauf si `VIDEO_LOCAL_PROCESSING_MS` simule un
 transcodage — de quoi éprouver le chemin asynchrone sans attendre l'instance
-ministérielle.
+PeerTube.
 
 ## 5. Routes
 
@@ -149,7 +149,7 @@ un message. Aucun 500 ne peut sortir de là : `describeVideo()` ne lève jamais.
 Deux commandes symétriques, et une troisième qui dit où on en est :
 
 ```bash
-make video-degraded   # hébergeur ministériel factice — indisponible
+make video-degraded   # hébergeur PeerTube factice — indisponible
 make video-local      # hébergement du dispositif — état nominal
 make video-etat       # quel hébergeur, quelle fiche ouvrir, ce qu'on doit y voir
 ```
@@ -172,8 +172,8 @@ masquée **avant** que l'hébergeur ne soit consulté. La fiche affiche alors
 « Aucune présentation vidéo », et non le message d'indisponibilité — ce qui
 donne l'impression, à tort, que le mode dégradé ne marche pas.
 
-Puis ouvrir une fiche portant une vidéo. Capture :
-`captures/video-fournisseur/02-mode-degrade-peertube.png`.
+Puis ouvrir une fiche portant une vidéo. Capture historique de l’ancienne interface :
+`_archive/identite-etat/captures/video-fournisseur/02-mode-degrade-peertube.png`.
 
 Ce qui marche, et ce qui ne marche pas, dans cet état :
 
@@ -181,7 +181,7 @@ Ce qui marche, et ce qui ne marche pas, dans cet état :
 | --- | --- | --- |
 | Consulter une fiche | `200`, message à la place du lecteur | c'est le but |
 | Modifier son profil | `200` | la vidéo n'est pas le profil |
-| **Déposer une vidéo** | **`503`** | l'instance ministérielle n'existe pas : il n'y a rien à téléverser |
+| **Déposer une vidéo** | **`503`** | l'instance PeerTube n'existe pas : il n'y a rien à téléverser |
 | Lire une vidéo | `404` | aucun octet n'est servi par un hébergeur hors service |
 | Retirer sa vidéo | `200`, **octets supprimés** | la suppression sollicite l'hébergeur réel, en service ou non |
 

@@ -36,7 +36,7 @@ export const VideoProviderSchema = named(
   "VideoProvider",
   z.enum(mutable(VIDEO_PROVIDERS)).meta({
     description:
-      "Hebergeur de la video. local : stockage du dispositif, servi par une route controlee. peertube : instance video du Ministere (non provisionnee). embed : lien tiers, desactive par defaut.",
+      "Hebergeur de la video. local : stockage du dispositif, servi par une route controlee. peertube : instance video PeerTube (non provisionnee). embed : lien tiers, desactive par defaut.",
   }),
 );
 export const VideoViewStateSchema = named(

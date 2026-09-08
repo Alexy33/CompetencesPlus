@@ -43,8 +43,8 @@ video-local: ## Bascule sur l'hebergement local du dispositif (etat nominal)
 	@VIDEO_PROVIDER=local docker compose --profile dev up -d --force-recreate web-dev
 	@$(MAKE) --no-print-directory video-etat
 
-video-degraded: ## Bascule sur l'hebergeur ministeriel factice (indisponible)
-	@VIDEO_PROVIDER=peertube VIDEO_PEERTUBE_URL=https://video.exemple.gouv.fr \
+video-degraded: ## Bascule sur l'hebergeur PeerTube factice (indisponible)
+	@VIDEO_PROVIDER=peertube VIDEO_PEERTUBE_URL=https://video.example.org \
 		docker compose --profile dev up -d --force-recreate web-dev
 	@$(MAKE) --no-print-directory video-etat
 

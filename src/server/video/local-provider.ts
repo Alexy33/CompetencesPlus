@@ -35,7 +35,7 @@ export interface LocalVideoProviderOptions {
    * Duree de « transcodage » simulee, en millisecondes. A zero, une video
    * deposee est immediatement `ready`. Au-dessus, elle reste `processing`
    * le temps indique : de quoi eprouver le chemin asynchrone sans attendre
-   * l'instance ministerielle.
+   * l'instance PeerTube.
    */
   processingDelayMs?: number;
 }

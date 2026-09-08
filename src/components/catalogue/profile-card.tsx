@@ -20,7 +20,7 @@ function CertificationChip({ certified, score }: { certified: boolean; score: nu
   return (
     <Chip tone="success" size="sm" className="font-mono font-bold tracking-wider">
       <BadgeCheck aria-hidden="true" className="size-3.5 stroke-[2]" />
-      Score {score}/100
+      Badge de certification · {score}/100
     </Chip>
   );
 }

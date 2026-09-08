@@ -15,7 +15,7 @@ import {
  * Suite de conformite du contrat VideoProvider.
  *
  * La MEME suite s'execute contre l'hebergement local et contre l'implementation
- * factice de l'instance ministerielle. C'est ce qui demontre que l'abstraction
+ * factice de l'instance PeerTube. C'est ce qui demontre que l'abstraction
  * tient : si elle ne passait que contre l'implementation locale, l'interface ne
  * serait qu'un deplacement de code.
  *
@@ -70,7 +70,7 @@ const CONTRACTS: Contract[] = [
     label: "FakePeerTubeProvider",
     available: false,
     create() {
-      return new FakePeerTubeProvider("https://video.exemple.gouv.fr");
+      return new FakePeerTubeProvider("https://video.example.org");
     },
   },
 ];

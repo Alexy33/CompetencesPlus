@@ -19,6 +19,35 @@ Les reproductions historiques du bloc-marque se trouvaient également dans `docs
 - police institutionnelle et ses préchargements ;
 - libellés, badges et adresses utilisant les anciens sigles ou domaines.
 
+Le service est nommé **ProfilsActifs** et le dispositif **badge de certification**
+sur le catalogue, la fiche publique et les espaces candidat et recruteur. Le
+score reste exprimé sur 100. Le compte de démonstration administrateur est
+`admin@exemple.fr`, y compris dans les tests E2E.
+
+Les rapports sous `docs/_archive/identite-etat/` conservent les libellés observés
+lors des audits historiques ; ils ne décrivent pas l’interface actuelle.
+
+## Vérification élargie du dépôt
+
+La vérification porte sur les 318 fichiers du répertoire de travail, fichiers
+cachés et ignorés compris, hors métadonnées Git : 286 fichiers texte et 32
+fichiers binaires. Les sommes d’intégrité de `package-lock.json` sont des
+empreintes techniques et ne sont pas des libellés à renommer.
+
+- Les références à une instance vidéo ministérielle sont remplacées par
+  « instance PeerTube » dans la configuration, le code, OpenAPI, les tests et
+  la documentation. Les URL vidéo fictives utilisent `video.example.org`.
+- Les 26 captures PNG ont été contrôlées par OCR et le texte du PDF a été
+  extrait. Les deux anciennes captures `video-fournisseur` ont été déplacées
+  dans `docs/_archive/identite-etat/captures/video-fournisseur/` ; les liens
+  documentaires ont été mis à jour.
+- Un échantillonnage des deux vidéos archivées, toutes les cinq secondes
+  (40 images), confirme la présence de l’ancienne identité. Il ne constitue
+  pas une vérification image par image ni un contrôle de la piste audio.
+- Les anciennes mentions restent dans les preuves historiques archivées
+  (rapports, captures, PDF et vidéos). Aucune occurrence textuelle des anciens
+  sigles ou du nom de travail du ministère ne subsiste hors de cette archive.
+
 Le projet n’implémente actuellement aucun envoi d’e-mail transactionnel ni export PDF/CSV applicatif. La phrase réglementaire est centralisée dans `PUBLIC_NOTICE` pour être réutilisée lorsqu’un modèle d’e-mail sera introduit.
 
 ## Captures après modification

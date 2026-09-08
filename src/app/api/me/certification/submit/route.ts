@@ -24,7 +24,7 @@ export const { POST } = defineRoute({
       session.user.id,
       "certification",
       result.passed
-        ? `Évaluation validée avec un score de ${result.score}/100. Le résultat est affiché sur votre profil.`
+        ? `Badge de certification obtenu avec un score de ${result.score}/100. Le badge est affiché sur votre profil.`
         : `Score de ${result.score}/100, en dessous du seuil de ${result.threshold}. Vous pouvez repasser le questionnaire sans delai.`,
     );
     return result;
