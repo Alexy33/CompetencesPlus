@@ -18,10 +18,11 @@ const TAGS = [
     name: "Espace demandeur",
     description: "Gestion de son propre profil et de ses notifications (CDC 2.1, 2.3).",
   },
-  { name: "Certification", description: "Questionnaire et badge JEB (CDC 2.2)." },
+  { name: "Certification", description: "Questionnaire et évaluation des aptitudes (CDC 2.2)." },
   {
     name: "Espace recruteur",
-    description: "Favoris, prise de contact et suivi des candidats (CDC 2.1).",
+    description:
+      "Entreprise declaree a l'inscription, favoris, prise de contact et suivi des candidats (CDC 2.1, 3.1).",
   },
   {
     name: "Administration",
@@ -37,8 +38,6 @@ export function buildOpenApiDocument() {
     entry[route.method.toLowerCase()] = operationOf(route);
   }
 
-  // Les routes better-auth sont servies par un catch-all : on les decrit a la
-  // main pour que le front voie l'ensemble de la surface au meme endroit.
   for (const [path, operations] of Object.entries(authPaths)) {
     paths[path] = { ...(paths[path] ?? {}), ...operations };
   }
@@ -60,7 +59,7 @@ export function buildOpenApiDocument() {
       title: "ProfilsActifs — API",
       version: "0.2.0",
       description: [
-        "API du demonstrateur ProfilsActifs (Ministere du Job et Bonheur, JEB/DNI/2026-003).",
+        "API du démonstrateur technique ProfilsActifs.",
         "",
         "**Authentification.** Les routes marquees d'un cadenas exigent une session.",
         "Ouvrez-en une via `POST /api/auth/sign-in/email` : le cookie httpOnly est pose",

@@ -1,7 +1,8 @@
+import { auth } from "@/lib/auth";
 import { defineRoute } from "@/server/openapi/routes";
 import { CatalogQuery, ProfilePageSchema } from "@/server/contracts/profile";
 import { errorResponse } from "@/server/contracts/common";
-import { searchCatalog } from "@/server/services/profiles";
+import { catalogViewerOf, searchCatalog } from "@/server/services/profiles";
 
 export const dynamic = "force-dynamic";
 
@@ -26,5 +27,9 @@ export const { GET } = defineRoute({
       },
     ),
   },
-  handler: ({ query }) => searchCatalog(query),
+
+  handler: async ({ query, request }) => {
+    const session = await auth.api.getSession({ headers: request.headers });
+    return searchCatalog({ ...query, viewer: catalogViewerOf(session) });
+  },
 });

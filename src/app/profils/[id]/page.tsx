@@ -8,22 +8,17 @@ import { ProfileActions } from "@/components/catalogue/profile-actions";
 import { SiteShell } from "@/components/layout/site-shell";
 import { getCurrentSession } from "@/lib/auth-session";
 import type { UserRole } from "@/lib/vocabulary";
-import { findProfileById, recordProfileView } from "@/server/services/profiles";
+import {
+  findProfileById,
+  recordProfileView,
+  type SessionLike,
+} from "@/server/services/profiles";
 import { getSettings } from "@/server/services/settings";
 
 export const dynamic = "force-dynamic";
 
-/**
- * Fiche publique d'un profil (CDC 2.3).
- *
- * « Le profil doit etre consultable publiquement sans compte recruteur » : la
- * page ne lit aucune session. Seuls les profils `published` sont servis — un
- * profil en moderation ou retire repond 404, y compris a un recruteur connecte,
- * exactement comme la route `/api/profiles/{id}`.
- */
-
-async function loadPublishedProfile(id: string) {
-  const found = await findProfileById(id);
+async function loadPublishedProfile(id: string, session?: SessionLike) {
+  const found = await findProfileById(id, session);
   if (!found || found.status !== "published") return null;
   return found;
 }
@@ -36,10 +31,10 @@ export async function generateMetadata({
   const { id } = await params;
   const profile = await loadPublishedProfile(id);
 
-  if (!profile) return { title: "Profil introuvable — ProfilsActifs" };
+  if (!profile) return { title: "Profil introuvable" };
 
   return {
-    title: `${profile.name} — ${profile.title} | ProfilsActifs`,
+    title: `${profile.name} — ${profile.title}`,
     description: profile.bio.slice(0, 160),
   };
 }
@@ -50,16 +45,15 @@ export default async function ProfilePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const profile = await loadPublishedProfile(id);
+
+  const session = await getCurrentSession();
+  const profile = await loadPublishedProfile(id, session ?? undefined);
 
   if (!profile) notFound();
 
-  // La consultation compte comme une vue : c'est le compteur d'interactions que
-  // le candidat suit depuis son espace (CDC 2.1).
   await recordProfileView(profile.id);
-  const views = profile.views + 1;
 
-  const [settings, session] = await Promise.all([getSettings(), getCurrentSession()]);
+  const settings = await getSettings();
 
   return (
     <SiteShell>
@@ -67,7 +61,7 @@ export default async function ProfilePage({
         <div className="w-full px-5 pb-24 pt-10 md:px-10 md:pt-14 lg:pl-4">
           <Link
             href="/catalogue"
-            className="group inline-flex items-center gap-2 font-mono text-xs font-semibold uppercase tracking-wider text-[#1B3A6B] transition-colors hover:text-[#273D4F] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1B3A6B]"
+            className="group inline-flex items-center gap-2 font-mono text-xs font-semibold uppercase tracking-wider text-brand transition-colors hover:text-brand-700 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
           >
             <ArrowLeft
               aria-hidden="true"
@@ -76,45 +70,44 @@ export default async function ProfilePage({
             Retour au catalogue
           </Link>
 
-          <div className="mt-7 border-b border-[#1B3A6B]/15 pb-7">
-            <p className="font-mono text-xs font-semibold uppercase tracking-wider text-[#718096]">
+          <div className="mt-7 border-b border-brand/15 pb-7">
+            <p className="font-mono text-xs font-semibold uppercase tracking-wider text-ink-muted">
               Profil public · présentation vidéo
             </p>
-            <h1 className="mt-3 text-4xl font-extrabold uppercase leading-tight tracking-tight text-[#2d3748] md:text-5xl">
+            <h1 className="mt-3 text-4xl font-extrabold uppercase leading-tight tracking-tight text-ink md:text-5xl">
               {profile.name}
             </h1>
-            <p className="mt-2 text-lg text-[#4a5568]">{profile.title}</p>
+            <p className="mt-2 text-lg text-ink-muted">{profile.title}</p>
           </div>
 
           <div className="mt-8 grid items-start gap-8 xl:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.75fr)] xl:gap-10">
-            {/* Colonne principale : video, identite, presentation */}
             <div>
-              <ProfileVideo videoUrl={profile.videoUrl} name={profile.name} />
+              <ProfileVideo video={profile.video} name={profile.name} />
 
               <div className="mt-5 flex flex-wrap items-center gap-2 font-mono text-[11px] font-semibold uppercase tracking-wider">
-                <span className="rounded-full bg-[#D1DEF0] px-3 py-1.5 text-[#1B2D3E]">{profile.city}</span>
-                <span className="rounded-full bg-[#eee7ff] px-3 py-1.5 text-[#65449b]">{profile.sector}</span>
+                <span className="rounded-full bg-brand-200 px-3 py-1.5 text-brand-800">{profile.city}</span>
+                <span className="rounded-full bg-info px-3 py-1.5 text-info-fg">{profile.sector}</span>
               </div>
 
               {profile.bio ? (
-                <div className="mt-6 rounded-3xl border border-[#A8C5E0] bg-[#F5F9FE] p-6">
-                  <h2 className="font-mono text-xs font-semibold uppercase tracking-wider text-[#718096]">Présentation</h2>
-                  <p className="mt-3 max-w-[70ch] text-[15.5px] leading-[1.65] text-[#4a5568]">
+                <div className="mt-6 rounded-3xl border border-brand-300 bg-panel p-6">
+                  <h2 className="font-mono text-xs font-semibold uppercase tracking-wider text-ink-muted">Présentation</h2>
+                  <p className="mt-3 max-w-[70ch] text-[15.5px] leading-[1.65] text-ink-muted">
                     {profile.bio}
                   </p>
                 </div>
               ) : null}
 
               {profile.skills.length > 0 ? (
-                <div className="mt-6 rounded-3xl border border-[#A8C5E0] bg-[#F5F9FE] p-6">
-                  <h2 className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[#1d1f20]/55">
+                <div className="mt-6 rounded-3xl border border-brand-300 bg-panel p-6">
+                  <h2 className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.14em] text-ink-muted">
                     Compétences déclarées
                   </h2>
                   <ul className="mt-3 flex flex-wrap gap-1.5">
                     {profile.skills.map((skill) => (
                       <li
                         key={skill}
-                        className="rounded-full bg-[#dff3f5] px-3 py-1.5 text-xs font-semibold text-[#25636a]"
+                        className="rounded-full bg-teal px-3 py-1.5 text-xs font-semibold text-teal-fg"
                       >
                         {skill}
                       </li>
@@ -124,16 +117,14 @@ export default async function ProfilePage({
               ) : null}
             </div>
 
-            {/* Colonne laterale : certification et compteurs */}
             <aside className="space-y-5 xl:sticky xl:top-8 xl:self-start">
               {profile.certified ? (
-                // Le badge est le seul aplat plein de la page : le CDC (2.3)
-                // demande qu'il soit visuellement distinct et mis en avant.
-                <div className="rounded-3xl bg-[#1B3A6B] p-7 text-white">
+
+                <div className="rounded-3xl bg-brand p-7 text-white">
                   <div className="flex items-center gap-2">
                     <BadgeCheck aria-hidden="true" className="size-5 stroke-[2]" />
                     <span className="font-mono text-[10.5px] font-bold uppercase tracking-[0.16em] text-white/80">
-                      Certification officielle
+                      Badge de certification
                     </span>
                   </div>
                   <p className="mt-4 text-6xl font-bold leading-none tracking-tight">
@@ -141,44 +132,28 @@ export default async function ProfilePage({
                     <span className="text-2xl font-bold text-white/70"> / 100</span>
                   </p>
                   <p className="mt-3 text-sm leading-relaxed text-white/80">
-                    Badge Aptitudes professionnelles JEB — délivré par la Direction
-                    Numérique et Innovation. Seuil : {settings.certificationThreshold}/100.
+                    Évaluation des aptitudes professionnelles. Seuil : {settings.certificationThreshold}/100.
                   </p>
                 </div>
               ) : (
-                <div className="rounded-3xl bg-[#ebf0f7] p-7 shadow-[8px_8px_16px_#c5d1e0,-8px_-8px_16px_#ffffff]">
-                  <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#718096]">
-                    Certification JEB
+                <div className="rounded-3xl bg-canvas p-7 shadow-raised-xl">
+                  <span className="font-mono text-xs font-bold uppercase tracking-wider text-ink-muted">
+                    Badge de certification
                   </span>
-                  <p className="mt-5 text-lg font-bold uppercase tracking-tight text-[#2d3748]">
+                  <p className="mt-5 text-lg font-bold uppercase tracking-tight text-ink">
                     Non certifié
                   </p>
-                  <p className="mt-3 text-sm leading-relaxed text-[#718096]">
+                  <p className="mt-3 text-sm leading-relaxed text-ink-muted">
                     Ce candidat n&apos;a pas encore validé le questionnaire de
                     certification des aptitudes professionnelles.
                   </p>
                 </div>
               )}
 
-              <div className="rounded-3xl bg-[#ebf0f7] p-7 shadow-[8px_8px_16px_#c5d1e0,-8px_-8px_16px_#ffffff]">
-                <div className="grid grid-cols-2 gap-5">
-                <div>
-                  <p className="text-3xl font-bold leading-none text-[#2d3748]">
-                    {views}
-                  </p>
-                  <p className="mt-1 text-xs text-[#718096]">
-                    vues du profil
-                  </p>
-                </div>
-                <div>
-                  <p className="text-3xl font-bold leading-none text-[#2d3748]">
-                    {profile.contactCount}
-                  </p>
-                  <p className="mt-1 text-xs text-[#718096]">
-                    contacts reçus
-                  </p>
-                </div>
-                </div>
+              {/* Le nombre de sollicitations recues n'est plus affiche ici : c'est
+                  un compteur d'engagement, il reste en base et visible du seul
+                  titulaire (instruction du cabinet, 7 septembre). */}
+              <div className="rounded-3xl bg-canvas p-7 shadow-raised-xl">
                 <ProfileActions
                   profileId={profile.id}
                   role={(session?.user.role as UserRole | undefined) ?? null}

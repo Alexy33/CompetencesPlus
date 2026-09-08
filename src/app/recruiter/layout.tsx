@@ -2,8 +2,6 @@ import { redirect } from "next/navigation";
 
 import { getCurrentSession } from "@/lib/auth-session";
 
-// for route protection inheritance
-
 export default async function RecruiterLayout({
   children,
 }: Readonly<{

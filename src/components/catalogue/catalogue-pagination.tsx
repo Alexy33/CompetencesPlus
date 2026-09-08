@@ -1,17 +1,10 @@
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
-/**
- * Pagination du catalogue.
- *
- * Rendue en liens plutot qu'en boutons : chaque page est une URL a part
- * entiere, indexable et partageable, ce que le CDC (3.4) attend d'un feed
- * pagine. Les parametres de filtre courants sont reconduits tels quels.
- */
 interface CataloguePaginationProps {
   page: number;
   totalPages: number;
-  /** Parametres de filtre courants, sans `page`. */
+
   params: URLSearchParams;
 }
 
@@ -27,14 +20,14 @@ export function CataloguePagination({ page, totalPages, params }: CataloguePagin
   };
 
   const linkClassName =
-    "inline-flex h-11 items-center gap-2 border border-[#1B3A6B]/30 bg-white px-5 text-sm font-semibold text-[#2d3748] transition-colors hover:border-[#1B3A6B] hover:text-[#273D4F]";
+    "inline-flex h-11 items-center gap-2 border border-brand/30 bg-white px-5 text-sm font-semibold text-ink transition-colors hover:border-brand hover:text-brand-700";
   const disabledClassName =
-    "inline-flex h-11 cursor-not-allowed items-center gap-2 border border-[#1B3A6B]/10 bg-transparent px-5 text-sm font-semibold text-[#718096]/50";
+    "inline-flex h-11 cursor-not-allowed items-center gap-2 border border-brand/10 bg-transparent px-5 text-sm font-semibold text-ink-soft";
 
   return (
     <nav
       aria-label="Pagination du catalogue"
-      className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-[#1B3A6B]/10 pt-8"
+      className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-brand/10 pt-8"
     >
       {page > 1 ? (
         <Link href={href(page - 1)} scroll={false} className={linkClassName}>
@@ -48,7 +41,7 @@ export function CataloguePagination({ page, totalPages, params }: CataloguePagin
         </span>
       )}
 
-      <p className="font-mono text-xs font-semibold uppercase tracking-wider text-[#718096]">
+      <p className="font-mono text-xs font-semibold uppercase tracking-wider text-ink-muted">
         Page {page} / {totalPages}
       </p>
 

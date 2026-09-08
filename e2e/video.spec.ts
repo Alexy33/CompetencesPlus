@@ -1,14 +1,33 @@
 import { expect, test, type APIRequestContext } from "@playwright/test";
 
 const PASSWORD = "demo1234";
-const CANDIDATE = "amina@exemple.fr";
+const ADULT_BIRTH_DATE = "1990-05-17";
 
 const FAKE_MP4 = Buffer.alloc(4096, 0x21);
 
+/**
+ * Chaque test travaille sur un candidat qu'il cree lui-meme.
+ *
+ * La suite depose et supprime des videos : la faire tourner sur un profil du
+ * jeu de demonstration reviendrait a detruire le temoin de non-regression
+ * (cf. docs/temoin-video.md) a chaque execution.
+ */
 async function candidateContext(playwright: typeof import("@playwright/test"), baseURL: string): Promise<APIRequestContext> {
   const context = await playwright.request.newContext({ baseURL });
-  const login = await context.post("/api/auth/sign-in/email", { data: { email: CANDIDATE, password: PASSWORD } });
-  expect(login.status(), "connexion candidate").toBe(200);
+
+  const signUp = await context.post("/api/auth/sign-up/email", {
+    data: {
+      name: "Video Test",
+      email: `video-${Date.now()}-${Math.random().toString(16).slice(2, 8)}@exemple.fr`,
+      password: PASSWORD,
+      birthDate: ADULT_BIRTH_DATE,
+    },
+  });
+  expect(signUp.status(), "creation du candidat de test").toBe(200);
+
+  // Sans consentement en cours, aucun depot n'est possible (R.3).
+  expect((await context.post("/api/me/profile/video/consent")).status()).toBe(200);
+
   return context;
 }
 
@@ -22,9 +41,13 @@ test.describe("Vidéo de présentation", () => {
     });
     expect(upload.status(), "PUT vidéo").toBe(200);
     const profile = await upload.json();
-    expect(profile.videoUrl).toMatch(/^\/api\/videos\/[^?]+(\?.*)?$/);
 
-    const videoPath = profile.videoUrl.split("?")[0];
+    // L'identifiant est opaque : ni chemin de fichier, ni identifiant de profil.
+    expect(profile.video.state).toBe("ready");
+    expect(profile.video.provider).toBe("local");
+    const videoPath = profile.video.playback.url as string;
+    expect(videoPath).toMatch(/^\/api\/videos\/[0-9a-f]{32}$/);
+    expect(videoPath).not.toContain(profile.id);
 
     const full = await candidate.get(videoPath);
     expect(full.status()).toBe(200);
@@ -39,8 +62,9 @@ test.describe("Vidéo de présentation", () => {
 
     const removed = await candidate.delete("/api/me/profile/video");
     expect(removed.status()).toBe(200);
-    expect((await removed.json()).videoUrl).toBeNull();
+    expect((await removed.json()).video.state).toBe("none");
 
+    // La suppression passe par le fournisseur : les octets ne sont plus la.
     expect((await candidate.get(videoPath)).status(), "vidéo supprimée").toBe(404);
 
     await candidate.dispose();
@@ -95,11 +119,32 @@ test.describe("Vidéo de présentation", () => {
     await recruiter.dispose();
   });
 
+  test("un identifiant inconnu ou devinable ne rend aucune vidéo", async ({ request }) => {
+    for (const guess of [
+      "/api/videos/00000000000000000000000000000000",
+      "/api/videos/..%2F..%2Fetc%2Fpasswd",
+      "/api/videos/presentation.mp4",
+    ]) {
+      expect((await request.get(guess)).status(), guess).toBe(404);
+    }
+  });
+
+  test("aucun fichier vidéo n'est servi depuis le répertoire public", async ({ request }) => {
+    // Le stockage vit hors du répertoire web : ces chemins n'existent pas, et
+    // aucun listing n'est possible.
+    for (const path of ["/videos/", "/uploads/", "/public/videos/"]) {
+      const response = await request.get(path, { maxRedirects: 0 });
+      expect([308, 404], `${path} → ${response.status()}`).toContain(response.status());
+    }
+  });
+
   test("la spécification OpenAPI décrit les routes vidéo", async ({ request }) => {
     const spec = await (await request.get("/api/openapi")).json();
     expect(spec.paths["/api/me/profile/video"]).toBeDefined();
     expect(spec.paths["/api/me/profile/video"].put).toBeDefined();
     expect(spec.paths["/api/me/profile/video"].delete).toBeDefined();
-    expect(spec.paths["/api/videos/{id}"].get).toBeDefined();
+    expect(spec.paths["/api/videos/{videoId}"].get).toBeDefined();
+    expect(spec.components.schemas.VideoView, "état de la vidéo décrit").toBeDefined();
+    expect(spec.components.schemas.VideoProvider, "hébergeurs décrits").toBeDefined();
   });
 });

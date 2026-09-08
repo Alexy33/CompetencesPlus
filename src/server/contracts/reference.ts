@@ -8,13 +8,6 @@ import {
   SkillSchema,
 } from "./common";
 
-/**
- * Vocabulaires et bornes du dispositif, en une seule requete.
- *
- * Le front remplit ses listes deroulantes depuis ici plutot que de recopier les
- * valeurs : ajouter un secteur cote serveur le fait apparaitre dans l'interface
- * sans toucher au code front.
- */
 export const ReferenceSchema = named(
   "Reference",
   z.object({
@@ -29,7 +22,6 @@ export const ReferenceSchema = named(
   }),
 );
 
-/** Compteurs publics affiches sur la page d'accueil. */
 export const PublicStatsSchema = named(
   "PublicStats",
   z.object({

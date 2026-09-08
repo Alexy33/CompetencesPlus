@@ -6,8 +6,6 @@ import { buttonVariants } from "@/components/ui/button";
 import { extensionForMime } from "@/server/services/video";
 import { computeScore, type LoadedQuestion } from "@/server/services/certification";
 
-//FRONTEND
-
 describe("front — cn (fusion de classes Tailwind)", () => {
   it("concatene les classes", () => {
     expect(cn("px-2", "py-1")).toBe("px-2 py-1");
@@ -41,8 +39,6 @@ describe("front — buttonVariants (variantes du bouton)", () => {
     expect(buttonVariants({ className: "ma-classe" })).toContain("ma-classe");
   });
 });
-
-//BACKEND
 
 describe("back — extensionForMime (upload video)", () => {
   it("associe un type MIME connu a son extension", () => {
@@ -82,13 +78,14 @@ describe("back — computeScore (bareme de la certification)", () => {
   const question = (id: string, weight: number, values: number[]): LoadedQuestion => ({
     id,
     text: id,
+    type: "single_choice",
     weight,
     position: 0,
     options: values.map((value, index) => ({ id: `${id}-${index}`, label: `${value}`, value })),
   });
 
   it("rend 100 quand toutes les meilleures reponses sont choisies", () => {
-    expect(computeScore([question("a", 1, [0, 1, 2])], { a: 2 })).toBe(100);
+    expect(computeScore([question("a", 1, [0, 1, 2])], { a: "a-2" })).toBe(100);
   });
 
   it("rend 0 sans aucune reponse", () => {

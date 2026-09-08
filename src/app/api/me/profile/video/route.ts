@@ -1,19 +1,30 @@
-import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
-import { db } from "@/db";
-import { profile } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { ApiError } from "@/server/http";
 import { findProfileByUserId } from "@/server/services/profiles";
 import {
   deleteProfileVideo,
   extensionForMime,
-  saveProfileVideo,
-  VideoTooLargeError,
+  MissingVideoConsentError,
+  resetVideoModeration,
+  storeProfileVideo,
 } from "@/server/services/video";
+import {
+  EmptyVideoError,
+  UnsupportedVideoTypeError,
+  VideoProviderUnavailableError,
+  VideoTooLargeError,
+} from "@/server/video/provider";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+
+/**
+ * Depot et retrait de la video du candidat connecte.
+ *
+ * La route ne sait rien du stockage : elle valide la requete, puis confie le
+ * flux a l'hebergeur actif (`VIDEO_PROVIDER`) via le service video.
+ */
 
 function fail(error: unknown): Response {
   const api = error instanceof ApiError ? error : new ApiError("internal", "Erreur interne.");
@@ -39,8 +50,8 @@ export async function PUT(request: Request): Promise<Response> {
     return fail(error);
   }
 
-  const extension = extensionForMime(request.headers.get("content-type"));
-  if (!extension) {
+  const mimeType = request.headers.get("content-type");
+  if (!mimeType || !extensionForMime(mimeType)) {
     return fail(
       ApiError.unprocessable(
         "Type de fichier non pris en charge. Formats acceptés : MP4, WebM, OGG, MOV — via l'en-tête Content-Type.",
@@ -52,16 +63,17 @@ export async function PUT(request: Request): Promise<Response> {
   }
 
   try {
-    await saveProfileVideo(ctx.profileId, extension, request.body);
+    // L'etat rendu peut etre « processing » : un depot reussi ne garantit pas
+    // que la video soit deja lisible. La fiche s'appuie sur `status()`.
+    await storeProfileVideo(ctx.profileId, mimeType, request.body);
   } catch (error) {
     if (error instanceof VideoTooLargeError) return fail(ApiError.unprocessable(error.message));
+    if (error instanceof UnsupportedVideoTypeError) return fail(ApiError.unprocessable(error.message));
+    if (error instanceof EmptyVideoError) return fail(ApiError.badRequest(error.message));
+    if (error instanceof MissingVideoConsentError) return fail(ApiError.forbidden(error.message));
+    if (error instanceof VideoProviderUnavailableError) return fail(ApiError.unavailable(error.message));
     return fail(new ApiError("internal", `Enregistrement impossible : ${(error as Error).message}`));
   }
-
-  await db
-    .update(profile)
-    .set({ videoUrl: `/api/videos/${ctx.profileId}?t=${Date.now()}`, updatedAt: new Date() })
-    .where(eq(profile.id, ctx.profileId));
 
   return Response.json(await findProfileByUserId(ctx.userId));
 }
@@ -74,11 +86,10 @@ export async function DELETE(): Promise<Response> {
     return fail(error);
   }
 
+  // Chemin de suppression unique : le service delegue a VideoProvider.delete(),
+  // qui efface les octets avant que la reference ne soit retiree de la base.
   await deleteProfileVideo(ctx.profileId);
-  await db
-    .update(profile)
-    .set({ videoUrl: null, updatedAt: new Date() })
-    .where(eq(profile.id, ctx.profileId));
+  await resetVideoModeration(ctx.profileId);
 
   return Response.json(await findProfileByUserId(ctx.userId));
 }

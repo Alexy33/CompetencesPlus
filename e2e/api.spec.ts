@@ -1,18 +1,8 @@
 import { expect, test, type APIRequestContext } from "@playwright/test";
 
-/**
- * Parcours complets de l'API, joues contre l'application reellement servie.
- *
- * Ces tests sont la contrepartie de la documentation Scalar : la doc dit ce que
- * l'API promet, ceux-ci verifient qu'elle le tient. Ils couvrent aussi les
- * refus (401, 403, 404, 400), qui sont la partie la plus facile a casser sans
- * s'en apercevoir.
- *
- * PREREQUIS : la base doit etre peuplee (`npm run db:seed`). Les comptes de
- * demonstration et les profils publies viennent de la.
- */
-
 const PASSWORD = "demo1234";
+
+const ADULT_BIRTH_DATE = "1990-05-17";
 
 async function signIn(request: APIRequestContext, email: string) {
   const response = await request.post("/api/auth/sign-in/email", {
@@ -21,7 +11,6 @@ async function signIn(request: APIRequestContext, email: string) {
   expect(response.status(), `connexion de ${email}`).toBe(200);
 }
 
-/** Contexte isole par role : chaque acteur garde son propre cookie de session. */
 async function contextFor(browserBaseURL: string, playwright: typeof import("@playwright/test"), email: string) {
   const context = await playwright.request.newContext({ baseURL: browserBaseURL });
   await signIn(context, email);
@@ -41,8 +30,7 @@ test.describe("Catalogue public", () => {
   });
 
   test("refuse une taille de page au-dela du plafond reglementaire", async ({ request }) => {
-    // CDC 3.4 : 20 profils par page au maximum. La borne est refusee a
-    // l'entree, elle n'est pas corrigee en silence.
+
     const response = await request.get("/api/profiles?pageSize=50");
     expect(response.status()).toBe(400);
     expect((await response.json()).error.code).toBe("bad_request");
@@ -62,6 +50,17 @@ test.describe("Catalogue public", () => {
     }
   });
 
+  test("exclut le nom de la recherche libre sans casser les criteres professionnels", async ({ request }) => {
+    const byName = await (await request.get("/api/profiles?q=Berthier&pageSize=20")).json();
+    expect(byName.items.some((item: { name: string }) => item.name === "Amina Berthier")).toBe(false);
+
+    const byTitle = await (await request.get("/api/profiles?q=Charg%C3%A9e%20de%20relation%20client&pageSize=20")).json();
+    expect(byTitle.items.some((item: { name: string }) => item.name === "Amina Berthier")).toBe(true);
+
+    const bySkill = await (await request.get("/api/profiles?q=Communication&pageSize=20")).json();
+    expect(bySkill.items.some((item: { name: string }) => item.name === "Amina Berthier")).toBe(true);
+  });
+
   test("ne divulgue pas les profils non publies", async ({ request }) => {
     const response = await request.get("/api/profiles/identifiant-inexistant");
     expect(response.status()).toBe(404);
@@ -78,8 +77,6 @@ test.describe("Controle d'acces", () => {
   test("refuse 403 avec une session de role insuffisant", async ({ playwright, baseURL }) => {
     const candidate = await contextFor(baseURL!, playwright, "amina@exemple.fr");
 
-    // Distinguer 401 et 403 compte : le front doit rediriger vers la connexion
-    // dans un cas, afficher « acces refuse » dans l'autre.
     expect((await candidate.get("/api/admin/stats")).status()).toBe(403);
     expect((await candidate.get("/api/me/favorites")).status()).toBe(403);
 
@@ -87,13 +84,13 @@ test.describe("Controle d'acces", () => {
   });
 
   test("l'inscription publique ne peut pas fabriquer un administrateur", async ({ request }) => {
-    // Le role est un champ d'inscription, donc fourni par le client : sans
-    // garde-fou cote serveur, n'importe qui obtiendrait la moderation.
+
     const response = await request.post("/api/auth/sign-up/email", {
       data: {
         name: "Tentative",
         email: `escalade-${Date.now()}@test.fr`,
         password: PASSWORD,
+        birthDate: ADULT_BIRTH_DATE,
         role: "admin",
       },
     });
@@ -118,7 +115,6 @@ test.describe("Espace demandeur", () => {
     expect(body.title).toBe("Responsable relation client");
     expect(body.skills.sort()).toEqual(["Communication", "Rigueur"]);
 
-    // Un champ hors vocabulaire est refuse, pas ignore.
     const rejected = await candidate.patch("/api/me/profile", { data: { sector: "Inexistant" } });
     expect(rejected.status()).toBe(400);
 
@@ -135,7 +131,6 @@ test.describe("Certification", () => {
     const questionnaire = await (await request.get("/api/certification/questions")).json();
     expect(questionnaire.questions.length).toBeGreaterThan(0);
 
-    // La ponderation ne doit jamais fuiter vers le candidat.
     expect(questionnaire.questions[0]).not.toHaveProperty("weight");
 
     const answers: Record<string, number> = {};
@@ -174,7 +169,6 @@ test.describe("Espace recruteur", () => {
     const target = catalog.items.find((item: { name: string }) => item.name === "Amina Berthier");
     expect(target, "profil de demonstration attendu — lancez `npm run db:seed`").toBeTruthy();
 
-    // Ajouter deux fois ne cree pas de doublon : la route est idempotente.
     expect((await recruiter.put(`/api/me/favorites/${target.id}`)).status()).toBe(200);
     expect((await recruiter.put(`/api/me/favorites/${target.id}`)).status()).toBe(200);
 
@@ -195,10 +189,8 @@ test.describe("Espace recruteur", () => {
     const stats = await (await recruiter.get("/api/me/stats")).json();
     expect(stats.interviewsPlanned).toBeGreaterThanOrEqual(1);
 
-    // Le suivi d'un autre recruteur est introuvable, pas « interdit ».
     expect((await recruiter.patch("/api/me/contacts/inexistant", { data: { status: "Retenu" } })).status()).toBe(404);
 
-    // Le candidat contacte doit avoir ete notifie (CDC 2.3).
     const candidate = await contextFor(baseURL!, playwright, "amina@exemple.fr");
     const notifications = await (await candidate.get("/api/me/notifications")).json();
     expect(notifications.items.some((n: { type: string }) => n.type === "contact")).toBe(true);
@@ -210,11 +202,10 @@ test.describe("Espace recruteur", () => {
 
 test.describe("Administration", () => {
   test("modere, gere les questions et les reglages", async ({ playwright, baseURL }) => {
-    const admin = await contextFor(baseURL!, playwright, "admin@jeb.gouv.fr");
+    const admin = await contextFor(baseURL!, playwright, "admin@exemple.fr");
 
     expect((await admin.get("/api/admin/stats")).status()).toBe(200);
 
-    // La file de moderation est la seule vue qui expose les profils non publies.
     const queue = await (await admin.get("/api/admin/profiles")).json();
     expect(queue.items.length).toBeGreaterThan(0);
 
@@ -235,7 +226,6 @@ test.describe("Administration", () => {
     expect((await admin.delete(`/api/admin/questions/${questionId}`)).status()).toBe(200);
     expect((await admin.delete(`/api/admin/questions/${questionId}`)).status()).toBe(404);
 
-    // Un reglage modifie doit etre visible du front immediatement.
     expect((await admin.patch("/api/admin/settings", { data: { certificationThreshold: 75 } })).status()).toBe(200);
     const reference = await (await admin.get("/api/reference")).json();
     expect(reference.certificationThreshold).toBe(75);
@@ -247,13 +237,93 @@ test.describe("Administration", () => {
   });
 });
 
+test.describe("Consentement video (R.3)", () => {
+
+  test("accord horodate et versionne, retrait qui supprime le fichier", async ({ playwright, baseURL }) => {
+    const email = `consent-${Date.now()}@exemple.fr`;
+    const context = await playwright.request.newContext({ baseURL });
+
+    const signUp = await context.post("/api/auth/sign-up/email", {
+      data: { name: "Consentement Test", email, password: PASSWORD, birthDate: ADULT_BIRTH_DATE },
+    });
+    expect(signUp.status()).toBe(200);
+
+    const profileId = (await (await context.get("/api/me/profile")).json()).id as string;
+
+    const payload = Buffer.concat([
+      Buffer.from([0, 0, 0, 0x18]),
+      Buffer.from("ftypmp42"),
+      Buffer.alloc(64, 0x21),
+    ]);
+
+    const refused = await context.put("/api/me/profile/video", {
+      headers: { "Content-Type": "video/mp4" },
+      data: payload,
+    });
+    expect(refused.status()).toBe(403);
+
+    const granted = await (await context.post("/api/me/profile/video/consent")).json();
+    expect(granted.granted).toBe(true);
+    expect(granted.version).toBeTruthy();
+    expect(Number.isNaN(Date.parse(granted.grantedAt))).toBe(false);
+    expect(granted.revokedAt).toBeNull();
+
+    const uploaded = await context.put("/api/me/profile/video", {
+      headers: { "Content-Type": "video/mp4" },
+      data: payload,
+    });
+    expect(uploaded.status()).toBe(200);
+
+    // L'adresse de lecture vient du fournisseur : elle porte un identifiant
+    // opaque, jamais l'identifiant du profil ni un chemin de fichier.
+    const withVideo = await uploaded.json();
+    expect(withVideo.video.state).toBe("ready");
+    expect(withVideo.video.provider).toBe("local");
+    const videoPath = withVideo.video.playback.url as string;
+    expect(videoPath).toMatch(/^\/api\/videos\/[0-9a-f]{32}$/);
+    expect(videoPath).not.toContain(profileId);
+
+    expect((await context.get(videoPath)).status()).toBe(200);
+    expect((await context.get(`/api/videos/${profileId}`)).status(), "identifiant de profil").toBe(404);
+
+    // Le lien tiers est un troisieme fournisseur, eteint par defaut : meme
+    // avec un consentement en cours, il est refuse.
+    const lienRefuse = await context.patch("/api/me/profile", {
+      data: { videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" },
+    });
+    expect(lienRefuse.status(), "hebergement tiers desactive").toBe(403);
+
+    const revoked = await (await context.delete("/api/me/profile/video/consent")).json();
+    expect(revoked.granted).toBe(false);
+    expect(Number.isNaN(Date.parse(revoked.revokedAt))).toBe(false);
+
+    expect(revoked.grantedAt).toBe(granted.grantedAt);
+    expect(revoked.version).toBe(granted.version);
+
+    // Le retrait passe par VideoProvider.delete() : les octets ont disparu,
+    // l'adresse de lecture ne rend plus rien.
+    expect((await context.get(videoPath)).status(), "octets supprimes").toBe(404);
+
+    const after = await (await context.get("/api/me/profile")).json();
+    expect(after.id).toBe(profileId);
+    expect(after.video.state).toBe("none");
+    expect(after.video.playback).toBeNull();
+
+    // Sans consentement, plus rien ne peut etre depose.
+    expect((await context.put("/api/me/profile/video", {
+      headers: { "Content-Type": "video/mp4" },
+      data: payload,
+    })).status()).toBe(403);
+
+    await context.dispose();
+  });
+});
+
 test.describe("Documentation", () => {
   test("la specification couvre toutes les routes du domaine", async ({ request }) => {
     const spec = await (await request.get("/api/openapi")).json();
     expect(spec.openapi).toMatch(/^3\./);
 
-    // Un echantillon representatif de chaque espace : si le manifeste oublie un
-    // fichier de route, la doc devient muette dessus sans que rien n'echoue.
     for (const path of [
       "/api/profiles",
       "/api/profiles/{id}",

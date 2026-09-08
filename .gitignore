@@ -24,7 +24,9 @@ next-env.d.ts
 *.db-shm
 *.db-wal
 /data
+# stockage de l'hebergeur video local (et son ancien emplacement)
 /uploads
+/videos
 
 # secrets
 .env

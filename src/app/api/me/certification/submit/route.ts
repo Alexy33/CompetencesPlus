@@ -12,7 +12,7 @@ export const { POST } = defineRoute({
   tags: ["Certification"],
   summary: "Valider le questionnaire et calculer le score",
   description:
-    "Cloture la tentative. Au-dessus du seuil, le badge JEB apparait sur le profil public. En dessous, une certification deja acquise n'est pas retiree.",
+    "Cloture la tentative. Au-dessus du seuil, l'évaluation validée apparait sur le profil public. En dessous, une validation déjà acquise n'est pas retirée.",
   access: "candidate",
   responses: {
     "200": { description: "Score calcule.", schema: CertificationResultSchema },
@@ -24,7 +24,7 @@ export const { POST } = defineRoute({
       session.user.id,
       "certification",
       result.passed
-        ? `Certification obtenue avec un score de ${result.score}/100. Le badge JEB est affiche sur votre profil.`
+        ? `Badge de certification obtenu avec un score de ${result.score}/100. Le badge est affiché sur votre profil.`
         : `Score de ${result.score}/100, en dessous du seuil de ${result.threshold}. Vous pouvez repasser le questionnaire sans delai.`,
     );
     return result;

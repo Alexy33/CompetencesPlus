@@ -41,11 +41,16 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --prefer-offline --no-audit --no-fund
       - name: Type check
         run: npm run typecheck
       - name: Apply database migrations
         run: npm run db:migrate
+      # Le seed genere une video de demonstration par profil via ffmpeg
+      # (drawtext). Sans l'outil, l'echec est avale silencieusement et se
+      # manifeste seulement plus tard, a l'etape "Verify demo data in bundle".
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
       - name: Seed demonstration data
         run: npm run db:seed
       - name: Build
@@ -70,9 +75,10 @@ jobs:
           cp -r public .next/standalone/public
           cp -r drizzle .next/standalone/drizzle
           cp ci.db .next/standalone/ci.db
-          # Les videos de demonstration sont servies depuis le disque : sans ce
-          # dossier, les fiches publiques s'ouvrent sans lecteur.
-          cp -r uploads .next/standalone/uploads
+          # Les videos de demonstration vivent HORS du repertoire web, dans le
+          # stockage de l'hebergeur local : sans ce dossier, les fiches
+          # publiques s'ouvrent sans lecteur.
+          cp -r videos .next/standalone/videos
       # Garde-fou : un artefact qui s'ouvre sur une base vide donne une
       # demonstration ou aucune connexion ne marche. On le detecte ici, pas
       # devant la camera.
@@ -90,7 +96,7 @@ jobs:
             process.exit(1);
           }
           "
-          videos=$(ls .next/standalone/uploads/*.mp4 2>/dev/null | wc -l)
+          videos=$(find .next/standalone/videos -name '*.mp4' 2>/dev/null | wc -l)
           echo "videos: $videos"
           if [ "$videos" -lt 5 ]; then
             echo "::error::Videos de demonstration manquantes dans l artefact"
@@ -116,7 +122,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --prefer-offline --no-audit --no-fund
       - name: Apply database migrations
         run: npm run db:migrate
       - name: Run unit tests

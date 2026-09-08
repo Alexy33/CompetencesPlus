@@ -15,6 +15,69 @@
       "when": 1788252777689,
       "tag": "0001_far_shiva",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1788439757902,
+      "tag": "0002_stale_post",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1788460664261,
+      "tag": "0003_red_moonstone",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1788500906238,
+      "tag": "0004_chief_black_queen",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1788502846681,
+      "tag": "0005_solid_sinister_six",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1788511073008,
+      "tag": "0006_small_killmonger",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1788769299852,
+      "tag": "0007_wise_doctor_doom",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1788769300852,
+      "tag": "0008_answers_option_id",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1788769301852,
+      "tag": "0009_attempt_catch_up",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1788800000000,
+      "tag": "0010_opaque_video_reference",
+      "breakpoints": true
     }
   ]
 }

@@ -1,15 +1,9 @@
 import { and, desc, eq, inArray, isNotNull, like, or, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { profile, profileSkill, user } from "@/db/schema";
-import type { City, ProfileStatus, Sector, Skill } from "@/lib/vocabulary";
-
-/**
- * Lecture des profils : catalogue, fiche publique, profil du titulaire.
- *
- * Tout ce qui sort de ce module est deja au format servi par l'API (dates en
- * ISO, competences resolues) : les handlers de route n'ont plus qu'a le
- * renvoyer, et deux routes qui exposent un profil ne peuvent pas diverger.
- */
+import type { City, ProfileStatus, Sector, Skill, VideoStatus } from "@/lib/vocabulary";
+import { MAJORITY_AGE, isMinor } from "@/lib/age";
+import { NO_VIDEO, describeVideo, type VideoView } from "@/server/video/presentation";
 
 type ProfileRow = typeof profile.$inferSelect;
 
@@ -23,19 +17,53 @@ export interface ProfileCard {
   skills: Skill[];
   certified: boolean;
   score: number | null;
-  views: number;
 }
 
 export interface FullProfile extends ProfileCard {
   bio: string;
-  videoUrl: string | null;
+  /**
+   * Etat de la video tel qu'il doit s'afficher. Ni chemin, ni nom de fichier :
+   * l'hebergeur a deja ete interroge (cf. `src/server/video/presentation.ts`).
+   */
+  video: VideoView;
   status: ProfileStatus;
-  contactCount: number;
   certifiedAt: string | null;
   createdAt: string;
 }
 
-/** « Sonia Delaunay-Frey » -> « SD ». Calcule ici pour que le front n'ait rien a deviner. */
+export interface VideoModerationView {
+  status: VideoStatus;
+  reason: string | null;
+
+  decidedBy: string | null;
+  decidedAt: string | null;
+}
+
+export interface VideoConsentView {
+  granted: boolean;
+  grantedAt: string | null;
+  version: string | null;
+  revokedAt: string | null;
+}
+
+/**
+ * Ce que le seul titulaire voit de son profil.
+ *
+ * `views` et `contactCount` sont des compteurs d'engagement : ils restent en
+ * base et restent visibles de la personne concernee, mais ne sortent plus ni
+ * sur la fiche publique, ni pour un recruteur, ni dans une reponse d'API
+ * (instruction du cabinet, 7 septembre : « vous gardez la donnee en base, vous
+ * coupez toutes les sorties »).
+ */
+export interface OwnProfile extends FullProfile {
+  contactCount: number;
+  views: number;
+
+  videoConsent: VideoConsentView;
+
+  videoModeration: VideoModerationView;
+}
+
 export function initialsOf(name: string): string {
   return name
     .split(/[\s-]+/)
@@ -46,12 +74,6 @@ export function initialsOf(name: string): string {
     .toUpperCase();
 }
 
-/**
- * Construit une carte de profil.
- *
- * Exportee parce que les favoris et le suivi recruteur embarquent la meme carte
- * que le catalogue : trois routes, une seule forme, une seule definition.
- */
 export function toCard(row: ProfileRow, name: string, skills: Skill[]): ProfileCard {
   return {
     id: row.id,
@@ -63,23 +85,39 @@ export function toCard(row: ProfileRow, name: string, skills: Skill[]): ProfileC
     skills,
     certified: row.certifiedAt !== null,
     score: row.score,
-    views: row.views,
   };
 }
 
-function toFull(row: ProfileRow, name: string, skills: Skill[]): FullProfile {
+/**
+ * Une video n'est montree au public que si la moderation l'a validee et que
+ * son titulaire est majeur. Le titulaire et l'administration la voient dans
+ * tous les cas.
+ */
+export function videoIsVisibleTo(
+  row: Pick<ProfileRow, "videoStatus">,
+  birthDate: string | null,
+  viewer: ProfileViewer,
+): boolean {
+  const privileged = viewer === "owner" || viewer === "admin";
+  return privileged || (!isMinor(birthDate) && row.videoStatus === "approved");
+}
+
+function toFull(
+  row: ProfileRow,
+  name: string,
+  skills: Skill[],
+  video: VideoView,
+): FullProfile {
   return {
     ...toCard(row, name, skills),
     bio: row.bio,
-    videoUrl: row.videoUrl,
+    video,
     status: row.status,
-    contactCount: row.contactCount,
     certifiedAt: row.certifiedAt?.toISOString() ?? null,
     createdAt: row.createdAt.toISOString(),
   };
 }
 
-/** Competences de plusieurs profils en une requete, pour eviter le N+1. */
 export async function skillsByProfile(ids: string[]): Promise<Map<string, Skill[]>> {
   const out = new Map<string, Skill[]>();
   if (ids.length === 0) return out;
@@ -98,9 +136,29 @@ export async function skillsByProfile(ids: string[]): Promise<Map<string, Skill[
   return out;
 }
 
-/* --------------------------------------------------------------------------
- * Catalogue
- * ----------------------------------------------------------------------- */
+export type CatalogViewer = "public" | "recruiter" | "admin";
+
+export type ProfileViewer = CatalogViewer | "owner";
+
+export type SessionLike = { user: { id: string; role?: string | null } };
+
+const OWNER_OF = (userId: string): SessionLike => ({ user: { id: userId, role: "candidate" } });
+
+export function viewerOf(
+  session: SessionLike | null | undefined,
+  ownerId?: string,
+): ProfileViewer {
+  if (!session) return "public";
+  if (session.user.role === "admin") return "admin";
+  if (ownerId && session.user.id === ownerId) return "owner";
+  if (session.user.role === "recruiter") return "recruiter";
+  return "public";
+}
+
+export function catalogViewerOf(session: SessionLike | null | undefined): CatalogViewer {
+  const viewer = viewerOf(session);
+  return viewer === "owner" ? "public" : viewer;
+}
 
 export interface CatalogFilters {
   q?: string;
@@ -110,6 +168,8 @@ export interface CatalogFilters {
   skills?: Skill[];
   page: number;
   pageSize: number;
+
+  viewer?: CatalogViewer;
 }
 
 export interface CatalogResult {
@@ -120,14 +180,19 @@ export interface CatalogResult {
 export async function searchCatalog(filters: CatalogFilters): Promise<CatalogResult> {
   const conditions = [eq(profile.status, "published")];
 
+  if ((filters.viewer ?? "public") === "public") {
+    conditions.push(
+      sql`(${user.birthDate} IS NULL OR ${user.birthDate} <= date('now', '-${sql.raw(String(MAJORITY_AGE))} years'))`,
+    );
+  }
+
   if (filters.sector) conditions.push(eq(profile.sector, filters.sector));
   if (filters.city) conditions.push(eq(profile.city, filters.city));
   if (filters.certified) conditions.push(isNotNull(profile.certifiedAt));
 
   if (filters.q) {
     const needle = `%${filters.q.toLowerCase()}%`;
-    // La recherche libre couvre aussi les competences, d'ou le EXISTS : elles
-    // vivent dans une table separee et ne peuvent pas etre filtrees par LIKE.
+
     const matchesSkill = sql`EXISTS (
       SELECT 1 FROM ${profileSkill}
       WHERE ${profileSkill.profileId} = ${profile.id}
@@ -135,7 +200,6 @@ export async function searchCatalog(filters: CatalogFilters): Promise<CatalogRes
     )`;
     conditions.push(
       or(
-        like(sql`lower(${user.name})`, needle),
         like(sql`lower(${profile.title})`, needle),
         like(sql`lower(${profile.sector})`, needle),
         like(sql`lower(${profile.city})`, needle),
@@ -145,9 +209,7 @@ export async function searchCatalog(filters: CatalogFilters): Promise<CatalogRes
   }
 
   if (filters.skills?.length) {
-    // « possede TOUTES les competences demandees » : on compte les competences
-    // distinctes trouvees et on exige qu'elles soient aussi nombreuses que
-    // celles demandees. Un IN simple donnerait « au moins une ».
+
     const wanted = filters.skills;
     const owning = db
       .select({ id: profileSkill.profileId })
@@ -175,9 +237,7 @@ export async function searchCatalog(filters: CatalogFilters): Promise<CatalogRes
     .from(profile)
     .innerJoin(user, eq(user.id, profile.userId))
     .where(where)
-    // Certifies d'abord, puis les mieux notes : le catalogue met en avant ce
-    // que le dispositif certifie, ce qui est tout son objet.
-    .orderBy(desc(profile.certifiedAt), desc(profile.score), desc(profile.views))
+    .orderBy(desc(profile.certifiedAt), desc(profile.score), desc(profile.createdAt))
     .limit(pageSize)
     .offset((page - 1) * pageSize);
 
@@ -189,32 +249,80 @@ export async function searchCatalog(filters: CatalogFilters): Promise<CatalogRes
   };
 }
 
-/* --------------------------------------------------------------------------
- * Fiches
- * ----------------------------------------------------------------------- */
-
-async function findOne(where: ReturnType<typeof eq>): Promise<FullProfile | null> {
+async function findOne(
+  where: ReturnType<typeof eq>,
+  session?: SessionLike,
+): Promise<OwnProfile | null> {
   const [row] = await db
-    .select({ profile, name: user.name })
+    .select({ profile, name: user.name, birthDate: user.birthDate })
     .from(profile)
     .innerJoin(user, eq(user.id, profile.userId))
     .where(where)
     .limit(1);
 
   if (!row) return null;
+
+  const viewer = viewerOf(session, row.profile.userId);
   const skills = await skillsByProfile([row.profile.id]);
-  return toFull(row.profile, row.name, skills.get(row.profile.id) ?? []);
+
+  const decidedBy = row.profile.videoReviewedBy
+    ? ((
+        await db
+          .select({ name: user.name })
+          .from(user)
+          .where(eq(user.id, row.profile.videoReviewedBy))
+          .limit(1)
+      )[0]?.name ?? null)
+    : null;
+
+  // Interroger l'hebergeur ne peut pas faire echouer la fiche : `describeVideo`
+  // ne jette jamais, il rend au pire un etat « indisponible ».
+  const video = videoIsVisibleTo(row.profile, row.birthDate, viewer)
+    ? await describeVideo(row.profile)
+    : NO_VIDEO;
+
+  return {
+    ...toFull(row.profile, row.name, skills.get(row.profile.id) ?? [], video),
+    contactCount: row.profile.contactCount,
+    views: row.profile.views,
+    videoConsent: {
+      granted: row.profile.videoConsentGranted,
+      grantedAt: row.profile.videoConsentAt?.toISOString() ?? null,
+      version: row.profile.videoConsentVersion,
+      revokedAt: row.profile.videoConsentRevokedAt?.toISOString() ?? null,
+    },
+    videoModeration: {
+      status: row.profile.videoStatus,
+      reason: row.profile.videoReviewReason,
+      decidedBy,
+      decidedAt: row.profile.videoReviewedAt?.toISOString() ?? null,
+    },
+  };
 }
 
-export function findProfileById(id: string) {
-  return findOne(eq(profile.id, id));
+export async function findProfileById(
+  id: string,
+  session?: SessionLike,
+): Promise<FullProfile | null> {
+  const found = await findOne(eq(profile.id, id), session);
+  if (!found) return null;
+  // Tout ce qui ne regarde que le titulaire est retire ici, compteurs
+  // d'engagement compris : `views` et `contactCount` restent en base, mais ne
+  // sortent ni pour le public, ni pour un recruteur.
+  const {
+    views: _views,
+    contactCount: _contacts,
+    videoConsent: _consent,
+    videoModeration: _moderation,
+    ...pub
+  } = found;
+  return pub;
 }
 
-export function findProfileByUserId(userId: string) {
-  return findOne(eq(profile.userId, userId));
+export function findProfileByUserId(userId: string, session?: SessionLike): Promise<OwnProfile | null> {
+  return findOne(eq(profile.userId, userId), session ?? OWNER_OF(userId));
 }
 
-/** Incremente le compteur de vues. Volontairement sans await bloquant l'appelant. */
 export async function recordProfileView(id: string): Promise<void> {
   await db
     .update(profile)
@@ -222,7 +330,6 @@ export async function recordProfileView(id: string): Promise<void> {
     .where(eq(profile.id, id));
 }
 
-/** Remplace l'integralite des competences d'un profil. */
 export async function replaceSkills(profileId: string, skills: Skill[]): Promise<void> {
   await db.delete(profileSkill).where(eq(profileSkill.profileId, profileId));
   if (skills.length === 0) return;

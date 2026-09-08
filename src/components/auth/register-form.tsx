@@ -1,136 +1,109 @@
 "use client";
 
-import { FormEvent, useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { FormAlert } from "@/components/common/feedback";
+import { MINIMUM_AGE, latestAllowedBirthDate } from "@/lib/age";
+import { AuthField, AuthSubmit, AuthSwitch } from "./auth-form-parts";
+import { CompanyFieldset } from "./register/company-fieldset";
+import { MinorApplicantNotice } from "./register/minor-notice";
+import { RoleSelector } from "./register/role-selector";
+import { useRegistration } from "./register/use-registration";
 
-import { authClient } from "@/lib/auth-client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+const MIN_PASSWORD_LENGTH = 8;
 
 export function RegisterForm() {
-  const router = useRouter();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    setError("");
-    setLoading(true);
-
-    try {
-      const result = await authClient.signUp.email({ name, email, password });
-
-      if (result.error) {
-        setError(result.error.message ?? "Impossible de créer le compte.");
-        setLoading(false);
-        return;
-      }
-
-      router.push("/candidate");
-      router.refresh();
-    } catch {
-      setError("Une erreur inattendue est survenue. Réessayez.");
-      setLoading(false);
-    }
-  }
+  const form = useRegistration();
+  const { role, loading } = form;
 
   return (
     <div className="grid gap-6">
-      <form onSubmit={handleSubmit} className="grid gap-5">
-        {error ? (
-          <div
-            role="alert"
-            className="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-base text-destructive"
-          >
-            <AlertCircle aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
-            <p>{error}</p>
-          </div>
+      <form onSubmit={form.handleSubmit} className="grid gap-5">
+        <FormAlert>{form.error}</FormAlert>
+
+        <RoleSelector value={role} disabled={loading} onChange={form.setRole} />
+
+        <AuthField
+          id="name"
+          label="Nom complet"
+          type="text"
+          value={form.name}
+          onChange={(event) => form.setName(event.target.value)}
+          placeholder="Jean Dupont"
+          autoCapitalize="words"
+          autoComplete="name"
+          autoCorrect="off"
+          disabled={loading}
+          required
+        />
+
+        <AuthField
+          id="email"
+          label="Adresse e-mail"
+          type="email"
+          value={form.email}
+          onChange={(event) => form.setEmail(event.target.value)}
+          placeholder={role === "recruiter" ? "jean.dupont@entreprise.fr" : "jean@exemple.fr"}
+          autoCapitalize="none"
+          autoComplete="email"
+          autoCorrect="off"
+          disabled={loading}
+          required
+        />
+
+        <AuthField
+          id="birthDate"
+          label="Date de naissance"
+          type="date"
+          value={form.birthDate}
+          onChange={(event) => form.setBirthDate(event.target.value)}
+          max={latestAllowedBirthDate()}
+          autoComplete="bday"
+          disabled={loading}
+          required
+          aria-describedby="birthDate-help"
+          aria-invalid={form.tooYoung || undefined}
+          hint={`L'inscription est réservée aux personnes de ${MINIMUM_AGE} ans et plus.`}
+          error={
+            form.tooYoung
+              ? `Vous devez avoir au moins ${MINIMUM_AGE} ans pour créer un compte sur ProfilsActifs.`
+              : null
+          }
+        >
+          {form.isMinorApplicant && role === "candidate" ? <MinorApplicantNotice /> : null}
+        </AuthField>
+
+        <AuthField
+          id="password"
+          label="Mot de passe"
+          type="password"
+          value={form.password}
+          onChange={(event) => form.setPassword(event.target.value)}
+          placeholder={`${MIN_PASSWORD_LENGTH} caractères minimum`}
+          autoComplete="new-password"
+          minLength={MIN_PASSWORD_LENGTH}
+          disabled={loading}
+          required
+          hint={`Doit contenir au moins ${MIN_PASSWORD_LENGTH} caractères.`}
+        />
+
+        {role === "recruiter" ? (
+          <CompanyFieldset
+            company={form.company}
+            loading={loading}
+            sirenInvalid={form.sirenInvalid}
+            onChange={form.setCompanyField}
+          />
         ) : null}
 
-        <div className="grid gap-2">
-          <Label htmlFor="name" className="text-sm text-[#2d3748]">Nom complet</Label>
-
-          <Input
-            id="name"
-            type="text"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            placeholder="Jean Dupont"
-            autoCapitalize="words"
-            autoComplete="name"
-            autoCorrect="off"
-            disabled={loading}
-            required
-            className="h-11 rounded-xl border-0 bg-[#ebf0f7] px-3.5 text-base shadow-[inset_4px_4px_8px_#c5d1e0,inset_-4px_-4px_8px_#ffffff] placeholder:text-[#718096] focus-visible:border-0 focus-visible:ring-2 focus-visible:ring-[#1B3A6B]/30 md:text-base"
-          />
-        </div>
-
-        <div className="grid gap-2">
-          <Label htmlFor="email" className="text-sm text-[#2d3748]">Adresse e-mail</Label>
-
-          <Input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="jean@exemple.fr"
-            autoCapitalize="none"
-            autoComplete="email"
-            autoCorrect="off"
-            disabled={loading}
-            required
-            className="h-11 rounded-xl border-0 bg-[#ebf0f7] px-3.5 text-base shadow-[inset_4px_4px_8px_#c5d1e0,inset_-4px_-4px_8px_#ffffff] placeholder:text-[#718096] focus-visible:border-0 focus-visible:ring-2 focus-visible:ring-[#1B3A6B]/30 md:text-base"
-          />
-        </div>
-
-        <div className="grid gap-2">
-          <Label htmlFor="password" className="text-sm text-[#2d3748]">Mot de passe</Label>
-
-          <Input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            placeholder="8 caractères minimum"
-            autoComplete="new-password"
-            minLength={8}
-            disabled={loading}
-            required
-            className="h-11 rounded-xl border-0 bg-[#ebf0f7] px-3.5 text-base shadow-[inset_4px_4px_8px_#c5d1e0,inset_-4px_-4px_8px_#ffffff] placeholder:text-[#718096] focus-visible:border-0 focus-visible:ring-2 focus-visible:ring-[#1B3A6B]/30 md:text-base"
-          />
-          <p className="text-sm text-[#718096]">
-            Doit contenir au moins 8 caractères.
-          </p>
-        </div>
-
-        <Button
-          type="submit"
-          size="lg"
-          disabled={loading}
-          className="mt-1 h-11 w-full rounded-xl bg-[#1B3A6B] text-base text-white shadow-[6px_6px_12px_#c5d1e0,-6px_-6px_12px_#ffffff] hover:bg-[#273D4F] hover:shadow-[inset_3px_3px_6px_#273D4F,inset_-3px_-3px_6px_#4A6B8A]"
-        >
-          {loading ? (
-            <Loader2 aria-hidden="true" className="animate-spin" />
-          ) : null}
-          {loading ? "Création du compte..." : "Créer le compte"}
-        </Button>
+        <AuthSubmit loading={loading} disabled={form.tooYoung}>
+          {loading
+            ? "Création du compte..."
+            : role === "recruiter"
+              ? "Créer le compte recruteur"
+              : "Créer le compte"}
+        </AuthSubmit>
       </form>
-      <p className="text-center text-base text-[#718096]">
-        Vous avez déjà un compte ?{" "}
-        <Link
-          href="/login"
-          className="font-medium text-[#273D4F] underline underline-offset-4 transition-colors hover:text-[#1B3A6B]"
-        >
-          Se connecter
-        </Link>
-      </p>
+
+      <AuthSwitch prompt="Vous avez déjà un compte ?" href="/login" label="Se connecter" />
     </div>
   );
 }

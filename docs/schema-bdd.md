@@ -2,7 +2,8 @@
 
 > Modèle **logique**, cardinalités et index.
 > Il décrit ce que produisent les migrations `drizzle/0000_complex_shriek.sql`
-> et `drizzle/0001_far_shiva.sql`, pas des intentions. Toute divergence entre
+> `drizzle/0001_far_shiva.sql` et `drizzle/0002_stale_post.sql`, pas des
+> intentions. Toute divergence entre
 > ce document et `src/db/schema.ts` est un bug de l'un des deux.
 
 - **SGBD** : SQLite (fichier unique, `DATABASE_URL=file:…`).
@@ -71,7 +72,7 @@ primaire composite :
 ### 2.1 Socle d'authentification (better-auth)
 
 Noms et colonnes **imposés** par l'adaptateur Drizzle de better-auth : ne rien
-renommer. `user.role` est le seul ajout maison.
+renommer. `user.role` et `user.birth_date` sont les seuls ajouts maison.
 
 #### `user`
 
@@ -83,8 +84,20 @@ renommer. `user.role` est le seul ajout maison.
 | `email_verified` | booléen | NOT NULL | `false` |
 | `image` | text | NULL | — |
 | `role` | text (`candidate` \| `recruiter` \| `admin`) | NOT NULL | `'candidate'` |
+| `birth_date` | text (`AAAA-MM-JJ`) | NULL | — |
 | `created_at` | timestamp | NOT NULL | `unixepoch()` |
 | `updated_at` | timestamp | NOT NULL | `unixepoch()` |
+
+**`birth_date`** — date de naissance déclarative, exigée à l'inscription
+(vérification de l'âge, R.1). Stockée en **texte** et non en timestamp : c'est
+une date civile, sans heure ni fuseau ; un timestamp la décalerait d'un jour
+selon le fuseau du serveur, ce qui change l'âge la veille d'un anniversaire.
+
+La colonne est **nullable**, et c'est délibéré : les comptes créés avant cette
+exigence n'en portent pas. Toute inscription *nouvelle* la renseigne
+obligatoirement — le contrôle vit dans `src/lib/auth.ts` et non dans le seul
+formulaire, donc un appel direct à l'API ne le contourne pas. Voir
+`docs/verification-age.md` pour le traitement des comptes antérieurs.
 
 #### `session`
 
@@ -135,13 +148,31 @@ renommer. `user.role` est le seul ajout maison.
 | `sector` | text (7 secteurs) | NOT NULL | — |
 | `city` | text (8 villes) | NOT NULL | — |
 | `bio` | text | NOT NULL | `''` |
-| `video_url` | text | NULL | — URL YouTube/Vimeo, jamais un fichier |
+| `video_id` | text | NULL, index `profile_video_id_idx` | — identifiant **opaque** rendu par l'hebergeur, jamais un chemin |
+| `video_provider` | text (`local` \| `peertube` \| `embed`) | NULL | — qui sait lire cet identifiant |
 | `status` | text (`pending` \| `published` \| `removed`) | NOT NULL | `'pending'` |
 | `score` | integer | NULL | — dernier score de certification obtenu |
-| `certified_at` | timestamp | NULL | — fait foi pour le badge JEB |
-| `views` | integer | NOT NULL | `0` — compteur dénormalisé |
+| `certified_at` | timestamp | NULL | — fait foi pour l’évaluation validée |
+| `views` | integer | NOT NULL | `0` — compteur dénormalisé, **privé** (voir ci-dessous) |
 | `contact_count` | integer | NOT NULL | `0` — compteur dénormalisé |
+| `video_consent_granted` | integer (booleen) | NOT NULL | `false` — accord en cours |
+| `video_consent_at` | timestamp | NULL | — date de l'accord, conservee apres un retrait |
+| `video_consent_version` | text | NULL | — version du texte acceptee |
+| `video_consent_revoked_at` | timestamp | NULL | — date du retrait |
 | `created_at` / `updated_at` | timestamp | NOT NULL | `unixepoch()` |
+
+Les quatre colonnes `video_consent_*` forment le registre de consentement a la
+diffusion video (R.3) : un booleen seul ne permettrait pas d'etablir *ce qui* a
+ete accepte ni *quand*. Le retrait remet `granted` a false, date `revoked_at` et
+declenche la suppression physique du fichier ; `at` et `version` survivent, comme
+trace. Voir `docs/consentement-video.md`.
+
+`views` est tenu en base et incrémenté à chaque consultation, mais ne sort pas
+du serveur : il figure dans le seul schéma `MyProfile` et ne s'affiche que dans
+l'espace du titulaire. Ni `Profile`, ni `ProfileCard`, ni un export, ni une vue
+recruteur ne le portent, et le catalogue ne s'en sert pas pour trier — on ne
+classe pas des personnes par audience. Toute mesure d'audience ajoutée plus tard
+(compteur de « j'aime » compris) suit la même règle.
 
 #### `profile_skill` — compétences d'un profil
 

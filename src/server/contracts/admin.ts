@@ -1,9 +1,10 @@
 import { z } from "zod";
 import { named } from "../openapi/schemas";
 import { MAX_PAGE_SIZE } from "@/lib/vocabulary";
-import { ProfileStatusSchema } from "./common";
+import { ProfileStatusSchema, VideoStatusSchema } from "./common";
+import { VideoViewSchema } from "./profile";
+import { QuestionTypeSchema } from "./questionnaire";
 
-/** Tableau de bord global du dispositif (CDC 2.1). */
 export const AdminStatsSchema = named(
   "AdminStats",
   z.object({
@@ -19,14 +20,15 @@ export const AdminStatsSchema = named(
   }),
 );
 
-/** Ligne de la file de moderation. */
 export const ModerationRowSchema = named(
   "ModerationRow",
   z.object({
     id: z.string(),
     name: z.string(),
     title: z.string(),
-    videoUrl: z.string().nullable(),
+    hasVideo: z.boolean().meta({
+      description: "Le profil porte une reference video. L'adresse de lecture n'est pas exposee ici.",
+    }),
     status: ProfileStatusSchema,
     createdAt: z.iso.datetime(),
   }),
@@ -39,7 +41,38 @@ export const ModerateProfileBody = named(
   }),
 );
 
-/* --- Gestion des questions ----------------------------------------------- */
+export const VideoModerationRowSchema = named(
+  "VideoModerationRow",
+  z.object({
+    profileId: z.string(),
+    name: z.string().meta({ description: "Titulaire de la video." }),
+    title: z.string(),
+    video: VideoViewSchema,
+    profileStatus: ProfileStatusSchema,
+    videoStatus: VideoStatusSchema,
+    reason: z.string().nullable(),
+    decidedBy: z.string().nullable().meta({ description: "Nom de l'administrateur decideur." }),
+    decidedAt: z.iso.datetime().nullable(),
+    submittedAt: z.iso.datetime().meta({ description: "Derniere modification du profil." }),
+  }),
+);
+
+export const DecideVideoBody = named(
+  "DecideVideoInput",
+  z
+    .object({
+      decision: z.enum(["approved", "rejected"]),
+      reason: z.string().trim().min(1).max(500).optional(),
+    })
+    .refine((body) => body.decision !== "rejected" || !!body.reason, {
+      path: ["reason"],
+      message: "Motif obligatoire pour un refus : il est communique au candidat.",
+    })
+    .refine((body) => body.decision !== "approved" || !body.reason, {
+      path: ["reason"],
+      message: "Une validation ne porte pas de motif.",
+    }),
+);
 
 const OptionInput = z.object({
   label: z.string().trim().min(1).max(300),
@@ -59,6 +92,41 @@ export const CreateQuestionBody = named(
   }),
 );
 
+export const PublishQuestionnaireBody = named(
+  "PublishQuestionnaireInput",
+  z.object({
+    questions: z
+      .array(
+        z.object({
+          id: z.string().trim().min(1).max(64),
+          text: z.string().trim().min(1).max(500),
+          type: QuestionTypeSchema,
+          weight: z.number().int().min(1).max(5),
+          options: z
+            .array(
+              z.object({
+                id: z.string().trim().min(1).max(64),
+                label: z.string().trim().min(1).max(300),
+                value: z
+                  .number()
+                  .int()
+                  .min(0)
+                  .meta({ description: "Points rapportes par cette reponse." }),
+              }),
+            )
+            .min(2)
+            .max(6),
+        }),
+      )
+      .min(1)
+      .meta({
+        description:
+          "Questionnaire complet. Il est publie comme NOUVELLE version : les versions " +
+          "existantes ne sont jamais modifiees, et les tentatives en cours conservent la leur.",
+      }),
+  }),
+);
+
 export const UpdateQuestionBody = named(
   "UpdateQuestionInput",
   z.object({
@@ -70,15 +138,13 @@ export const UpdateQuestionBody = named(
   }),
 );
 
-/* --- Reglages ------------------------------------------------------------ */
-
 export const SettingsSchema = named(
   "Settings",
   z.object({
     certificationThreshold: z
       .number()
       .int()
-      .meta({ description: "Score minimal, sur 100, pour delivrer le badge JEB." }),
+      .meta({ description: "Score minimal, sur 100, pour valider l'évaluation." }),
     catalogPageSize: z
       .number()
       .int()
@@ -91,5 +157,67 @@ export const UpdateSettingsBody = named(
   z.object({
     certificationThreshold: z.number().int().min(0).max(100).optional(),
     catalogPageSize: z.number().int().min(1).max(MAX_PAGE_SIZE).optional(),
+  }),
+);
+
+export const RetentionPolicySchema = named(
+  "RetentionPolicy",
+  z.object({
+    accountInactivityMonths: z.number().int().meta({
+      description:
+        "Mois d'inactivite au terme desquels un compte non administrateur est supprime, avec profil, entreprise, favoris et contacts.",
+    }),
+    sessionLogMonths: z.number().int().meta({
+      description: "Mois de conservation du journal de connexion (table session : IP, user agent).",
+    }),
+    verificationGraceDays: z
+      .number()
+      .int()
+      .meta({ description: "Jours de conservation d'un jeton apres son expiration." }),
+    contactMonths: z.number().int().meta({
+      description: "Mois de conservation d'une prise de contact, depuis son dernier changement.",
+    }),
+    favoriteMonths: z.number().int().meta({ description: "Mois de conservation d'un favori." }),
+    notificationMonths: z
+      .number()
+      .int()
+      .meta({ description: "Mois de conservation d'une notification, lue ou non." }),
+    submittedAttemptMonths: z
+      .number()
+      .int()
+      .meta({ description: "Mois de conservation d'une tentative de certification soumise." }),
+    abandonedAttemptDays: z
+      .number()
+      .int()
+      .meta({ description: "Jours au bout desquels une tentative jamais soumise est effacee." }),
+    rejectedVideoDays: z.number().int().meta({
+      description: "Jours de conservation du fichier d'une video refusee, apres la decision.",
+    }),
+    revokedConsentMonths: z
+      .number()
+      .int()
+      .meta({ description: "Mois de conservation de la trace d'un consentement retire." }),
+    pingDays: z.number().int().meta({ description: "Jours de conservation de la table ping." }),
+  }),
+);
+
+export const RetentionReportSchema = named(
+  "RetentionReport",
+  z.object({
+    ranAt: z.string().meta({ description: "Horodatage ISO 8601 de l'execution." }),
+    deleted: z
+      .object({
+        accounts: z.number().int(),
+        sessions: z.number().int(),
+        verifications: z.number().int(),
+        contacts: z.number().int(),
+        favorites: z.number().int(),
+        notifications: z.number().int(),
+        attempts: z.number().int(),
+        videos: z.number().int(),
+        consentTraces: z.number().int(),
+        pings: z.number().int(),
+      })
+      .meta({ description: "Lignes reellement supprimees, par traitement du registre." }),
   }),
 );

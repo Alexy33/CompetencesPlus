@@ -5,14 +5,13 @@ import { named } from "@/server/openapi/schemas";
 import { defineRoute } from "@/server/openapi/routes";
 import { errorResponse } from "@/server/contracts/common";
 
-// Cible du HEALTHCHECK Docker. Doit etre dynamique : une route mise en cache
-// repondrait 200 meme base morte, ce qui rend le healthcheck inutile.
 export const dynamic = "force-dynamic";
 
 const HealthSchema = named(
   "Health",
   z.object({
     status: z.literal("ok"),
+    version: z.string().meta({ description: "Version deployee (depuis package.json)." }),
     db: z.literal("up"),
     ts: z.iso.datetime(),
   }),
@@ -30,11 +29,10 @@ export const { GET } = defineRoute({
   },
   handler: () => {
     try {
-      // Requete la moins chere qui prouve que le fichier SQLite est bien ouvert.
+
       db.get(sql`SELECT 1`);
     } catch (error) {
-      // 503 et non 500 : la sonde doit dire « indisponible, reessayez », c'est
-      // ce que la politique de redemarrage de Docker attend.
+
       return Response.json(
         {
           error: {
@@ -45,6 +43,12 @@ export const { GET } = defineRoute({
         { status: 503 },
       );
     }
-    return { status: "ok" as const, db: "up" as const, ts: new Date().toISOString() };
+    const version = process.env.npm_package_version || "unknown";
+    return {
+      status: "ok" as const,
+      version,
+      db: "up" as const,
+      ts: new Date().toISOString(),
+    };
   },
 });

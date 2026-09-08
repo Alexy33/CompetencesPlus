@@ -1,10 +1,5 @@
 import { expect, test } from "@playwright/test";
 
-/**
- * Verification de viabilite de la stack : chaque brique est testee a travers
- * l'application reellement servie, pas en isolation.
- */
-
 test("la sonde de sante confirme que SQLite repond", async ({ request }) => {
   const response = await request.get("/api/health");
   expect(response.ok()).toBe(true);
@@ -25,7 +20,6 @@ test("l'ecriture en base fonctionne depuis l'interface", async ({ page }) => {
 
   await page.getByRole("button", { name: "Ping la base" }).click();
 
-  // La page est re-rendue cote serveur : le compteur vient d'un COUNT(*).
   await expect(counter).toContainText(`${before + 1} ping`);
 });
 
@@ -50,8 +44,6 @@ test("better-auth ouvre une session qui survit a un rechargement", async ({ page
   const state = page.getByTestId("session-state");
   await expect(state).toContainText("e2e@exemple.fr");
 
-  // Le rechargement prouve que le cookie httpOnly est bien pose, et qu'il ne
-  // s'agit pas d'un simple etat React.
   await page.reload();
   await expect(page.getByTestId("session-state")).toContainText("e2e@exemple.fr");
 

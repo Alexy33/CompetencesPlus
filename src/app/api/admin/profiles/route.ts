@@ -38,7 +38,6 @@ export const { GET } = defineRoute({
       .from(profile)
       .innerJoin(user, eq(user.id, profile.userId))
       .where(query.status ? eq(profile.status, query.status) : undefined)
-      // Les profils en attente d'abord : c'est ce que l'ecran doit traiter.
       .orderBy(desc(profile.status), desc(profile.createdAt));
 
     return {
@@ -46,7 +45,7 @@ export const { GET } = defineRoute({
         id: row.profile.id,
         name: row.name,
         title: row.profile.title,
-        videoUrl: row.profile.videoUrl,
+        hasVideo: row.profile.videoId !== null,
         status: row.profile.status,
         createdAt: row.profile.createdAt.toISOString(),
       })),

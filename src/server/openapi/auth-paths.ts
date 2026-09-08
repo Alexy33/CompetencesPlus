@@ -1,13 +1,3 @@
-/**
- * Description des routes better-auth.
- *
- * Elles sont servies par le catch-all `/api/auth/[...all]` et ne passent donc
- * pas par `defineRoute` : c'est le seul endroit du depot ou une portion de
- * specification est ecrite a la main. La contrepartie est qu'elle peut deriver
- * si better-auth change — le test `openapi.test.ts` verifie au moins que les
- * chemins repondent.
- */
-
 const userResponse = {
   description: "Session ouverte. Le cookie httpOnly est pose sur la reponse.",
   content: {
@@ -35,7 +25,9 @@ export const authPaths: Record<string, Record<string, unknown>> = {
       summary: "Creer un compte",
       operationId: "authSignUpEmail",
       description:
-        "Un compte `candidate` cree aussi un profil vide, en attente de moderation. Un compte `recruiter` n'en cree pas.",
+        "Route better-auth brute : elle cree TOUJOURS un compte `candidate`, avec son profil vide en attente de moderation. " +
+        "Le role n'est pas un champ d'entree — personne ne se promeut recruteur ni administrateur par ici. " +
+        "Pour creer un compte recruteur, utiliser `POST /api/register`, qui exige la declaration de l'entreprise.",
       requestBody: {
         required: true,
         content: {

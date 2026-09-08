@@ -1,0 +1,81 @@
+"use client";
+
+import { useEffect, useRef, useState, useTransition } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+
+export interface UrlFilters {
+  query: string;
+  sector: string;
+  city: string;
+  certifiedOnly: boolean;
+  skills: string[];
+  hasAny: boolean;
+  pending: boolean;
+  draftQuery: string;
+  setDraftQuery: (value: string) => void;
+  setSingle: (key: string, value: string) => void;
+  toggleMulti: (key: string, value: string) => void;
+  reset: () => void;
+}
+
+export function useUrlFilters(): UrlFilters {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [pending, startTransition] = useTransition();
+  const latestParams = useRef(searchParams.toString());
+
+  const query = searchParams.get("q") ?? "";
+  const sector = searchParams.get("sector") ?? "";
+  const city = searchParams.get("city") ?? "";
+  const certifiedOnly = searchParams.get("certified") === "true";
+  const skills = searchParams.getAll("skills");
+
+  const [draftQuery, setDraftQuery] = useState(query);
+
+  useEffect(() => {
+    setDraftQuery(query);
+    latestParams.current = searchParams.toString();
+  }, [query, searchParams]);
+
+  function navigate(target: string) {
+    startTransition(() => router.push(target, { scroll: false }));
+  }
+
+  function apply(mutate: (params: URLSearchParams) => void) {
+    const params = new URLSearchParams(latestParams.current);
+    mutate(params);
+    params.delete("page");
+    latestParams.current = params.toString();
+    navigate(latestParams.current ? `${pathname}?${latestParams.current}` : pathname);
+  }
+
+  return {
+    query,
+    sector,
+    city,
+    certifiedOnly,
+    skills,
+    hasAny: Boolean(query || sector || city || certifiedOnly || skills.length),
+    pending,
+    draftQuery,
+    setDraftQuery,
+    setSingle: (key, value) =>
+      apply((params) => (value ? params.set(key, value) : params.delete(key))),
+    toggleMulti: (key, value) =>
+      apply((params) => {
+        const current = params.getAll(key);
+        const next = current.includes(value)
+          ? current.filter((item) => item !== value)
+          : [...current, value];
+
+        params.delete(key);
+        for (const item of next) params.append(key, item);
+      }),
+    reset: () => {
+      latestParams.current = "";
+      setDraftQuery("");
+      navigate(pathname);
+    },
+  };
+}

@@ -41,8 +41,6 @@ export const { PATCH } = defineRoute({
     const [updated] = await db
       .update(contact)
       .set({ status: body.status, updatedAt: now })
-      // Le filtre sur `recruiterId` fait aussi office de controle d'acces :
-      // le suivi d'un autre recruteur est introuvable, pas « interdit ».
       .where(and(eq(contact.id, params.id), eq(contact.recruiterId, session.user.id)))
       .returning();
 

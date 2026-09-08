@@ -5,15 +5,10 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, Loader2 } from "lucide-react";
 
 import { authClient } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
+import { DEMO_PASSWORD, type DemoAccount } from "@/components/landing/landing-content";
 
-interface DemoAccountCardProps {
-  role: string;
-  email: string;
-  color: string;
-  destination: "/candidate" | "/recruiter" | "/admin";
-}
-
-export function DemoAccountCard({ role, email, color, destination }: DemoAccountCardProps) {
+export function DemoAccountCard({ account }: { account: DemoAccount }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +16,11 @@ export function DemoAccountCard({ role, email, color, destination }: DemoAccount
   async function connect() {
     setLoading(true);
     setError(null);
-    const result = await authClient.signIn.email({ email, password: "demo1234" });
+
+    const result = await authClient.signIn.email({
+      email: account.email,
+      password: DEMO_PASSWORD,
+    });
 
     if (result.error) {
       setError("Connexion impossible. Vérifiez que la base de démonstration est initialisée.");
@@ -29,7 +28,7 @@ export function DemoAccountCard({ role, email, color, destination }: DemoAccount
       return;
     }
 
-    router.push(destination);
+    router.push(account.destination);
     router.refresh();
   }
 
@@ -38,15 +37,19 @@ export function DemoAccountCard({ role, email, color, destination }: DemoAccount
       type="button"
       onClick={connect}
       disabled={loading}
-      className="group rounded-2xl border border-[#1B3A6B]/15 bg-white p-5 text-left transition-colors hover:border-[#1B3A6B]/45 hover:bg-[#F5F9FE] disabled:cursor-wait disabled:opacity-70"
+      className="group rounded-2xl border border-brand/15 bg-white p-5 text-left transition-colors hover:border-brand/45 hover:bg-panel disabled:cursor-wait disabled:opacity-70"
     >
-      <span className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${color}`}>
-        {role}
+      <span
+        className={cn("inline-flex rounded-full px-3 py-1 text-xs font-bold", account.chipClassName)}
+      >
+        {account.role}
       </span>
-      <span className="mt-5 block break-all font-mono text-sm font-semibold text-[#2d3748]">
-        {email}
+
+      <span className="mt-5 block break-all font-mono text-sm font-semibold text-ink">
+        {account.email}
       </span>
-      <span className="mt-5 flex items-center gap-2 text-sm font-semibold text-[#1B3A6B] group-hover:text-[#273D4F]">
+
+      <span className="mt-5 flex items-center gap-2 text-sm font-semibold text-brand group-hover:text-brand-700">
         {loading ? (
           <>
             <Loader2 aria-hidden="true" className="size-4 animate-spin" />
@@ -54,12 +57,16 @@ export function DemoAccountCard({ role, email, color, destination }: DemoAccount
           </>
         ) : (
           <>
-            Ouvrir l&apos;espace {role.toLowerCase()}
-            <ArrowRight aria-hidden="true" className="size-4 transition-transform group-hover:translate-x-1" />
+            Ouvrir l&apos;espace {account.role.toLowerCase()}
+            <ArrowRight
+              aria-hidden="true"
+              className="size-4 transition-transform group-hover:translate-x-1"
+            />
           </>
         )}
       </span>
-      {error ? <span className="mt-3 block text-xs text-[#8a3f5b]">{error}</span> : null}
+
+      {error ? <span className="mt-3 block text-xs text-danger-fg">{error}</span> : null}
     </button>
   );
 }

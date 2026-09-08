@@ -1,11 +1,3 @@
-/**
- * Modele d'erreur unique de l'API.
- *
- * Toute reponse non-2xx sort d'ici, avec la meme forme JSON. Le front n'a donc
- * qu'un seul cas a coder, et la specification n'a qu'un seul schema d'erreur a
- * documenter (`ApiError`).
- */
-
 export type ApiErrorCode =
   | "bad_request"
   | "unauthorized"
@@ -13,7 +5,9 @@ export type ApiErrorCode =
   | "not_found"
   | "conflict"
   | "unprocessable"
-  | "internal";
+  | "internal"
+  /** Dependance externe muette (hebergeur video). Le dispositif, lui, repond. */
+  | "unavailable";
 
 const STATUS_BY_CODE: Record<ApiErrorCode, number> = {
   bad_request: 400,
@@ -23,20 +17,15 @@ const STATUS_BY_CODE: Record<ApiErrorCode, number> = {
   conflict: 409,
   unprocessable: 422,
   internal: 500,
+  unavailable: 503,
 };
 
-/** Detail de validation, aligne sur la forme des `issues` de Zod. */
 export interface ApiErrorDetail {
-  /** Chemin du champ fautif, ex. `body.title` ou `query.page`. */
+
   path: string;
   message: string;
 }
 
-/**
- * Erreur metier levee depuis un handler. Le wrapper de route la transforme en
- * reponse JSON : c'est le SEUL moyen de renvoyer une erreur, pour qu'aucune
- * route ne puisse inventer sa propre forme.
- */
 export class ApiError extends Error {
   readonly code: ApiErrorCode;
   readonly status: number;
@@ -77,5 +66,8 @@ export class ApiError extends Error {
   }
   static unprocessable(message: string, details?: ApiErrorDetail[]) {
     return new ApiError("unprocessable", message, details);
+  }
+  static unavailable(message: string) {
+    return new ApiError("unavailable", message);
   }
 }

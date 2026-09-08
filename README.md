@@ -1,11 +1,15 @@
 # ProfilsActifs — socle technique
 
-Demonstrateur pour le Ministere du Job et Bonheur (JEB/DNI/2026-003).
+Démonstrateur technique de valorisation des profils professionnels.
 
-Ce depot contient **le backend complet et sa documentation interactive**. Les
-ecrans restent a construire : l'API couvre deja le perimetre de la maquette
-fonctionnelle (catalogue, certification, espace recruteur, administration) et
-se decouvre sur [`/api/docs`](http://localhost:3000/api/docs).
+Le service s’appelle **ProfilsActifs**. Le questionnaire permet d’obtenir un
+**badge de certification**, accompagné d’un score sur 100 et visible sur le
+profil du candidat.
+
+Ce depot contient **le backend complet et sa documentation interactive**. L'API
+couvre le perimetre de la maquette fonctionnelle (catalogue, certification,
+espace recruteur, administration) et se decouvre sur
+[`/api/docs`](http://localhost:3000/api/docs).
 
 ## Stack
 
@@ -85,8 +89,6 @@ Elle n'est pas decorative : chaque ligne est verifiee a l'execution.
 - **SQLite + Drizzle** — les compteurs viennent de vrais `COUNT(*)`.
 - **better-auth** — le bouton ouvre une session ; elle survit a un F5, ce qui
   prouve que le cookie httpOnly est bien pose (et pas un simple etat React).
-- **Ecriture en base** — « Ping la base » insere une ligne et le compteur
-  augmente apres re-rendu serveur.
 - **Scalar** — la doc est servie sur `/api/docs`, lue depuis `/api/openapi`.
 
 ## L'API
@@ -99,7 +101,9 @@ Le catalogue des reponses d'erreur, avec les corps reels et des appels `curl`,
 est dans [`docs/api-erreurs.md`](docs/api-erreurs.md). Le schema de la base est
 dans [`docs/schema-bdd.md`](docs/schema-bdd.md). L'upload et la lecture des
 videos de presentation (routes binaires) sont dans
-[`docs/video.md`](docs/video.md).
+[`docs/video.md`](docs/video.md) ; le choix de l'hebergeur et ce qui changera le
+jour de l'instance PeerTube, dans
+[`docs/video-fournisseurs.md`](docs/video-fournisseurs.md).
 
 ### Une route se declare une seule fois
 
@@ -173,7 +177,7 @@ Crees par `npm run db:seed`, mot de passe `demo` :
 | --- | --- |
 | `amina@exemple.fr` | `candidate` — profil publie et certifie |
 | `recruteur@exemple.fr` | `recruiter` |
-| `admin@jeb.gouv.fr` | `admin` |
+| `admin@exemple.fr` | `admin` |
 
 Le seed installe aussi 14 profils (dont 2 en attente de moderation) et les 12
 questions de certification, pour que le catalogue et la doc ne soient pas vides.
@@ -187,7 +191,7 @@ moderation.
 
 | Espace | Routes |
 | --- | --- |
-| Systeme | `GET /api/health`, `POST /api/ping` |
+| Systeme | `GET /api/health` |
 | Reference | `GET /api/reference`, `GET /api/stats` |
 | Authentification | `/api/auth/*` (better-auth) |
 | Catalogue | `GET /api/profiles`, `GET /api/profiles/{id}` |
@@ -222,7 +226,7 @@ Les migrations sont **rejouees automatiquement au demarrage** par
 `src/instrumentation.ts` : rien a lancer a la main dans le conteneur.
 
 Les quatre tables `user`, `session`, `account`, `verification` sont imposees
-par better-auth — ne pas les renommer. La table `ping` est temporaire.
+par better-auth — ne pas les renommer.
 
 Les vocabulaires fermes (secteurs, villes, competences, statuts) vivent dans
 `src/lib/vocabulary.ts` et **nulle part ailleurs** : le schema Drizzle, les
@@ -238,9 +242,11 @@ npm run db:seed   # jeu de demonstration (destructif, rejouable)
 Le backend couvre le perimetre de la maquette fonctionnelle. Restent ouverts :
 
 - [ ] Interface : les ecrans sont a construire sur cette API
-- [ ] Heberger les videos plutot que referencer une URL YouTube/Vimeo
+- [x] Heberger les videos derriere une abstraction de fournisseur, plutot que
+      referencer une URL YouTube/Vimeo (`VIDEO_PROVIDER`, cf.
+      [`docs/video-fournisseurs.md`](docs/video-fournisseurs.md))
+- [ ] Brancher le vrai client PeerTube quand l'instance PeerTube existera
 - [ ] Notifications par e-mail (aujourd'hui uniquement en base)
-- [ ] Supprimer la route `/api/ping` et sa table avec la page de verification
 
 ## Points a savoir
 
