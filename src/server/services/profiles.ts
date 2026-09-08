@@ -27,7 +27,6 @@ export interface FullProfile extends ProfileCard {
    */
   video: VideoView;
   status: ProfileStatus;
-  contactCount: number;
   certifiedAt: string | null;
   createdAt: string;
 }
@@ -47,7 +46,17 @@ export interface VideoConsentView {
   revokedAt: string | null;
 }
 
+/**
+ * Ce que le seul titulaire voit de son profil.
+ *
+ * `views` et `contactCount` sont des compteurs d'engagement : ils restent en
+ * base et restent visibles de la personne concernee, mais ne sortent plus ni
+ * sur la fiche publique, ni pour un recruteur, ni dans une reponse d'API
+ * (instruction du cabinet, 7 septembre : « vous gardez la donnee en base, vous
+ * coupez toutes les sorties »).
+ */
 export interface OwnProfile extends FullProfile {
+  contactCount: number;
   views: number;
 
   videoConsent: VideoConsentView;
@@ -104,7 +113,6 @@ function toFull(
     bio: row.bio,
     video,
     status: row.status,
-    contactCount: row.contactCount,
     certifiedAt: row.certifiedAt?.toISOString() ?? null,
     createdAt: row.createdAt.toISOString(),
   };
@@ -275,6 +283,7 @@ async function findOne(
 
   return {
     ...toFull(row.profile, row.name, skills.get(row.profile.id) ?? [], video),
+    contactCount: row.profile.contactCount,
     views: row.profile.views,
     videoConsent: {
       granted: row.profile.videoConsentGranted,
@@ -297,7 +306,16 @@ export async function findProfileById(
 ): Promise<FullProfile | null> {
   const found = await findOne(eq(profile.id, id), session);
   if (!found) return null;
-  const { views: _views, videoConsent: _consent, videoModeration: _moderation, ...pub } = found;
+  // Tout ce qui ne regarde que le titulaire est retire ici, compteurs
+  // d'engagement compris : `views` et `contactCount` restent en base, mais ne
+  // sortent ni pour le public, ni pour un recruteur.
+  const {
+    views: _views,
+    contactCount: _contacts,
+    videoConsent: _consent,
+    videoModeration: _moderation,
+    ...pub
+  } = found;
   return pub;
 }
 
