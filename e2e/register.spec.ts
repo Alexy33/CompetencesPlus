@@ -154,7 +154,17 @@ test.describe("Inscription multi-roles", () => {
     await page.goto("/register");
 
     await expect(page.getByLabel("SIREN")).toHaveCount(0);
-    await page.getByRole("radio", { name: /Recruteur/ }).click();
+    // Le selecteur de role est un vrai groupe de boutons radio, dont l'input est
+    // masque visuellement (`sr-only`) derriere son libelle. On verifie donc les
+    // deux choses separement : que le role est bien expose a l'assistance
+    // technique, et que le geste de l'utilisateur — cliquer le libelle — coche
+    // le bon bouton. Viser l'input lui-meme echouerait : il fait un pixel.
+    const recruteur = page.getByRole("radio", { name: /Recruteur/ });
+    await expect(recruteur, "le role recruteur est expose comme bouton radio").toBeAttached();
+
+    await page.getByText("Recruteur", { exact: true }).click();
+
+    await expect(recruteur, "le clic sur le libelle coche le bouton").toBeChecked();
     await expect(page.getByLabel("SIREN")).toBeVisible();
 
     await page.getByLabel("Nom complet").fill("Inscription Formulaire");
