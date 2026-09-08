@@ -17,6 +17,17 @@ const nextConfig: NextConfig = {
     "/**": ["./drizzle/**/*"],
   },
 
+  // Le feed vertical n'a jamais existe dans ce depot : le catalogue a toujours
+  // ete une grille paginee (CDC v1.0, points 3.2 et 3.4). Mais des liens vers
+  // /feed ont circule la semaine derniere, y compris dans les courriels du
+  // cabinet. Ils doivent mener a la grille, pas a une 404.
+  async redirects() {
+    return [
+      { source: "/feed", destination: "/catalogue", permanent: true },
+      { source: "/feed/:path*", destination: "/catalogue", permanent: true },
+    ];
+  },
+
   // Vignettes des videos YouTube / Vimeo (integration par iframe, cf. CDC 3.2)
   images: {
     remotePatterns: [

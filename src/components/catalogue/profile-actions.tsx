@@ -12,7 +12,9 @@ import type { UserRole } from "@/lib/vocabulary";
 const MAX_MESSAGE_LENGTH = 2000;
 
 function ActionsSection({ children }: { children: ReactNode }) {
-  return <div className="mt-6 border-t border-brand/15 pt-5">{children}</div>;
+  // Pas de filet separateur : depuis le retrait du compteur public de
+  // sollicitations, ce bloc est seul dans sa carte et n'a plus rien a separer.
+  return <div>{children}</div>;
 }
 
 function RecruiterActions({ profileId }: { profileId: string }) {

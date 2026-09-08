@@ -150,17 +150,10 @@ export default async function ProfilePage({
                 </div>
               )}
 
+              {/* Le nombre de sollicitations recues n'est plus affiche ici : c'est
+                  un compteur d'engagement, il reste en base et visible du seul
+                  titulaire (instruction du cabinet, 7 septembre). */}
               <div className="rounded-3xl bg-canvas p-7 shadow-raised-xl">
-                <div className="grid grid-cols-1 gap-5">
-                <div>
-                  <p className="text-3xl font-bold leading-none text-ink">
-                    {profile.contactCount}
-                  </p>
-                  <p className="mt-1 text-xs text-ink-muted">
-                    contacts reçus
-                  </p>
-                </div>
-                </div>
                 <ProfileActions
                   profileId={profile.id}
                   role={(session?.user.role as UserRole | undefined) ?? null}

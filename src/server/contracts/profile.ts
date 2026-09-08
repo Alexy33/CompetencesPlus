@@ -107,7 +107,6 @@ export const ProfileSchema = named(
     bio: z.string(),
     video: VideoViewSchema,
     status: ProfileStatusSchema,
-    contactCount: z.number().int(),
     certifiedAt: z.iso.datetime().nullable(),
     createdAt: z.iso.datetime(),
   }),
@@ -116,6 +115,10 @@ export const ProfileSchema = named(
 export const MyProfileSchema = named(
   "MyProfile",
   ProfileSchema.extend({
+    contactCount: z.number().int().meta({
+      description:
+        "Nombre de sollicitations recues. Compteur d'engagement : visible du seul titulaire, jamais du public ni d'un recruteur.",
+    }),
     views: z.number().int().meta({
       description: "Nombre de consultations. Visible du seul titulaire du profil.",
     }),

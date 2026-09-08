@@ -3871,9 +3871,6 @@
           "status": {
             "$ref": "#/components/schemas/ProfileStatus"
           },
-          "contactCount": {
-            "type": "integer"
-          },
           "certifiedAt": {
             "nullable": true,
             "type": "string",
@@ -3897,7 +3894,6 @@
           "bio",
           "video",
           "status",
-          "contactCount",
           "certifiedAt",
           "createdAt"
         ],
@@ -3949,9 +3945,6 @@
           "status": {
             "$ref": "#/components/schemas/ProfileStatus"
           },
-          "contactCount": {
-            "type": "integer"
-          },
           "certifiedAt": {
             "nullable": true,
             "type": "string",
@@ -3960,6 +3953,10 @@
           "createdAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "contactCount": {
+            "type": "integer",
+            "description": "Nombre de sollicitations recues. Compteur d'engagement : visible du seul titulaire, jamais du public ni d'un recruteur."
           },
           "views": {
             "type": "integer",
@@ -3985,9 +3982,9 @@
           "bio",
           "video",
           "status",
-          "contactCount",
           "certifiedAt",
           "createdAt",
+          "contactCount",
           "views",
           "videoConsent",
           "videoModeration"
