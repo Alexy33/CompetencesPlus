@@ -177,3 +177,45 @@ exister aucune autre copie de ces listes dans le dépôt. Les libellés affiché
   sans cela l'écran d'administration est vide et la restriction d'accès indémontrable.
 - `recruiter-activity.ts` remplit l'espace recruteur (contacts sur les quatre statuts,
   favoris, notifications), seul écran qui s'ouvrirait autrement entièrement vide.
+
+## Résistance au crash (audit du 8 septembre 2026)
+
+Trois campagnes : 203 requêtes hostiles sur les 36 routes, ~1 900 requêtes de charge,
+et des scénarios d'épuisement de ressources. Six défauts corrigés.
+
+Le fil rouge des crashs : **du code qui fait confiance à ce qu'il lit en base.** Les
+entrées HTTP sont verrouillées par Zod via `defineRoute` ; c'est la frontière avec le
+stockage qui ne l'était pas.
+
+- **Réglages bornés à la lecture** (`normalizeSetting`). Un `catalogPageSize` à 0 en base
+  faisait tomber `/catalogue` en 500 : le repli de `parseCatalogFilters` réutilisait la
+  valeur qui venait de faire échouer le parse. Les bornes sont désormais appliquées à
+  l'écriture ET à la lecture ; une valeur absente rend le défaut, une valeur hors bornes
+  est ramenée dans les bornes.
+- **Version de questionnaire illisible** (`readableVersion`). Le fichier d'une version
+  utilisée par des tentatives ne doit jamais être supprimé, mais il peut disparaître : les
+  versions publiées depuis l'administration vivent sur le volume de données, pas dans
+  l'image. Un volume recréé laisse des tentatives orphelines. Plutôt que de rendre l'espace
+  du candidat inaccessible, on retombe sur la version en vigueur et la tentative est traitée
+  comme périmée.
+- **Horodatages défensifs** (`toIso`, `toIsoOrNull`). Un `created_at` hors de la plage
+  représentable faisait jeter `toISOString()` : la fiche d'un profil tombait en 500 alors que
+  le catalogue tenait, parce que seul `toFull()` sérialise la date.
+
+Deux points d'exploitation :
+
+- **Verrou SQLite → 503 + `Retry-After`** plutôt qu'un 500 générique, pour que le client
+  sache qu'il peut réessayer.
+- **Panne de stockage vidéo → 503**, message générique. La réponse contenait auparavant le
+  chemin absolu du serveur (`EACCES ... /home/...`). Les codes `EACCES`, `EPERM`, `EROFS`,
+  `ENOSPC`, `EMFILE`, `ENFILE`, `EDQUOT` sont couverts : le disque plein l'est donc aussi.
+
+Et une faille :
+
+- **Vérification de l'`Origin` sur les écritures** (`src/lib/origins.ts`, appliquée dans
+  `defineRoute`). better-auth protégeait ses propres routes, pas celles de l'application :
+  un `PATCH /api/me/profile` cross-origin écrivait en base. Le cookie étant `SameSite=Lax`,
+  aucun navigateur n'aurait porté la session — le risque pratique était faible, mais il n'y
+  avait aucune seconde ligne de défense. Une origine absente reste acceptée : c'est le cas
+  des clients hors navigateur, et ce n'est pas un vecteur CSRF. La liste est désormais
+  partagée avec `auth.ts` au lieu d'être dupliquée.

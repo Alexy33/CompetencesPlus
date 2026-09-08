@@ -72,7 +72,8 @@ export async function PUT(request: Request): Promise<Response> {
     if (error instanceof EmptyVideoError) return fail(ApiError.badRequest(error.message));
     if (error instanceof MissingVideoConsentError) return fail(ApiError.forbidden(error.message));
     if (error instanceof VideoProviderUnavailableError) return fail(ApiError.unavailable(error.message));
-    return fail(new ApiError("internal", `Enregistrement impossible : ${(error as Error).message}`));
+    console.error("[api] PUT /api/me/profile/video :", error);
+    return fail(new ApiError("internal", "Enregistrement de la video impossible."));
   }
 
   return Response.json(await findProfileByUserId(ctx.userId));

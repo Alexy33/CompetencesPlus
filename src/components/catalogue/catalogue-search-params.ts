@@ -1,17 +1,18 @@
 import { CatalogQuery } from "@/server/contracts/profile";
+import { normalizeSetting } from "@/server/services/settings";
 
 export type SearchParams = Record<string, string | string[] | undefined>;
 export type CatalogFilters = ReturnType<typeof CatalogQuery.parse>;
 
 export function parseCatalogFilters(raw: SearchParams, defaultPageSize: number): CatalogFilters {
+  const pageSize = normalizeSetting("catalogPageSize", defaultPageSize);
   const skills = raw.skills === undefined ? undefined : [raw.skills].flat();
-  const parsed = CatalogQuery.safeParse({
-    ...raw,
-    skills,
-    pageSize: raw.pageSize ?? defaultPageSize,
-  });
 
-  return parsed.success ? parsed.data : CatalogQuery.parse({ pageSize: defaultPageSize });
+  const parsed = CatalogQuery.safeParse({ ...raw, skills, pageSize: raw.pageSize ?? pageSize });
+  if (parsed.success) return parsed.data;
+
+  const repli = CatalogQuery.safeParse({ pageSize });
+  return repli.success ? repli.data : CatalogQuery.parse({});
 }
 
 export function toCarriedParams(filters: CatalogFilters): URLSearchParams {

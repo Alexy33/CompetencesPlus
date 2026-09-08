@@ -4,6 +4,7 @@ import { profile, profileSkill, user } from "@/db/schema";
 import type { City, ProfileStatus, Sector, Skill, VideoStatus } from "@/lib/vocabulary";
 import { MAJORITY_AGE, isMinor } from "@/lib/age";
 import { NO_VIDEO, describeVideo, type VideoView } from "@/server/video/presentation";
+import { toIso, toIsoOrNull } from "@/lib/dates";
 
 type ProfileRow = typeof profile.$inferSelect;
 
@@ -113,8 +114,8 @@ function toFull(
     bio: row.bio,
     video,
     status: row.status,
-    certifiedAt: row.certifiedAt?.toISOString() ?? null,
-    createdAt: row.createdAt.toISOString(),
+    certifiedAt: toIsoOrNull(row.certifiedAt),
+    createdAt: toIso(row.createdAt),
   };
 }
 
@@ -287,15 +288,15 @@ async function findOne(
     views: row.profile.views,
     videoConsent: {
       granted: row.profile.videoConsentGranted,
-      grantedAt: row.profile.videoConsentAt?.toISOString() ?? null,
+      grantedAt: toIsoOrNull(row.profile.videoConsentAt),
       version: row.profile.videoConsentVersion,
-      revokedAt: row.profile.videoConsentRevokedAt?.toISOString() ?? null,
+      revokedAt: toIsoOrNull(row.profile.videoConsentRevokedAt),
     },
     videoModeration: {
       status: row.profile.videoStatus,
       reason: row.profile.videoReviewReason,
       decidedBy,
-      decidedAt: row.profile.videoReviewedAt?.toISOString() ?? null,
+      decidedAt: toIsoOrNull(row.profile.videoReviewedAt),
     },
   };
 }
