@@ -18,7 +18,7 @@ const TAGS = [
     name: "Espace demandeur",
     description: "Gestion de son propre profil et de ses notifications (CDC 2.1, 2.3).",
   },
-  { name: "Certification", description: "Questionnaire et badge JEB (CDC 2.2)." },
+  { name: "Certification", description: "Questionnaire et évaluation des aptitudes (CDC 2.2)." },
   {
     name: "Espace recruteur",
     description:
@@ -59,7 +59,7 @@ export function buildOpenApiDocument() {
       title: "ProfilsActifs — API",
       version: "0.2.0",
       description: [
-        "API du demonstrateur ProfilsActifs (Ministere du Job et Bonheur, JEB/DNI/2026-003).",
+        "API du démonstrateur technique ProfilsActifs.",
         "",
         "**Authentification.** Les routes marquees d'un cadenas exigent une session.",
         "Ouvrez-en une via `POST /api/auth/sign-in/email` : le cookie httpOnly est pose",

@@ -12,7 +12,7 @@ import { seedVideoModeration } from "./video-moderation";
 const DEMO_ACCOUNTS = [
   { email: "amina@exemple.fr", role: "candidate" },
   { email: "recruteur@exemple.fr", role: "recruiter" },
-  { email: "admin@jeb.gouv.fr", role: "admin" },
+  { email: "admin@exemple.fr", role: "admin" },
 ];
 
 async function seedSettings() {
@@ -47,7 +47,7 @@ async function seed() {
 
   const adminId = await createAccount(
     "Thomas Vignal",
-    "admin@jeb.gouv.fr",
+    "admin@exemple.fr",
     "admin",
     "1972-06-09",
   );

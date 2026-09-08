@@ -3,7 +3,7 @@
   "info": {
     "title": "ProfilsActifs — API",
     "version": "0.2.0",
-    "description": "API du demonstrateur ProfilsActifs (Ministere du Job et Bonheur, JEB/DNI/2026-003).\n\n**Authentification.** Les routes marquees d'un cadenas exigent une session.\nOuvrez-en une via `POST /api/auth/sign-in/email` : le cookie httpOnly est pose\nautomatiquement et accompagne les requetes suivantes. Depuis un front sur une\nautre origine, pensez a `credentials: \"include\"`.\n\n**Roles.** `candidate` (demandeur d'emploi), `recruiter`, `admin`. Une session\nvalide mais d'un role insuffisant recoit 403, jamais 401.\n\n**Erreurs.** Toutes les reponses non-2xx suivent le schema `ApiError`."
+    "description": "API du démonstrateur technique ProfilsActifs.\n\n**Authentification.** Les routes marquees d'un cadenas exigent une session.\nOuvrez-en une via `POST /api/auth/sign-in/email` : le cookie httpOnly est pose\nautomatiquement et accompagne les requetes suivantes. Depuis un front sur une\nautre origine, pensez a `credentials: \"include\"`.\n\n**Roles.** `candidate` (demandeur d'emploi), `recruiter`, `admin`. Une session\nvalide mais d'un role insuffisant recoit 403, jamais 401.\n\n**Erreurs.** Toutes les reponses non-2xx suivent le schema `ApiError`."
   },
   "servers": [
     {
@@ -34,7 +34,7 @@
     },
     {
       "name": "Certification",
-      "description": "Questionnaire et badge JEB (CDC 2.2)."
+      "description": "Questionnaire et évaluation des aptitudes (CDC 2.2)."
     },
     {
       "name": "Espace recruteur",
@@ -1401,7 +1401,7 @@
           "Certification"
         ],
         "summary": "Valider le questionnaire et calculer le score",
-        "description": "Cloture la tentative. Au-dessus du seuil, le badge JEB apparait sur le profil public. En dessous, une certification deja acquise n'est pas retiree.",
+        "description": "Cloture la tentative. Au-dessus du seuil, l'évaluation validée apparait sur le profil public. En dessous, une validation déjà acquise n'est pas retirée.",
         "operationId": "postMeCertificationSubmit",
         "responses": {
           "200": {
@@ -2786,7 +2786,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "Recherche libre sur le nom, l'intitule, le secteur et les competences."
+            "description": "Recherche libre sur l'intitulé, le secteur, la ville et les compétences."
           },
           {
             "name": "sector",
@@ -2834,7 +2834,7 @@
                 "false"
               ]
             },
-            "description": "true : uniquement les profils certifies JEB."
+            "description": "true : uniquement les profils dont l'évaluation est validée."
           },
           {
             "name": "skills",
@@ -4329,7 +4329,7 @@
           },
           "threshold": {
             "type": "integer",
-            "description": "Score minimal, sur 100, pour obtenir le badge JEB."
+            "description": "Score minimal, sur 100, pour valider l'évaluation."
           }
         },
         "required": [
@@ -5165,7 +5165,7 @@
         "properties": {
           "certificationThreshold": {
             "type": "integer",
-            "description": "Score minimal, sur 100, pour delivrer le badge JEB."
+            "description": "Score minimal, sur 100, pour valider l'évaluation."
           },
           "catalogPageSize": {
             "type": "integer",

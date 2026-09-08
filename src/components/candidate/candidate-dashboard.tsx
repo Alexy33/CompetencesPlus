@@ -27,7 +27,7 @@ function statsOf(profile: OwnProfile): Stat[] {
       icon: FileVideo,
       tone: "warning",
     },
-    { label: "Score JEB", value: profile.score ?? "—", icon: BadgeCheck, tone: "info" },
+    { label: "Score d’évaluation", value: profile.score ?? "—", icon: BadgeCheck, tone: "info" },
   ];
 }
 

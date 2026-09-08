@@ -169,8 +169,8 @@ export function QuestionEditor({
         title="Questionnaire"
         description={
           version === null
-            ? "Libellés et pondérations du calcul JEB."
-            : `Version ${version} en vigueur — libellés et pondérations du calcul JEB.`
+            ? "Libellés et pondérations du score d'évaluation."
+            : `Version ${version} en vigueur — libellés et pondérations du score d'évaluation.`
         }
         icon={<FileQuestion className="size-5" />}
       />

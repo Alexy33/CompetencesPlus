@@ -144,7 +144,7 @@ export const SettingsSchema = named(
     certificationThreshold: z
       .number()
       .int()
-      .meta({ description: "Score minimal, sur 100, pour delivrer le badge JEB." }),
+      .meta({ description: "Score minimal, sur 100, pour valider l'évaluation." }),
     catalogPageSize: z
       .number()
       .int()

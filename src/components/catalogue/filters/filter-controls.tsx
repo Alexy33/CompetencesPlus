@@ -61,7 +61,7 @@ export function SearchFilter({
           type="search"
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          placeholder="Nom, métier, compétence"
+          placeholder="Intitulé, secteur, ville ou compétence"
           className={`${CONTROL} pl-11 pr-4 placeholder:text-ink-soft`}
         />
       </div>

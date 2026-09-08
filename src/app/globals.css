@@ -4,67 +4,30 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* ---------------------------------------------------------------------------
- * Charte graphique ministerielle (R.10)
- *
- * Marianne pour les titres, Spectral pour le corps. Marianne n'est pas sur
- * Google Fonts : c'est le caractere propre de l'Etat, distribue avec le DSFR
- * (@gouvfr/dsfr 1.15.2, Licence Ouverte 2.0). Les fichiers sont donc
- * auto-heberges dans public/fonts plutot que charges depuis un tiers — ce qui
- * evite aussi une requete vers un domaine externe sur chaque page publique.
- *
- * `font-display: swap` : le texte reste lisible pendant le chargement plutot
- * que de laisser un bloc invisible, ce qui compte pour un service public
- * consulte sur des connexions lentes.
- * ------------------------------------------------------------------------ */
-@font-face {
-  font-family: "Marianne";
-  src: url("/fonts/Marianne-Regular.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Marianne";
-  src: url("/fonts/Marianne-Medium.woff2") format("woff2");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Marianne";
-  src: url("/fonts/Marianne-Bold.woff2") format("woff2");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
 @theme {
-  --color-canvas: #ebf0f7;
-  --color-panel: #f5f9fe;
-  --color-panel-hover: #f2f8ff;
-  --color-surface-soft: #f7fafc;
-  --color-track: #d4dee9;
+  --color-canvas: #edf6f4;
+  --color-panel: #f7fbfa;
+  --color-panel-hover: #f0faf7;
+  --color-surface-soft: #f5faf9;
+  --color-track: #cfe2de;
 
-  --color-ink: #22334d;
-  --color-ink-muted: #41556e;
-  --color-ink-soft: #566274;
+  --color-ink: #173c37;
+  --color-ink-muted: #365e58;
+  --color-ink-soft: #536d69;
 
-  --color-brand: #1b3a6b;
-  --color-brand-100: #e8f0f8;
-  --color-brand-200: #d1def0;
-  --color-brand-300: #a8c5e0;
-  --color-brand-400: #6b8cb5;
-  --color-brand-500: #4a6b8a;
-  --color-brand-600: #2f4a6b;
-  --color-brand-700: #273d4f;
-  --color-brand-800: #1b2d3e;
-  --color-brand-900: #0f1d2a;
+  --color-brand: #0f766e;
+  --color-brand-100: #ccfbf1;
+  --color-brand-200: #99f6e4;
+  --color-brand-300: #5eead4;
+  --color-brand-400: #2dd4bf;
+  --color-brand-500: #14b8a6;
+  --color-brand-600: #0d9488;
+  --color-brand-700: #115e59;
+  --color-brand-800: #134e4a;
+  --color-brand-900: #042f2e;
 
-  --color-action: #2d3748;
-  --color-action-hover: #1e293b;
+  --color-action: #0f766e;
+  --color-action-hover: #115e59;
   --color-action-contour: #ffffff;
 
   --color-success: #dff7e9;
@@ -83,20 +46,20 @@
   --color-teal: #dff3f5;
   --color-teal-fg: #25636a;
 
-  --shadow-raised-2xs: 2px 2px 5px #c5d1e0, -2px -2px 5px #ffffff;
-  --shadow-raised-xs: 3px 3px 6px #c5d1e0, -3px -3px 6px #ffffff;
-  --shadow-raised-sm: 4px 4px 8px #c5d1e0, -4px -4px 8px #ffffff;
-  --shadow-raised-md: 5px 5px 10px #c5d1e0, -5px -5px 10px #ffffff;
-  --shadow-raised-lg: 6px 6px 12px #c5d1e0, -6px -6px 12px #ffffff;
-  --shadow-raised-xl: 8px 8px 16px #c5d1e0, -8px -8px 16px #ffffff;
-  --shadow-raised-2xl: 10px 10px 20px #c5d1e0, -10px -10px 20px #ffffff;
-  --shadow-raised-3xl: 14px 14px 28px #c5d1e0, -14px -14px 28px #ffffff;
-  --shadow-pressed-xs: inset 3px 3px 6px #c5d1e0, inset -3px -3px 6px #ffffff;
-  --shadow-pressed-sm: inset 4px 4px 8px #c5d1e0, inset -4px -4px 8px #ffffff;
-  --shadow-pressed-brand: inset 3px 3px 6px #273d4f, inset -3px -3px 6px #4a6b8a;
+  --shadow-raised-2xs: 2px 2px 5px #c9dbd7, -2px -2px 5px #ffffff;
+  --shadow-raised-xs: 3px 3px 6px #c9dbd7, -3px -3px 6px #ffffff;
+  --shadow-raised-sm: 4px 4px 8px #c9dbd7, -4px -4px 8px #ffffff;
+  --shadow-raised-md: 5px 5px 10px #c9dbd7, -5px -5px 10px #ffffff;
+  --shadow-raised-lg: 6px 6px 12px #c9dbd7, -6px -6px 12px #ffffff;
+  --shadow-raised-xl: 8px 8px 16px #c9dbd7, -8px -8px 16px #ffffff;
+  --shadow-raised-2xl: 10px 10px 20px #c9dbd7, -10px -10px 20px #ffffff;
+  --shadow-raised-3xl: 14px 14px 28px #c9dbd7, -14px -14px 28px #ffffff;
+  --shadow-pressed-xs: inset 3px 3px 6px #c9dbd7, inset -3px -3px 6px #ffffff;
+  --shadow-pressed-sm: inset 4px 4px 8px #c9dbd7, inset -4px -4px 8px #ffffff;
+  --shadow-pressed-brand: inset 3px 3px 6px #115e59, inset -3px -3px 6px #14b8a6;
 
-  --font-heading: "Marianne", system-ui, sans-serif;
-  --font-body: "Spectral", Georgia, serif;
+  --font-heading: var(--font-geist-sans), system-ui, sans-serif;
+  --font-body: var(--font-geist-sans), system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
@@ -122,8 +85,6 @@
   * {
     @apply border-border outline-ring/50;
   }
-  /* La charte fixe Spectral pour le corps de texte : le `font-mono` qui etait
-     pose ici imposait le monospace a toute la page et prenait le pas sur elle. */
   html {
     font-family: var(--font-body);
   }
@@ -248,14 +209,11 @@
  * toute regle couchee : l'indicateur de focus ne peut donc pas etre supprime
  * par megarde au detour d'une classe utilitaire.
  *
- * Valeurs mesurees (scripts/a11y-audit.mjs) : #1B3A6B contre les fonds du
- * dispositif donne 9.84:1 sur #ebf0f7, 10.66:1 sur #f5f9fe et 11.27:1 sur
- * #ffffff, la ou l'ancien anneau `--ring` a 50 % plafonnait a 1.54:1 — sous le
- * seuil de 3:1 exige pour un indicateur.
+ * La couleur primaire foncee fournit un indicateur visible sur les surfaces.
  * ------------------------------------------------------------------------ */
 
 :focus-visible {
-  outline: 3px solid #1b3a6b;
+  outline: 3px solid #0f766e;
   outline-offset: 2px;
   /* Le decalage pose l'anneau sur le fond de page : il reste visible meme
      quand l'element lui-meme est sombre (pastille de navigation active). */
@@ -267,13 +225,13 @@
    C'est donc le cadre qui porte l'anneau pour le compte de la video — sans quoi
    la tabulation traverse le lecteur sans rien montrer. */
 :has(> iframe):focus-within {
-  outline: 3px solid #1b3a6b;
+  outline: 3px solid #0f766e;
   outline-offset: 2px;
 }
 
 /* Lien d'evitement : hors ecran tant qu'il n'a pas le focus, puis visible.
    Il se presente comme un bouton : il porte donc la couleur d'action de la
-   charte et non le bleu institutionnel (blanc sur #8A3F5B = 7.14:1). */
+   palette commune. */
 .lien-evitement {
   position: absolute;
   left: 1rem;
@@ -292,14 +250,7 @@
   top: 1rem;
 }
 
-/* ---------------------------------------------------------------------------
- * Bouton d'action (R.10)
- *
- * Le bleu institutionnel etant interdit en fond de bouton, l'action passe par
- * le bordeaux. Deux classes plutot que des utilitaires repetes dans 30
- * composants : la charte peut ainsi etre corrigee en un seul endroit, et un
- * bouton ne peut pas repasser au bleu par recopie d'une classe voisine.
- * ------------------------------------------------------------------------ */
+/* Boutons d'action alignes sur la couleur primaire neutre. */
 .bouton-action {
   background: var(--color-action);
   color: #ffffff;
@@ -309,9 +260,7 @@
   background: var(--color-action-hover);
 }
 
-/* Sur fond bleu institutionnel, le bordeaux seul ne se distingue du fond qu'a
-   1.58:1 : le contour blanc redonne au bouton sa forme (11.27:1 contre le
-   bleu, 7.14:1 contre le bordeaux, au-dela des 3:1 exiges). */
+/* Le contour conserve la forme du bouton sur un fond de meme couleur. */
 .bouton-action-sur-bleu {
   background: var(--color-action);
   color: #ffffff;

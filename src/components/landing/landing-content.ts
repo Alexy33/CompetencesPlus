@@ -83,7 +83,7 @@ export const DEMO_ACCOUNTS: DemoAccount[] = [
   },
   {
     role: "Administration",
-    email: "admin@jeb.gouv.fr",
+    email: "admin@exemple.fr",
     chipClassName: "bg-info text-info-fg",
     destination: "/admin",
   },

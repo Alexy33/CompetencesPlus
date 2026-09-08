@@ -23,9 +23,9 @@ import { getSettings } from "@/server/services/settings";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Catalogue des profils — ProfilsActifs",
+  title: "Catalogue des profils",
   description:
-    "Consultez les profils des demandeurs d'emploi : compétences, secteur, localisation et certification JEB. Accessible sans compte recruteur.",
+    "Consultez les profils : compétences, secteur, localisation et évaluation professionnelle. Accessible sans compte recruteur.",
 };
 
 async function favoriteIdsOf(recruiterId: string): Promise<Set<string>> {
@@ -76,7 +76,7 @@ export default async function CataloguePage({
             className="lg:shrink-0"
             title="Découvrez les"
             highlight="talents."
-            description="Parcourez les compétences des demandeurs d'emploi et repérez les profils dont les aptitudes ont été certifiées par le dispositif JEB."
+            description="Parcourez les compétences et repérez les profils dont les aptitudes ont été évaluées."
             action={
               <p className="font-mono text-sm font-semibold uppercase tracking-wider text-brand">
                 {meta.total} profil{meta.total > 1 ? "s" : ""}

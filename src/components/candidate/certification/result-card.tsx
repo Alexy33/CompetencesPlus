@@ -40,7 +40,7 @@ export function ResultCard({
 
         <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-ink-soft">
           {result.passed
-            ? "Votre badge JEB est maintenant visible sur votre profil public."
+            ? "Votre évaluation validée est maintenant visible sur votre profil public."
             : `Le seuil est de ${result.threshold}/100. Vous pouvez repasser le questionnaire sans délai.`}
         </p>
 

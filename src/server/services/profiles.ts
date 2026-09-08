@@ -192,7 +192,6 @@ export async function searchCatalog(filters: CatalogFilters): Promise<CatalogRes
     )`;
     conditions.push(
       or(
-        like(sql`lower(${user.name})`, needle),
         like(sql`lower(${profile.title})`, needle),
         like(sql`lower(${profile.sector})`, needle),
         like(sql`lower(${profile.city})`, needle),

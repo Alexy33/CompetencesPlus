@@ -1,6 +1,6 @@
 "use client";
 
-import { BriefcaseBusiness, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -32,12 +32,7 @@ export function AuthPopup({ children }: Readonly<{ children: React.ReactNode }>)
         >
           <Card className="w-full gap-0 rounded-3xl border-0 bg-canvas py-0 shadow-raised-3xl ring-1 ring-brand/10">
             <CardHeader className="flex flex-row items-center justify-between border-b border-brand/12 px-8 py-6 sm:px-12">
-              <div className="flex items-center gap-3 text-lg font-semibold tracking-tight text-ink">
-                <span className="rounded-lg bg-brand p-2.5 text-white shadow-sm">
-                  <BriefcaseBusiness aria-hidden="true" className="size-5" />
-                </span>
-                ProfilsActifs
-              </div>
+              <span className="font-heading text-lg font-bold tracking-tight text-brand">ProfilsActifs</span>
               <Link
                 href="/"
                 aria-label="Retourner à l'accueil"

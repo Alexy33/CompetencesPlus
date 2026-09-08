@@ -3,7 +3,7 @@ import { expect, test, type APIRequestContext } from "@playwright/test";
 const PASSWORD = "demo1234";
 const ADULT_BIRTH_DATE = "1990-05-17";
 
-const ADMIN = "admin@jeb.gouv.fr";
+const ADMIN = "admin@exemple.fr";
 const RECRUITER = "recruteur@exemple.fr";
 
 const FAKE_MP4 = Buffer.alloc(4096, 0x21);

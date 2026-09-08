@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { X } from "lucide-react";
 
 import { isActivePath, navigationFor } from "./navigation";
-import { BlocMarque } from "../bloc-marque";
+import { ProductName } from "../product-name";
 import { SidebarSessionCard } from "./sidebar-session";
 import type { SidebarSession } from "./types";
 
@@ -22,7 +22,7 @@ export function SidebarPanel({
   return (
     <div className="flex h-full flex-col bg-canvas px-5 py-7">
       <div className="flex items-start justify-between gap-2">
-        <BlocMarque />
+        <ProductName />
         {onClose ? (
           <button
             type="button"

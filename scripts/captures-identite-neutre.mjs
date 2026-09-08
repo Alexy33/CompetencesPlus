@@ -1,6 +1,6 @@
 /**
- * Les quatre captures nommees par la charte graphique (R.10) :
- * accueil, inscription, fiche profil candidat, catalogue recruteur.
+ * Les cinq captures de preuve de l'identite neutre : accueil, inscription,
+ * fiche profil publique, catalogue recruteur et dashboard recruteur.
  *
  * Pourquoi un script plutot que des captures a la main : la charte sera
  * revue, et une capture refaite a la main ne montre jamais tout a fait le
@@ -13,7 +13,7 @@
  * les memes actions. La session est ouverte par l'API puis injectee en
  * cookie, ce qui est plus stable que de piloter le formulaire.
  *
- * Usage : node scripts/captures-charte.mjs [--base URL] [--out DIR]
+ * Usage : node scripts/captures-identite-neutre.mjs [--base URL] [--out DIR]
  */
 import { chromium } from "@playwright/test";
 import { mkdirSync } from "node:fs";
@@ -25,7 +25,7 @@ const opt = (name, fallback) => {
 };
 
 const BASE = opt("--base", process.env.BASE ?? "http://localhost:3000");
-const OUT = opt("--out", process.env.OUT ?? "docs/captures/r10");
+const OUT = opt("--out", process.env.OUT ?? "docs/preuves/identite-neutre");
 const EMAIL = process.env.RECRUITER_EMAIL ?? "recruteur@exemple.fr";
 const PASSWORD = process.env.RECRUITER_PASSWORD ?? "demo1234";
 
@@ -100,7 +100,7 @@ async function capturer(page, chemin, nom) {
 const navigateur = await chromium.launch();
 const echecs = [];
 
-/* --- 1 a 3 : ecrans publics ---------------------------------------------- */
+/* --- Ecrans publics ------------------------------------------------------- */
 const publique = await navigateur.newContext({ viewport: { width: 1440, height: 900 } });
 await masquerOutillage(publique);
 const anon = await publique.newPage();
@@ -110,8 +110,7 @@ for (const [chemin, nom] of [["/", "01-accueil"], ["/register", "02-inscription"
   console.log(`${nom.padEnd(24)} titre=${polices.titre} | corps=${polices.corps}`);
 }
 
-/* La fiche capturee est celle d'un profil certifie : c'est l'etat que la
-   charte donne a voir (badge, aplat bleu institutionnel). */
+/* La fiche capturee est celle d'un profil dont l'evaluation est validee. */
 const { items } = await fetch(`${BASE}/api/profiles?limit=20`).then((r) => r.json());
 const fiche = items.find((p) => p.certified) ?? items[0];
 if (!fiche) throw new Error("aucun profil publie : lancer le seed avant les captures");
@@ -122,7 +121,7 @@ console.log(
 console.log(`   profil : ${fiche.name} (certifie : ${fiche.certified})`);
 await publique.close();
 
-/* --- 4 : catalogue sous session recruteur -------------------------------- */
+/* --- Ecrans sous session recruteur --------------------------------------- */
 const { token, user } = await sessionRecruteur();
 const ctx = await navigateur.newContext({ viewport: { width: 1440, height: 900 } });
 await ctx.addCookies([
@@ -149,6 +148,8 @@ const connecte = await recruteur.evaluate(
 console.log(`${"04-catalogue-recruteur".padEnd(24)} titre=${polices.titre} | corps=${polices.corps}`);
 console.log(`   session : ${user.name} (${user.role}) — visible dans la page : ${connecte ? "oui" : "NON"}`);
 if (!connecte) echecs.push("le catalogue n'a pas ete rendu en session recruteur");
+const policesDashboard = await capturer(recruteur, "/recruiter", "05-dashboard-recruteur");
+console.log(`${"05-dashboard-recruteur".padEnd(24)} titre=${policesDashboard.titre} | corps=${policesDashboard.corps}`);
 await ctx.close();
 
 await navigateur.close();
@@ -157,4 +158,4 @@ if (echecs.length) {
   for (const e of echecs) console.error(`ECHEC : ${e}`);
   process.exit(1);
 }
-console.log(`\nQuatre captures ecrites dans ${OUT}/`);
+console.log(`\nCinq captures ecrites dans ${OUT}/`);
