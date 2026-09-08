@@ -20,7 +20,7 @@ export interface VideoConfig {
   legacyUploadDir: string;
   /** Lien YouTube / Vimeo : desactive par defaut (decision du cabinet). */
   embedEnabled: boolean;
-  /** URL de l'instance ministerielle, quand elle existera. */
+  /** URL de l'instance PeerTube, quand elle existera. */
   peertubeUrl: string | null;
   /** Transcodage simule de l'hebergeur local, en millisecondes. */
   processingDelayMs: number;

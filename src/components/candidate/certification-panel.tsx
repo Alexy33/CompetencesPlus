@@ -10,7 +10,7 @@ function summaryText(certification: CertificationSummary | null): string {
   if (certification?.status === "in_progress") {
     return `Questionnaire en cours : ${certification.answered}/${certification.questionCount} réponses.`;
   }
-  if (certification?.passed) return "Badge obtenu et visible sur votre profil public.";
+  if (certification?.passed) return "Badge de certification obtenu et visible sur votre profil public.";
   return "Passez le questionnaire pour certifier vos aptitudes professionnelles.";
 }
 
@@ -32,7 +32,7 @@ export function CertificationPanel({
 
   return (
     <Surface tone="raised">
-      <SurfaceHeading title="Évaluation professionnelle" icon={<BadgeCheck className="size-5" />} />
+      <SurfaceHeading title="Badge de certification" icon={<BadgeCheck className="size-5" />} />
 
       <p className="mt-5 text-4xl font-extrabold text-brand">
         {score ?? "—"}

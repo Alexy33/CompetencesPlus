@@ -35,12 +35,12 @@ export function ResultCard({
         </p>
 
         <h1 className="mt-6 text-3xl font-extrabold uppercase text-ink md:text-4xl">
-          {result.passed ? "Certification obtenue !" : "Continuez vos efforts"}
+          {result.passed ? "Badge de certification obtenu !" : "Continuez vos efforts"}
         </h1>
 
         <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-ink-soft">
           {result.passed
-            ? "Votre évaluation validée est maintenant visible sur votre profil public."
+            ? "Votre badge de certification est maintenant visible sur votre profil public."
             : `Le seuil est de ${result.threshold}/100. Vous pouvez repasser le questionnaire sans délai.`}
         </p>
 

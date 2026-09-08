@@ -9,7 +9,7 @@ import { buildVideoRegistry, readVideoConfig } from "../registry";
  * Selection de l'hebergeur par la configuration.
  *
  * C'est le seul endroit du code qui decide « lequel » : le jour ou l'instance
- * ministerielle existe, le basculement est cette variable d'environnement, pas
+ * PeerTube existe, le basculement est cette variable d'environnement, pas
  * une reecriture.
  */
 
@@ -35,7 +35,7 @@ describe("configuration video", () => {
     );
   });
 
-  it("bascule sur l'instance ministerielle par VIDEO_PROVIDER", () => {
+  it("bascule sur l'instance PeerTube par VIDEO_PROVIDER", () => {
     expect(readVideoConfig({ ...BASE, VIDEO_PROVIDER: "peertube" }).provider).toBe("peertube");
   });
 
@@ -45,7 +45,7 @@ describe("configuration video", () => {
 });
 
 describe("resolution des hebergeurs", () => {
-  it("local est en service, l'instance ministerielle ne l'est pas", () => {
+  it("local est en service, l'instance PeerTube ne l'est pas", () => {
     const registry = buildVideoRegistry(readVideoConfig(BASE));
 
     expect(registry.active).toBeInstanceOf(LocalVideoProvider);

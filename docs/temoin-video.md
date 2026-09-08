@@ -40,14 +40,14 @@ doit rester constant, et qui l'est, c'est l'empreinte du fichier.
 | # | Vérification | Résultat |
 | --- | --- | --- |
 | 1 | `GET /profils/4bca205f-829f-46f7-a361-7ee74ae84ed2` | `200`, fiche complète |
-| 2 | La vidéo s'affiche | lecteur de 1 min 41 s — capture `captures/video-fournisseur/01-lecture-hebergeur-local.png` |
+| 2 | La vidéo s'affiche | lecteur de 1 min 41 s — capture `_archive/identite-etat/captures/video-fournisseur/01-lecture-hebergeur-local.png` |
 | 3 | `GET /api/videos/<identifiant opaque>` | `200`, `content-length: 30809121`, `accept-ranges: bytes` |
 | 4 | Lecture par intervalle | `206`, `content-range: bytes 0-99/30809121` |
 | 5 | Aucun chemin physique servi | `/videos/…mp4`, `/uploads/…mp4`, `/public/videos/…` → `404` |
 | 6 | Aucune URL devinable | l'identifiant du profil en URL de lecture → `404` |
 | 7 | Le profil se modifie | `PATCH /api/me/profile` → `200`, vidéo intacte |
 | 8 | La vidéo se supprime, octets compris | voir ci-dessous |
-| 9 | Mode dégradé | `make video-degraded` → fiche `200`, message à la place du lecteur — capture `captures/video-fournisseur/02-mode-degrade-peertube.png` |
+| 9 | Mode dégradé | `make video-degraded` → fiche `200`, message à la place du lecteur — capture `_archive/identite-etat/captures/video-fournisseur/02-mode-degrade-peertube.png` |
 
 Les points 7 et 8 ne sont **pas** joués sur le témoin : les supprimer le
 détruirait à chaque exécution. Ils sont couverts, à l'identique, par

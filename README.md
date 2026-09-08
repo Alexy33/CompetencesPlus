@@ -2,6 +2,10 @@
 
 Démonstrateur technique de valorisation des profils professionnels.
 
+Le service s’appelle **ProfilsActifs**. Le questionnaire permet d’obtenir un
+**badge de certification**, accompagné d’un score sur 100 et visible sur le
+profil du candidat.
+
 Ce depot contient **le backend complet et sa documentation interactive**. L'API
 couvre le perimetre de la maquette fonctionnelle (catalogue, certification,
 espace recruteur, administration) et se decouvre sur
@@ -98,7 +102,7 @@ est dans [`docs/api-erreurs.md`](docs/api-erreurs.md). Le schema de la base est
 dans [`docs/schema-bdd.md`](docs/schema-bdd.md). L'upload et la lecture des
 videos de presentation (routes binaires) sont dans
 [`docs/video.md`](docs/video.md) ; le choix de l'hebergeur et ce qui changera le
-jour de l'instance ministerielle, dans
+jour de l'instance PeerTube, dans
 [`docs/video-fournisseurs.md`](docs/video-fournisseurs.md).
 
 ### Une route se declare une seule fois
@@ -241,7 +245,7 @@ Le backend couvre le perimetre de la maquette fonctionnelle. Restent ouverts :
 - [x] Heberger les videos derriere une abstraction de fournisseur, plutot que
       referencer une URL YouTube/Vimeo (`VIDEO_PROVIDER`, cf.
       [`docs/video-fournisseurs.md`](docs/video-fournisseurs.md))
-- [ ] Brancher le vrai client PeerTube quand l'instance ministerielle existera
+- [ ] Brancher le vrai client PeerTube quand l'instance PeerTube existera
 - [ ] Notifications par e-mail (aujourd'hui uniquement en base)
 
 ## Points a savoir

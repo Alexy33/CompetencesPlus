@@ -7,7 +7,7 @@ x-app-env: &app-env
   NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
   NEXT_TELEMETRY_DISABLED: "1"
   # Hebergeur video. `local` par defaut ; poser VIDEO_PROVIDER=peertube dans
-  # l'environnement (ou dans .env) bascule sur l'instance ministerielle
+  # l'environnement (ou dans .env) bascule sur l'instance PeerTube
   # factice et met le dispositif en mode degrade.
   VIDEO_PROVIDER: ${VIDEO_PROVIDER:-local}
   VIDEO_EMBED_ENABLED: ${VIDEO_EMBED_ENABLED:-false}

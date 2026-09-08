@@ -91,7 +91,7 @@ describe("etat de la video presente a l'application", () => {
   });
 });
 
-describe("VIDEO_PROVIDER=peertube — instance ministerielle non provisionnee", () => {
+describe("VIDEO_PROVIDER=peertube — instance PeerTube non provisionnee", () => {
   it("une video hebergee ailleurs n'est plus servie, mais la fiche tient", async () => {
     configure({ VIDEO_PROVIDER: "peertube", VIDEO_STORAGE_DIR: storage });
 
@@ -101,8 +101,8 @@ describe("VIDEO_PROVIDER=peertube — instance ministerielle non provisionnee", 
     expect(view.provider).toBe("local");
   });
 
-  it("une video confiee a l'instance ministerielle est annoncee indisponible", async () => {
-    configure({ VIDEO_PROVIDER: "peertube", VIDEO_PEERTUBE_URL: "https://video.exemple.gouv.fr" });
+  it("une video confiee a l'instance PeerTube est annoncee indisponible", async () => {
+    configure({ VIDEO_PROVIDER: "peertube", VIDEO_PEERTUBE_URL: "https://video.example.org" });
 
     const view = await describeVideo({ videoId: "quelconque", videoProvider: "peertube" });
     expect(view.state).toBe("unavailable");

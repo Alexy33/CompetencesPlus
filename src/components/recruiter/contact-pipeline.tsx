@@ -22,7 +22,7 @@ function ContactRow({
           <h3 className="font-bold text-ink">{contact.profile.name}</h3>
           {contact.profile.certified ? (
             <Chip tone="success" size="xs" className="font-bold">
-              Score {contact.profile.score}
+              Badge de certification · {contact.profile.score}/100
             </Chip>
           ) : null}
         </div>

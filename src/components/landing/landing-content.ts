@@ -25,7 +25,7 @@ export const STEPS: LandingStep[] = [
     number: "02",
     title: "Certifiez vos compétences",
     description:
-      "Complétez le parcours de certification et obtenez un badge professionnel visible par les recruteurs.",
+      "Complétez le parcours de certification et obtenez un badge de certification visible par les recruteurs.",
   },
   {
     icon: Search,

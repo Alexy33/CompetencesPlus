@@ -3355,7 +3355,7 @@
           "peertube",
           "embed"
         ],
-        "description": "Hebergeur de la video. local : stockage du dispositif, servi par une route controlee. peertube : instance video du Ministere (non provisionnee). embed : lien tiers, desactive par defaut."
+        "description": "Hebergeur de la video. local : stockage du dispositif, servi par une route controlee. peertube : instance video PeerTube (non provisionnee). embed : lien tiers, desactive par defaut."
       },
       "VideoViewState": {
         "type": "string",

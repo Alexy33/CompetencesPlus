@@ -5,29 +5,29 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --color-canvas: #edf6f4;
-  --color-panel: #f7fbfa;
-  --color-panel-hover: #f0faf7;
-  --color-surface-soft: #f5faf9;
-  --color-track: #cfe2de;
+  --color-canvas: #ebf0f7;
+  --color-panel: #f5f9fe;
+  --color-panel-hover: #f2f8ff;
+  --color-surface-soft: #f7fafc;
+  --color-track: #d4dee9;
 
-  --color-ink: #173c37;
-  --color-ink-muted: #365e58;
-  --color-ink-soft: #536d69;
+  --color-ink: #22334d;
+  --color-ink-muted: #41556e;
+  --color-ink-soft: #566274;
 
-  --color-brand: #0f766e;
-  --color-brand-100: #ccfbf1;
-  --color-brand-200: #99f6e4;
-  --color-brand-300: #5eead4;
-  --color-brand-400: #2dd4bf;
-  --color-brand-500: #14b8a6;
-  --color-brand-600: #0d9488;
-  --color-brand-700: #115e59;
-  --color-brand-800: #134e4a;
-  --color-brand-900: #042f2e;
+  --color-brand: #1b3a6b;
+  --color-brand-100: #e8f0f8;
+  --color-brand-200: #d1def0;
+  --color-brand-300: #a8c5e0;
+  --color-brand-400: #6b8cb5;
+  --color-brand-500: #4a6b8a;
+  --color-brand-600: #2f4a6b;
+  --color-brand-700: #273d4f;
+  --color-brand-800: #1b2d3e;
+  --color-brand-900: #0f1d2a;
 
-  --color-action: #0f766e;
-  --color-action-hover: #115e59;
+  --color-action: #1b3a6b;
+  --color-action-hover: #273d4f;
   --color-action-contour: #ffffff;
 
   --color-success: #dff7e9;
@@ -46,17 +46,17 @@
   --color-teal: #dff3f5;
   --color-teal-fg: #25636a;
 
-  --shadow-raised-2xs: 2px 2px 5px #c9dbd7, -2px -2px 5px #ffffff;
-  --shadow-raised-xs: 3px 3px 6px #c9dbd7, -3px -3px 6px #ffffff;
-  --shadow-raised-sm: 4px 4px 8px #c9dbd7, -4px -4px 8px #ffffff;
-  --shadow-raised-md: 5px 5px 10px #c9dbd7, -5px -5px 10px #ffffff;
-  --shadow-raised-lg: 6px 6px 12px #c9dbd7, -6px -6px 12px #ffffff;
-  --shadow-raised-xl: 8px 8px 16px #c9dbd7, -8px -8px 16px #ffffff;
-  --shadow-raised-2xl: 10px 10px 20px #c9dbd7, -10px -10px 20px #ffffff;
-  --shadow-raised-3xl: 14px 14px 28px #c9dbd7, -14px -14px 28px #ffffff;
-  --shadow-pressed-xs: inset 3px 3px 6px #c9dbd7, inset -3px -3px 6px #ffffff;
-  --shadow-pressed-sm: inset 4px 4px 8px #c9dbd7, inset -4px -4px 8px #ffffff;
-  --shadow-pressed-brand: inset 3px 3px 6px #115e59, inset -3px -3px 6px #14b8a6;
+  --shadow-raised-2xs: 2px 2px 5px #c5d1e0, -2px -2px 5px #ffffff;
+  --shadow-raised-xs: 3px 3px 6px #c5d1e0, -3px -3px 6px #ffffff;
+  --shadow-raised-sm: 4px 4px 8px #c5d1e0, -4px -4px 8px #ffffff;
+  --shadow-raised-md: 5px 5px 10px #c5d1e0, -5px -5px 10px #ffffff;
+  --shadow-raised-lg: 6px 6px 12px #c5d1e0, -6px -6px 12px #ffffff;
+  --shadow-raised-xl: 8px 8px 16px #c5d1e0, -8px -8px 16px #ffffff;
+  --shadow-raised-2xl: 10px 10px 20px #c5d1e0, -10px -10px 20px #ffffff;
+  --shadow-raised-3xl: 14px 14px 28px #c5d1e0, -14px -14px 28px #ffffff;
+  --shadow-pressed-xs: inset 3px 3px 6px #c5d1e0, inset -3px -3px 6px #ffffff;
+  --shadow-pressed-sm: inset 4px 4px 8px #c5d1e0, inset -4px -4px 8px #ffffff;
+  --shadow-pressed-brand: inset 3px 3px 6px #273d4f, inset -3px -3px 6px #4a6b8a;
 
   --font-heading: var(--font-geist-sans), system-ui, sans-serif;
   --font-body: var(--font-geist-sans), system-ui, sans-serif;
@@ -213,7 +213,7 @@
  * ------------------------------------------------------------------------ */
 
 :focus-visible {
-  outline: 3px solid #0f766e;
+  outline: 3px solid var(--color-brand);
   outline-offset: 2px;
   /* Le decalage pose l'anneau sur le fond de page : il reste visible meme
      quand l'element lui-meme est sombre (pastille de navigation active). */
@@ -225,7 +225,7 @@
    C'est donc le cadre qui porte l'anneau pour le compte de la video — sans quoi
    la tabulation traverse le lecteur sans rien montrer. */
 :has(> iframe):focus-within {
-  outline: 3px solid #0f766e;
+  outline: 3px solid var(--color-brand);
   outline-offset: 2px;
 }
 
