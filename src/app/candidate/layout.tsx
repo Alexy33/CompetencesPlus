@@ -20,7 +20,7 @@ export default async function CandidateLayout({
 
   return (
     <>
-      <MentionDroits className="relative z-50 lg:pl-64" />
+      <MentionDroits className="relative z-50 lg:ml-64" />
       {children}
     </>
   );
