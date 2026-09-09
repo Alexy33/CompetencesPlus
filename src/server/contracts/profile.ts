@@ -1,6 +1,12 @@
 import { z } from "zod";
 import { named } from "../openapi/schemas";
 import {
+  CATALOG_ORDERS,
+  CATALOG_ORDER_DESCRIPTIONS,
+  DEFAULT_CATALOG_ORDER,
+} from "@/lib/catalog-order";
+import { mutable } from "@/lib/vocabulary";
+import {
   CitySchema,
   PaginationQuery,
   ProfileStatusSchema,
@@ -129,7 +135,20 @@ export const MyProfileSchema = named(
 
 export const ProfilePageSchema = pageOf("ProfilePage", ProfileCardSchema);
 
+export const CatalogOrderSchema = named(
+  "CatalogOrder",
+  z.enum(mutable(CATALOG_ORDERS)).meta({
+    description: Object.entries(CATALOG_ORDER_DESCRIPTIONS)
+      .map(([cle, texte]) => `${cle} : ${texte}`)
+      .join(" "),
+  }),
+);
+
 export const CatalogQuery = PaginationQuery.extend({
+  order: CatalogOrderSchema.default(DEFAULT_CATALOG_ORDER).meta({
+    description:
+      "Ordre de presentation. Tous les ordres se terminent par l'identifiant du profil, ce qui rend la pagination deterministe. Aucun critere de popularite n'est propose.",
+  }),
   q: z
     .string()
     .trim()
