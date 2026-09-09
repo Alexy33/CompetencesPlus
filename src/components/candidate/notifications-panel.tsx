@@ -1,14 +1,13 @@
 "use client";
 
-import { Bell } from "lucide-react";
-
 import { Surface } from "@/components/common/surface";
 import { formatDay } from "@/lib/dates";
-import type { Notification } from "./types";
+import { Bell } from "lucide-react";
+import type { NotificationsPanelProps } from "./types";
 
 const VISIBLE_COUNT = 5;
 
-export function NotificationsPanel({ notifications }: { notifications: Notification[] }) {
+export function NotificationsPanel({ notifications }: NotificationsPanelProps) {
   return (
     <Surface>
       <div className="flex items-center gap-3">

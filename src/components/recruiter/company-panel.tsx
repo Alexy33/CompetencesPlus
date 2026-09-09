@@ -1,13 +1,11 @@
 "use client";
 
-import { Building2 } from "lucide-react";
-import type { ReactNode } from "react";
-
 import { Surface } from "@/components/common/surface";
 import { formatSiren } from "@/lib/siren";
-import type { RecruiterCompany } from "./types";
+import { Building2 } from "lucide-react";
+import type { CompanyPanelProps, RowProps } from "./types";
 
-function Row({ label, children }: { label: string; children: ReactNode }) {
+function Row({ label, children }: RowProps) {
   return (
     <div className="rounded-xl bg-white p-4">
       <dt className="font-mono text-[10px] font-semibold uppercase tracking-wider text-ink-muted">
@@ -18,7 +16,7 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-export function CompanyPanel({ company }: { company: RecruiterCompany | null }) {
+export function CompanyPanel({ company }: CompanyPanelProps) {
   return (
     <Surface>
       <div className="flex items-center gap-3">

@@ -1,23 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-
-export interface UrlFilters {
-  query: string;
-  sector: string;
-  city: string;
-  certifiedOnly: boolean;
-  availability: string;
-  skills: string[];
-  hasAny: boolean;
-  pending: boolean;
-  draftQuery: string;
-  setDraftQuery: (value: string) => void;
-  setSingle: (key: string, value: string) => void;
-  toggleMulti: (key: string, value: string) => void;
-  reset: () => void;
-}
+import { useEffect, useRef, useState, useTransition } from "react";
+import type { UrlFilters } from "./types";
 
 export function useUrlFilters(): UrlFilters {
   const router = useRouter();

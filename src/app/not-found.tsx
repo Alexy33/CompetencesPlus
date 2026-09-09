@@ -1,7 +1,6 @@
-import type { Metadata } from "next";
-
 import { ActionLink } from "@/components/common/action";
 import { ErrorPageShell } from "@/components/layout/error-page-shell";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Page introuvable — ProfilsActifs",

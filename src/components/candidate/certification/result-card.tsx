@@ -1,19 +1,10 @@
 "use client";
 
-import { AlertTriangle, BadgeCheck, RotateCcw } from "lucide-react";
-
 import { Action, ActionLink } from "@/components/common/action";
-import type { CertificationResult } from "./types";
+import { AlertTriangle, BadgeCheck, RotateCcw } from "lucide-react";
+import type { ResultCardProps } from "./types";
 
-export function ResultCard({
-  result,
-  busy,
-  onRestart,
-}: {
-  result: CertificationResult;
-  busy: boolean;
-  onRestart: () => void;
-}) {
+export function ResultCard({ result, busy, onRestart }: ResultCardProps) {
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-5xl items-center px-5 py-12 md:px-10">
       <section className="w-full px-2 py-8 text-center md:px-8 md:py-12">
@@ -80,7 +71,9 @@ export function ResultCard({
             disabled={busy}
           >
             <RotateCcw aria-hidden="true" className="size-4" />
-            {result.outdated ? "Repasser en version " + result.currentQuestionnaireVersion : "Repasser"}
+            {result.outdated
+              ? "Repasser en version " + result.currentQuestionnaireVersion
+              : "Repasser"}
           </Action>
         </div>
       </section>

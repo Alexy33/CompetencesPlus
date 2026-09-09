@@ -1,22 +1,16 @@
 "use client";
 
-import { Building2 } from "lucide-react";
-
+import { AuthField, authControl } from "@/components/auth/auth-form-parts";
 import { SECTORS } from "@/lib/vocabulary";
-import { AuthField, authControl } from "../auth-form-parts";
-import type { CompanyDraft } from "./types";
+import { Building2 } from "lucide-react";
+import type { CompanyFieldsetProps } from "./types";
 
 export function CompanyFieldset({
   company,
   loading,
   sirenInvalid,
   onChange,
-}: {
-  company: CompanyDraft;
-  loading: boolean;
-  sirenInvalid: boolean;
-  onChange: (field: keyof CompanyDraft, value: string) => void;
-}) {
+}: CompanyFieldsetProps) {
   return (
     <fieldset className="grid gap-5 rounded-2xl border border-brand/20 bg-panel p-5">
       <legend className="flex items-center gap-2 px-2 text-sm font-semibold text-ink">

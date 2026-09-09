@@ -1,16 +1,9 @@
 "use client";
 
 import { BriefcaseBusiness, UserRound } from "lucide-react";
-import type { ComponentType } from "react";
+import type { RegistrationRoleOption, RoleSelectorProps } from "./types";
 
-import type { RegistrationRole } from "./types";
-
-const ROLES: {
-  id: RegistrationRole;
-  label: string;
-  hint: string;
-  icon: ComponentType<{ className?: string; "aria-hidden"?: boolean | "true" }>;
-}[] = [
+const ROLES: RegistrationRoleOption[] = [
   {
     id: "candidate",
     label: "Demandeur d'emploi",
@@ -25,15 +18,7 @@ const ROLES: {
   },
 ];
 
-export function RoleSelector({
-  value,
-  disabled,
-  onChange,
-}: {
-  value: RegistrationRole;
-  disabled: boolean;
-  onChange: (role: RegistrationRole) => void;
-}) {
+export function RoleSelector({ value, disabled, onChange }: RoleSelectorProps) {
   const selectedRole = ROLES.find((role) => role.id === value) ?? ROLES[0];
 
   return (
@@ -45,7 +30,10 @@ export function RoleSelector({
           const active = value === id;
 
           return (
-            <label key={id} className={disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"}>
+            <label
+              key={id}
+              className={disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"}
+            >
               <input
                 type="radio"
                 name="registration-role"

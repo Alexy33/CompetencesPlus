@@ -1,29 +1,15 @@
 "use client";
 
 import { FileQuestion, Users, Video } from "lucide-react";
-import type { ComponentType } from "react";
+import type { AdminTab, AdminTabsProps } from "./types";
 
-import type { Tab } from "./types";
-
-const TABS: {
-  id: Tab;
-  label: string;
-  icon: ComponentType<{ className?: string }>;
-}[] = [
+const TABS: AdminTab[] = [
   { id: "profils", label: "Profils", icon: Users },
   { id: "videos", label: "Vidéos", icon: Video },
   { id: "questionnaire", label: "Questionnaire", icon: FileQuestion },
 ];
 
-export function AdminTabs({
-  current,
-  pendingVideos,
-  onChange,
-}: {
-  current: Tab;
-  pendingVideos: number;
-  onChange: (tab: Tab) => void;
-}) {
+export function AdminTabs({ current, pendingVideos, onChange }: AdminTabsProps) {
   return (
     <nav
       aria-label="Sections de l'administration"

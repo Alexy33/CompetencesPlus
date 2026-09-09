@@ -1,19 +1,12 @@
 "use client";
 
-import Link from "next/link";
-import { Heart, Trash2 } from "lucide-react";
-
 import { EmptyState } from "@/components/common/feedback";
 import { Surface } from "@/components/common/surface";
-import type { RecruiterFavorite } from "./types";
+import { Heart, Trash2 } from "lucide-react";
+import Link from "next/link";
+import type { FavoritesPanelProps } from "./types";
 
-export function FavoritesPanel({
-  favorites,
-  onRemove,
-}: {
-  favorites: RecruiterFavorite[];
-  onRemove: (profileId: string) => void;
-}) {
+export function FavoritesPanel({ favorites, onRemove }: FavoritesPanelProps) {
   return (
     <Surface>
       <div className="flex items-center gap-3">

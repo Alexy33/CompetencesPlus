@@ -1,7 +1,8 @@
+import { cn } from "@/lib/utils";
+import type { LayoutProps } from "@/types/pages";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { cn } from "@/lib/utils";
 
 const geistSans = Geist({
   subsets: ["latin"],
@@ -23,22 +24,20 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "ProfilsActifs",
     title: "ProfilsActifs",
-    description: "Des profils professionnels enrichis par la vidéo et l'évaluation des compétences.",
+    description:
+      "Des profils professionnels enrichis par la vidéo et l'évaluation des compétences.",
   },
   twitter: {
     card: "summary",
     title: "ProfilsActifs",
-    description: "Des profils professionnels enrichis par la vidéo et l'évaluation des compétences.",
+    description:
+      "Des profils professionnels enrichis par la vidéo et l'évaluation des compétences.",
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children }: LayoutProps) {
   return (
-
-    <html
-      lang="fr"
-      className={cn(geistSans.variable, geistMono.variable)}
-    >
+    <html lang="fr" className={cn(geistSans.variable, geistMono.variable)}>
       <body className="min-h-screen antialiased">{children}</body>
     </html>
   );

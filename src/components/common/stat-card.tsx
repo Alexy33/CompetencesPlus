@@ -1,8 +1,5 @@
-import type { ComponentType, ReactNode } from "react";
-
 import { cn } from "@/lib/utils";
-
-export type StatTone = "brand" | "success" | "warning" | "info" | "danger";
+import type { Stat, StatGridProps, StatTone } from "./types";
 
 const TONE_STYLES: Record<StatTone, string> = {
   brand: "bg-brand-200 text-brand-800",
@@ -11,13 +8,6 @@ const TONE_STYLES: Record<StatTone, string> = {
   info: "bg-info text-info-fg",
   danger: "bg-danger text-danger-fg",
 };
-
-export interface Stat {
-  label: string;
-  value: ReactNode;
-  icon: ComponentType<{ className?: string }>;
-  tone: StatTone;
-}
 
 export function StatCard({ label, value, icon: Icon, tone }: Stat) {
   return (
@@ -38,7 +28,7 @@ export function StatCard({ label, value, icon: Icon, tone }: Stat) {
   );
 }
 
-export function StatGrid({ stats, className }: { stats: Stat[]; className?: string }) {
+export function StatGrid({ stats, className }: StatGridProps) {
   return (
     <section className={cn("grid gap-3", className)}>
       {stats.map((stat) => (

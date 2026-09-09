@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { ArrowRight, Loader2 } from "lucide-react";
-
+import { DEMO_PASSWORD } from "@/components/landing/landing-content";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
-import { DEMO_PASSWORD, type DemoAccount } from "@/components/landing/landing-content";
+import { ArrowRight, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import type { DemoAccountCardProps } from "./types";
 
-export function DemoAccountCard({ account }: { account: DemoAccount }) {
+export function DemoAccountCard({ account }: DemoAccountCardProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +40,10 @@ export function DemoAccountCard({ account }: { account: DemoAccount }) {
       className="group rounded-2xl border border-brand/15 bg-white p-5 text-left transition-colors hover:border-brand/45 hover:bg-panel disabled:cursor-wait disabled:opacity-70"
     >
       <span
-        className={cn("inline-flex rounded-full px-3 py-1 text-xs font-bold", account.chipClassName)}
+        className={cn(
+          "inline-flex rounded-full px-3 py-1 text-xs font-bold",
+          account.chipClassName,
+        )}
       >
         {account.role}
       </span>

@@ -1,14 +1,14 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { authClient } from "@/lib/auth-client";
+import { LayoutGrid, LogOut } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { LayoutGrid, LogOut } from "lucide-react";
+import type { LandingSessionActionsProps } from "./types";
 
-import { Button } from "@/components/ui/button";
-import { authClient } from "@/lib/auth-client";
-
-export function LandingSessionActions({ connected }: { connected: boolean }) {
+export function LandingSessionActions({ connected }: LandingSessionActionsProps) {
   const router = useRouter();
   const [signingOut, setSigningOut] = useState(false);
 

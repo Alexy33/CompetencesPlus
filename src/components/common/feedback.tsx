@@ -1,9 +1,14 @@
-import { AlertCircle, Loader2 } from "lucide-react";
-import type { ReactNode } from "react";
-
 import { cn } from "@/lib/utils";
+import { AlertCircle, Loader2 } from "lucide-react";
+import type {
+  EmptyStateProps,
+  ErrorMessageProps,
+  FormAlertProps,
+  LoadingBlockProps,
+  StatusMessageProps,
+} from "./types";
 
-export function StatusMessage({ children, className }: { children: ReactNode; className?: string }) {
+export function StatusMessage({ children, className }: StatusMessageProps) {
   if (!children) return null;
 
   return (
@@ -19,7 +24,7 @@ export function StatusMessage({ children, className }: { children: ReactNode; cl
   );
 }
 
-export function ErrorMessage({ children, className }: { children: ReactNode; className?: string }) {
+export function ErrorMessage({ children, className }: ErrorMessageProps) {
   if (!children) return null;
 
   return (
@@ -32,7 +37,7 @@ export function ErrorMessage({ children, className }: { children: ReactNode; cla
   );
 }
 
-export function FormAlert({ children }: { children: ReactNode }) {
+export function FormAlert({ children }: FormAlertProps) {
   if (!children) return null;
 
   return (
@@ -46,7 +51,7 @@ export function FormAlert({ children }: { children: ReactNode }) {
   );
 }
 
-export function EmptyState({ children }: { children: ReactNode }) {
+export function EmptyState({ children }: EmptyStateProps) {
   return (
     <div className="rounded-2xl border border-dashed border-brand/25 px-5 py-10 text-center text-sm text-ink-soft">
       {children}
@@ -54,7 +59,7 @@ export function EmptyState({ children }: { children: ReactNode }) {
   );
 }
 
-export function LoadingBlock({ label = "Chargement" }: { label?: string }) {
+export function LoadingBlock({ label = "Chargement" }: LoadingBlockProps) {
   return (
     <div role="status" aria-label={label} className="flex justify-center py-24">
       <Loader2 aria-hidden="true" className="size-7 animate-spin text-brand" />

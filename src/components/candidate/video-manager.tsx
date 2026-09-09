@@ -1,13 +1,12 @@
 "use client";
 
-import { Loader2, Save, Trash2, Upload } from "lucide-react";
-import type { ReactNode } from "react";
-
+import { ProfileVideo } from "@/components/catalogue/profile-video";
 import { Action } from "@/components/common/action";
 import { Field, fieldControl } from "@/components/common/field";
 import { Surface, SurfaceHeading } from "@/components/common/surface";
-import { ProfileVideo } from "@/components/catalogue/profile-video";
 import type { VideoView } from "@/server/video/presentation";
+import { Loader2, Save, Trash2, Upload } from "lucide-react";
+import type { VideoManagerProps } from "./types";
 
 const MAX_UPLOAD_LABEL = "Importer une vidéo (100 Mo max.)";
 const ACCEPTED_TYPES = "video/mp4,video/webm,video/ogg,video/quicktime";
@@ -45,21 +44,7 @@ export function VideoManager({
   onRemove,
   onSave,
   children,
-}: {
-  name: string;
-  video: VideoView;
-  draftUrl: string;
-  /** Hébergement par lien tiers (YouTube, Vimeo) : éteint par défaut. */
-  embedEnabled: boolean;
-  uploading: boolean;
-  removing: boolean;
-  disabled: boolean;
-  onDraftUrlChange: (value: string) => void;
-  onUpload: (file: File) => void;
-  onRemove: () => void;
-  onSave: () => void;
-  children?: ReactNode;
-}) {
+}: VideoManagerProps) {
   return (
     <Surface padding="responsive">
       <SurfaceHeading

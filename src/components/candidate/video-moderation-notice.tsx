@@ -1,15 +1,20 @@
 "use client";
 
-import { CircleCheck, CircleX, Clock } from "lucide-react";
-import type { ComponentType } from "react";
-
 import { formatTimestamp } from "@/lib/dates";
 import type { VideoStatus } from "@/lib/vocabulary";
-import type { OwnProfile } from "@/server/services/profiles";
+import { CircleCheck, CircleX, Clock } from "lucide-react";
+import type { ComponentType } from "react";
+import type { VideoModerationNoticeProps } from "./types";
 
 const PRESENTATION: Record<
   VideoStatus,
-  { frame: string; icon: string; glyph: ComponentType<{ className?: string }>; title: string; detail: string }
+  {
+    frame: string;
+    icon: string;
+    glyph: ComponentType<{ className?: string }>;
+    title: string;
+    detail: string;
+  }
 > = {
   approved: {
     frame: "border-success-fg/25 bg-success",
@@ -36,11 +41,7 @@ const PRESENTATION: Record<
   },
 };
 
-export function VideoModerationNotice({
-  moderation,
-}: {
-  moderation: OwnProfile["videoModeration"];
-}) {
+export function VideoModerationNotice({ moderation }: VideoModerationNoticeProps) {
   const view = PRESENTATION[moderation.status];
   const Glyph = view.glyph;
 

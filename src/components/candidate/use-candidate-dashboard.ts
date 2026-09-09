@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
 import { apiLoad, apiSend, apiUpload } from "@/lib/api-client";
 import type { Skill } from "@/lib/vocabulary";
 import type { OwnProfile } from "@/server/services/profiles";
-import { MAX_SKILLS, type CertificationSummary, type Notification, type ProfileDraft } from "./types";
+import { useEffect, useState } from "react";
+import { MAX_SKILLS } from "./constants";
+import type { CertificationSummary, Notification, ProfileDraft } from "./types";
 
 /**
  * Lien tiers eventuellement en place. Une video hebergee par le dispositif ne

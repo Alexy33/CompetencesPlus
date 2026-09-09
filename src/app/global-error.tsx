@@ -1,19 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
-import { RotateCcw } from "lucide-react";
-
-import "./globals.css";
 import { Action, ActionLink } from "@/components/common/action";
 import { ErrorPageShell } from "@/components/layout/error-page-shell";
+import type { ErrorBoundaryProps } from "@/types/pages";
+import { RotateCcw } from "lucide-react";
+import { useEffect } from "react";
+import "./globals.css";
 
-export default function GlobalError({
-  error,
-  reset,
-}: {
-  error: Error & { digest?: string };
-  reset: () => void;
-}) {
+export default function GlobalError({ error, reset }: ErrorBoundaryProps) {
   useEffect(() => {
     console.error("[app] erreur de mise en page racine :", error);
   }, [error]);
