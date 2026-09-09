@@ -22,7 +22,8 @@
     "openapi:export": "tsx scripts/export-openapi.ts",
     "a11y": "node scripts/a11y-audit.mjs",
     "certification:migrate": "tsx scripts/certification-migration.ts",
-    "catalog:determinisme": "tsx scripts/catalog-determinism.ts"
+    "catalog:determinisme": "tsx scripts/catalog-determinism.ts",
+    "seed:charge": "tsx scripts/seed-charge.ts"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",
