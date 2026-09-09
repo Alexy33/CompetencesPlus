@@ -1,0 +1,10 @@
+Date              : 2026-09-09T00:24:41+02:00
+Noyau             : Linux 6.17.0-35-generic
+Processeur        : 13th Gen Intel(R) Core(TM) i5-1335U
+Coeurs            : 12
+Memoire           : 15Gi
+Node              : v20.19.5
+Next              : 16.3.3
+k6                : k6 v0.54.0 (commit/baba871c8a, go1.23.1, linux/amd64)
+Base              : SQLite (better-sqlite3), WAL
+Mode serveur      : next start (production)

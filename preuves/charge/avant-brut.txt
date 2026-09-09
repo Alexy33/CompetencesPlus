@@ -1,0 +1,29 @@
+
+     ✓ catalogue API 200
+     ✓ catalogue page 200
+     ✓ filtre ville 200
+     ✓ recherche libre 200
+     ✓ fiche profil 200
+     ✓ filtre secteur 200
+
+     checks.........................: 100.00% 9504 out of 9504
+     data_received..................: 256 MB  2.9 MB/s
+     data_sent......................: 1.1 MB  13 kB/s
+     http_req_blocked...............: avg=14.78µs  min=1.88µs  med=8.9µs    max=3.9ms    p(90)=14.04µs  p(95)=17.19µs 
+     http_req_connecting............: avg=3.59µs   min=0s      med=0s       max=3.82ms   p(90)=0s       p(95)=0s      
+     http_req_duration..............: avg=151.9ms  min=3.18ms  med=72.04ms  max=1.79s    p(90)=432.23ms p(95)=618.59ms
+       { expected_response:true }...: avg=151.9ms  min=3.18ms  med=72.04ms  max=1.79s    p(90)=432.23ms p(95)=618.59ms
+   ✓ http_req_failed................: 0.00%   0 out of 9504
+     http_req_receiving.............: avg=159.58µs min=45.33µs med=119.88µs max=5.76ms   p(90)=281.38µs p(95)=358.08µs
+     http_req_sending...............: avg=29.25µs  min=5.41µs  med=25.76µs  max=349.74µs p(90)=41.87µs  p(95)=52.99µs 
+     http_req_tls_handshaking.......: avg=0s       min=0s      med=0s       max=0s       p(90)=0s       p(95)=0s      
+     http_req_waiting...............: avg=151.71ms min=3.07ms  med=71.83ms  max=1.79s    p(90)=432.05ms p(95)=618.4ms 
+     http_reqs......................: 9504    108.953418/s
+     iteration_duration.............: avg=3.1s     min=1.69s   med=3.08s    max=5.19s    p(90)=3.75s    p(95)=3.99s   
+     iterations.....................: 2376    27.238355/s
+     route_api_profil_fiche.........: avg=67.69ms  min=3.18ms  med=47.95ms  max=563.6ms  p(90)=149.12ms p(95)=193.85ms
+   ✓ route_api_profiles.............: avg=74.98ms  min=3.75ms  med=54.76ms  max=559.12ms p(90)=159.28ms p(95)=202.16ms
+   ✓ route_page_catalogue...........: avg=389.95ms min=15.38ms med=341.64ms max=1.79s    p(90)=756.52ms p(95)=908.36ms
+     vus............................: 1       min=1            max=100
+     vus_max........................: 100     min=100          max=100
+

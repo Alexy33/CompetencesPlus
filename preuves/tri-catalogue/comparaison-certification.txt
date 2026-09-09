@@ -1,0 +1,18 @@
+Determinisme de la pagination du catalogue
+Date            : 2026-09-09T07:03:30.234Z
+Cible           : http://localhost:3000
+Ordre           : certification
+Taille de page  : 20
+Pages parcourues: 25
+
+Profils attendus (en base)   : 496
+Identifiants execution 1     : 496
+Identifiants execution 2     : 496
+Identifiants distincts       : 496
+
+Listes identiques            : OUI
+Doublons                     : aucun
+Manquants                    : aucun
+Compte conforme a la base    : OUI
+
+Fichiers : preuves/tri-catalogue/execution-1-certification.txt / preuves/tri-catalogue/execution-2-certification.txt
