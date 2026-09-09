@@ -2,7 +2,8 @@
 
 import { Loader2, RotateCcw, SlidersHorizontal } from "lucide-react";
 
-import type { City, Sector, Skill } from "@/lib/vocabulary";
+import { AVAILABILITIES, type City, type Sector, type Skill } from "@/lib/vocabulary";
+import { AVAILABILITY_LABELS } from "@/lib/labels";
 import {
   ChipFilter,
   FilterGroup,
@@ -63,6 +64,17 @@ export function CatalogueFilters({
           placeholder="Toute la France"
           options={cities}
           onChange={(value) => filters.setSingle("city", value)}
+        />
+      </FilterGroup>
+
+      <FilterGroup label="Disponibilité" htmlFor="catalogue-availability">
+        <SelectFilter
+          id="catalogue-availability"
+          value={filters.availability}
+          placeholder="Toutes disponibilités"
+          options={AVAILABILITIES}
+          labels={AVAILABILITY_LABELS}
+          onChange={(value) => filters.setSingle("availability", value)}
         />
       </FilterGroup>
 

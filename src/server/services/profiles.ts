@@ -1,7 +1,7 @@
 import { and, asc, desc, eq, inArray, isNotNull, like, or, sql, type SQL } from "drizzle-orm";
 import { db } from "@/db";
 import { profile, profileSkill, user } from "@/db/schema";
-import type { City, ProfileStatus, Sector, Skill, VideoStatus } from "@/lib/vocabulary";
+import type { Availability, City, ProfileStatus, Sector, Skill, VideoStatus } from "@/lib/vocabulary";
 import { MAJORITY_AGE, isMinor } from "@/lib/age";
 import { NO_VIDEO, describeVideo, type VideoView } from "@/server/video/presentation";
 import { toIso, toIsoOrNull } from "@/lib/dates";
@@ -16,6 +16,7 @@ export interface ProfileCard {
   title: string;
   sector: Sector;
   city: City;
+  availability: Availability;
   skills: Skill[];
   certified: boolean;
   score: number | null;
@@ -84,6 +85,7 @@ export function toCard(row: ProfileRow, name: string, skills: Skill[]): ProfileC
     title: row.title,
     sector: row.sector,
     city: row.city,
+    availability: row.availability,
     skills,
     certified: row.certifiedAt !== null,
     score: row.score,
@@ -167,6 +169,7 @@ export interface CatalogFilters {
   sector?: Sector;
   city?: City;
   certified?: boolean;
+  availability?: Availability;
   skills?: Skill[];
   page: number;
   pageSize: number;
@@ -180,6 +183,11 @@ const ORDRES: Record<CatalogOrder, () => SQL[]> = {
   ancien: () => [asc(profile.updatedAt), asc(profile.id)],
   certification: () => [
     sql`(${profile.certifiedAt} IS NULL)`,
+    desc(profile.updatedAt),
+    asc(profile.id),
+  ],
+  disponibilite: () => [
+    sql`CASE ${profile.availability} WHEN 'immediate' THEN 0 WHEN 'sous_preavis' THEN 1 ELSE 2 END`,
     desc(profile.updatedAt),
     asc(profile.id),
   ],
@@ -208,6 +216,7 @@ export async function searchCatalog(filters: CatalogFilters): Promise<CatalogRes
   if (filters.sector) conditions.push(eq(profile.sector, filters.sector));
   if (filters.city) conditions.push(eq(profile.city, filters.city));
   if (filters.certified) conditions.push(isNotNull(profile.certifiedAt));
+  if (filters.availability) conditions.push(eq(profile.availability, filters.availability));
 
   if (filters.q) {
     const needle = `%${filters.q.toLowerCase()}%`;

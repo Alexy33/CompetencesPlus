@@ -25,6 +25,7 @@ function draftFrom(profile: OwnProfile): ProfileDraft {
     title: profile.title,
     sector: profile.sector,
     city: profile.city,
+    availability: profile.availability,
     bio: profile.bio,
     videoUrl: embedLinkOf(profile),
     skills: profile.skills,

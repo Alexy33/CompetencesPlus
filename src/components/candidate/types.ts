@@ -1,4 +1,4 @@
-import type { City, Sector, Skill } from "@/lib/vocabulary";
+import type { Availability, City, Sector, Skill } from "@/lib/vocabulary";
 
 export type CertificationStatus = "not_started" | "in_progress" | "submitted";
 
@@ -27,6 +27,7 @@ export interface ProfileDraft {
   title: string;
   sector: Sector;
   city: City;
+  availability: Availability;
   bio: string;
   videoUrl: string;
   skills: Skill[];

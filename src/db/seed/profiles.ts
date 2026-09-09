@@ -46,6 +46,7 @@ async function seedOne(item: SeedProfile): Promise<boolean> {
       videoId: stored?.videoId ?? null,
       videoProvider: stored?.provider ?? null,
       status: item.status,
+      availability: item.availability,
       score: item.score > 0 ? item.score : null,
       certifiedAt: item.score > 0 ? new Date() : null,
       views: item.views,

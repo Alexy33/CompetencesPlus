@@ -1,5 +1,6 @@
 import { z } from "zod";
 import {
+  AVAILABILITIES,
   CITIES,
   CONTACT_STATUSES,
   DEFAULT_PAGE_SIZE,
@@ -47,6 +48,13 @@ export const VideoViewStateSchema = named(
   }),
 );
 export const ContactStatusSchema = named("ContactStatus", z.enum(mutable(CONTACT_STATUSES)));
+export const AvailabilitySchema = named(
+  "Availability",
+  z.enum(mutable(AVAILABILITIES)).meta({
+    description:
+      "immediate : peut prendre un poste tout de suite. sous_preavis : disponible apres un preavis. non_disponible : pas en recherche active.",
+  }),
+);
 export const UserRoleSchema = named("UserRole", z.enum(mutable(USER_ROLES)));
 
 export const ApiErrorSchema = named(

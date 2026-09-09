@@ -1,4 +1,4 @@
-import type { City, ProfileStatus, Sector, Skill } from "@/lib/vocabulary";
+import type { Availability, City, ProfileStatus, Sector, Skill } from "@/lib/vocabulary";
 
 export interface SeedProfile {
   name: string;
@@ -15,6 +15,7 @@ export interface SeedProfile {
   views: number;
   contactCount: number;
   status: ProfileStatus;
+  availability: Availability;
 }
 
 export const SEED_PROFILES: SeedProfile[] = [
@@ -32,6 +33,7 @@ export const SEED_PROFILES: SeedProfile[] = [
     views: 214,
     contactCount: 6,
     status: "published",
+    availability: "sous_preavis",
   },
   {
     name: "Karim Vasseur",
@@ -47,6 +49,7 @@ export const SEED_PROFILES: SeedProfile[] = [
     views: 168,
     contactCount: 4,
     status: "published",
+    availability: "non_disponible",
   },
   {
     name: "Sonia Delaunay-Frey",
@@ -62,6 +65,7 @@ export const SEED_PROFILES: SeedProfile[] = [
     views: 402,
     contactCount: 11,
     status: "published",
+    availability: "immediate",
   },
   {
     name: "Mathieu Ozanne",
@@ -77,6 +81,7 @@ export const SEED_PROFILES: SeedProfile[] = [
     views: 96,
     contactCount: 2,
     status: "published",
+    availability: "sous_preavis",
   },
   {
     name: "Fatou Nguyen",
@@ -92,6 +97,7 @@ export const SEED_PROFILES: SeedProfile[] = [
     views: 311,
     contactCount: 9,
     status: "published",
+    availability: "non_disponible",
   },
   {
     name: "Tristan Lebel",
@@ -107,6 +113,7 @@ export const SEED_PROFILES: SeedProfile[] = [
     views: 74,
     contactCount: 1,
     status: "published",
+    availability: "immediate",
   },
   {
     name: "Leïla Amrani",
@@ -122,6 +129,7 @@ export const SEED_PROFILES: SeedProfile[] = [
     views: 132,
     contactCount: 3,
     status: "published",
+    availability: "sous_preavis",
   },
   {
     name: "Pierre-Yves Caron",
@@ -137,6 +145,7 @@ export const SEED_PROFILES: SeedProfile[] = [
     views: 187,
     contactCount: 5,
     status: "published",
+    availability: "non_disponible",
   },
   {
     name: "Marion Estève",
@@ -152,6 +161,7 @@ export const SEED_PROFILES: SeedProfile[] = [
     views: 205,
     contactCount: 7,
     status: "published",
+    availability: "immediate",
   },
   {
     name: "Yann Kervella",
@@ -167,6 +177,7 @@ export const SEED_PROFILES: SeedProfile[] = [
     views: 61,
     contactCount: 0,
     status: "published",
+    availability: "sous_preavis",
   },
   {
     name: "Nadia Chevallier",
@@ -182,6 +193,7 @@ export const SEED_PROFILES: SeedProfile[] = [
     views: 143,
     contactCount: 3,
     status: "published",
+    availability: "non_disponible",
   },
   {
     name: "Olivier Ranucci",
@@ -197,6 +209,7 @@ export const SEED_PROFILES: SeedProfile[] = [
     views: 88,
     contactCount: 1,
     status: "pending",
+    availability: "immediate",
   },
   {
     name: "Claire Bonnefoy",
@@ -212,6 +225,7 @@ export const SEED_PROFILES: SeedProfile[] = [
     views: 356,
     contactCount: 12,
     status: "published",
+    availability: "sous_preavis",
   },
   {
     name: "Sébastien Marchal",
@@ -227,5 +241,6 @@ export const SEED_PROFILES: SeedProfile[] = [
     views: 119,
     contactCount: 2,
     status: "pending",
+    availability: "non_disponible",
   },
 ];

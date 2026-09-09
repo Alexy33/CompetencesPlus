@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight, BadgeCheck, Heart, Loader2, MapPin } from "lucide-react";
 
 import { Chip, SkillChip } from "@/components/common/chip";
+import { AVAILABILITY_SHORT_LABELS } from "@/lib/labels";
 import { apiSend } from "@/lib/api-client";
 import type { ProfileCard as ProfileCardData } from "@/server/services/profiles";
 
@@ -102,6 +103,12 @@ export function ProfileCard({
             </span>
             <Chip tone="info" size="xs">
               {profile.sector}
+            </Chip>
+            <Chip
+              tone={profile.availability === "immediate" ? "success" : "warning"}
+              size="xs"
+            >
+              {AVAILABILITY_SHORT_LABELS[profile.availability]}
             </Chip>
           </div>
 

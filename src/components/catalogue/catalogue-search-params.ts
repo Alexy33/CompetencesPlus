@@ -22,6 +22,7 @@ export function toCarriedParams(filters: CatalogFilters): URLSearchParams {
   if (filters.sector) carried.set("sector", filters.sector);
   if (filters.city) carried.set("city", filters.city);
   if (filters.certified) carried.set("certified", "true");
+  if (filters.availability) carried.set("availability", filters.availability);
   for (const skill of filters.skills ?? []) carried.append("skills", skill);
 
   return carried;
