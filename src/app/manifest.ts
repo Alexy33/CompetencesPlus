@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Profils professionnels, vidéo et évaluation des compétences.",
     start_url: "/",
     display: "standalone",
-    background_color: "#ebf0f7",
-    theme_color: "#1b3a6b",
+    background_color: "#edf6f4",
+    theme_color: "#0f766e",
     lang: "fr",
   };
 }

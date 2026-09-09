@@ -123,7 +123,7 @@ export default async function ProfilePage({
                 <div className="rounded-3xl bg-brand p-7 text-white">
                   <div className="flex items-center gap-2">
                     <BadgeCheck aria-hidden="true" className="size-5 stroke-[2]" />
-                    <span className="font-mono text-[10.5px] font-bold uppercase tracking-[0.16em] text-white/80">
+                    <span className="font-mono text-[10.5px] font-bold uppercase tracking-[0.16em] text-white/90">
                       Badge de certification
                     </span>
                   </div>
@@ -131,7 +131,7 @@ export default async function ProfilePage({
                     {profile.score}
                     <span className="text-2xl font-bold text-white/70"> / 100</span>
                   </p>
-                  <p className="mt-3 text-sm leading-relaxed text-white/80">
+                  <p className="mt-3 text-sm leading-relaxed text-white/90">
                     Évaluation des aptitudes professionnelles. Seuil : {settings.certificationThreshold}/100.
                   </p>
                 </div>
