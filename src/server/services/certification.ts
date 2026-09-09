@@ -9,6 +9,7 @@ import {
   questionsToReanswer,
 } from "./questionnaire";
 import { getSettings } from "./settings";
+import { toIsoOrNull } from "@/lib/dates";
 
 export interface LoadedQuestion {
   id: string;
@@ -34,7 +35,28 @@ export function loadQuestions(): LoadedQuestion[] {
  * avec la version sous laquelle elle a ete ouverte.
  */
 export function questionsOf(version: number): LoadedQuestion[] {
-  return getQuestionnaireVersion(version).questions.map((item, position) => ({
+  return toLoadedQuestions(getQuestionnaireVersion(version));
+}
+
+export function readableVersion(version: number): number {
+  try {
+    getQuestionnaireVersion(version);
+    return version;
+  } catch {
+    return questionnaireVersion();
+  }
+}
+
+function toLoadedQuestions(questionnaire: {
+  questions: readonly {
+    id: string;
+    text: string;
+    type: QuestionType;
+    weight: number;
+    options: readonly { id: string; label: string; value: number }[];
+  }[];
+}): LoadedQuestion[] {
+  return questionnaire.questions.map((item, position) => ({
     id: item.id,
     text: item.text,
     type: item.type,
@@ -131,7 +153,7 @@ export async function certificationState(userId: string): Promise<CertificationS
 
   // Une tentative existante reste lue avec SA version : le nombre de
   // questions affiche ne change pas sous les pieds du candidat.
-  const version = attempt?.questionnaireVersion ?? questionnaireVersion();
+  const version = readableVersion(attempt?.questionnaireVersion ?? questionnaireVersion());
   const questions = questionsOf(version);
 
   const answers = attempt ? await answersOf(attempt.id) : {};
@@ -161,7 +183,7 @@ export async function certificationState(userId: string): Promise<CertificationS
     threshold: settings.certificationThreshold,
     score: attempt?.score ?? null,
     passed: attempt?.passed ?? null,
-    submittedAt: attempt?.submittedAt?.toISOString() ?? null,
+    submittedAt: toIsoOrNull(attempt?.submittedAt),
   };
 }
 
@@ -206,7 +228,7 @@ export async function submitAttempt(userId: string): Promise<SubmitResult> {
 
   // Le bareme applique est celui sous lequel la tentative a ete ouverte,
   // meme si une version plus recente est deployee entre-temps.
-  const questions = questionsOf(attempt.questionnaireVersion);
+  const questions = questionsOf(readableVersion(attempt.questionnaireVersion));
   const current = questionnaireVersion();
   const score = computeScore(questions, answers);
   const passed = score >= settings.certificationThreshold;

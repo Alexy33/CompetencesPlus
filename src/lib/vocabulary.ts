@@ -56,6 +56,10 @@ export const CONTACT_STATUSES = [
   "Écarté",
 ] as const;
 
+export const AVAILABILITIES = ["immediate", "sous_preavis", "non_disponible"] as const;
+
+export const DEFAULT_AVAILABILITY = "immediate";
+
 export const USER_ROLES = ["candidate", "recruiter", "admin"] as const;
 
 // Types de question acceptes dans certification/questions.vN.json.
@@ -73,6 +77,7 @@ export type VideoProviderName = (typeof VIDEO_PROVIDERS)[number];
 export type VideoProcessingState = (typeof VIDEO_PROCESSING_STATES)[number];
 export type VideoViewState = (typeof VIDEO_VIEW_STATES)[number];
 export type ContactStatus = (typeof CONTACT_STATUSES)[number];
+export type Availability = (typeof AVAILABILITIES)[number];
 export type UserRole = (typeof USER_ROLES)[number];
 export type QuestionType = (typeof QUESTION_TYPES)[number];
 

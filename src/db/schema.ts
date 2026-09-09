@@ -1,8 +1,10 @@
-import { sql } from "drizzle-orm";
+import { desc, sql } from "drizzle-orm";
 import { index, integer, primaryKey, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
 import {
+  AVAILABILITIES,
   CITIES,
   CONTACT_STATUSES,
+  DEFAULT_AVAILABILITY,
   PROFILE_STATUSES,
   SECTORS,
   SKILLS,
@@ -127,6 +129,9 @@ export const profile = sqliteTable(
     videoReviewedBy: text("video_reviewed_by").references(() => user.id, { onDelete: "set null" }),
     videoReviewedAt: integer("video_reviewed_at", { mode: "timestamp" }),
 
+    availability: text("availability", { enum: mutable(AVAILABILITIES) })
+      .notNull()
+      .default(DEFAULT_AVAILABILITY),
     status: text("status", { enum: mutable(PROFILE_STATUSES) })
       .notNull()
       .default("pending"),
@@ -144,7 +149,14 @@ export const profile = sqliteTable(
       .notNull()
       .default(sql`(unixepoch())`),
   },
-  (table) => [index("profile_video_id_idx").on(table.videoId)],
+  (table) => [
+    index("profile_video_id_idx").on(table.videoId),
+    index("profile_catalogue_idx").on(table.status, desc(table.updatedAt), table.id),
+    index("profile_sector_idx").on(table.status, table.sector),
+    index("profile_city_idx").on(table.status, table.city),
+    index("profile_certified_idx").on(table.status, table.certifiedAt),
+    index("profile_availability_idx").on(table.status, table.availability),
+  ],
 );
 
 export const profileSkill = sqliteTable(

@@ -5,7 +5,8 @@ import { Loader2, Save } from "lucide-react";
 import { Action } from "@/components/common/action";
 import { Field, fieldControl } from "@/components/common/field";
 import { Surface, SurfaceHeading } from "@/components/common/surface";
-import type { City, Sector, Skill } from "@/lib/vocabulary";
+import { AVAILABILITIES, type Availability, type City, type Sector, type Skill } from "@/lib/vocabulary";
+import { AVAILABILITY_LABELS } from "@/lib/labels";
 import type { ProfileDraft } from "./types";
 
 export function ProfileForm({
@@ -83,6 +84,20 @@ export function ProfileForm({
           >
             {cities.map((city) => (
               <option key={city}>{city}</option>
+            ))}
+          </select>
+        </Field>
+
+        <Field label="Disponibilité">
+          <select
+            className={fieldControl}
+            value={draft.availability}
+            onChange={(event) => onPatch({ availability: event.target.value as Availability })}
+          >
+            {AVAILABILITIES.map((valeur) => (
+              <option key={valeur} value={valeur}>
+                {AVAILABILITY_LABELS[valeur]}
+              </option>
             ))}
           </select>
         </Field>

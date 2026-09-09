@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import type { z } from "zod";
 
+import { isTrustedOrigin } from "@/lib/origins";
 import { ApiError } from "../http";
 import { arrayFields, parseOrThrow, readBody, readQuery, requireAccess } from "./request";
 import {
@@ -17,6 +18,13 @@ type NextRouteHandler = (request: NextRequest, context: NextRouteContext) => Pro
 const INTERNAL_ERROR = {
   error: { code: "internal", message: "Erreur interne du serveur." },
 };
+
+const VERROUS_SQLITE = new Set(["SQLITE_BUSY", "SQLITE_LOCKED", "SQLITE_BUSY_SNAPSHOT"]);
+
+function baseIndisponible(error: unknown): boolean {
+  const code = (error as { code?: unknown } | null)?.code;
+  return typeof code === "string" && VERROUS_SQLITE.has(code);
+}
 
 function toResponse(result: unknown, successStatus: number): Response {
   if (result instanceof Response) return result;
@@ -36,8 +44,14 @@ export function defineRoute<
 
   let arrays: Set<string> | null = null;
 
+  const ecrit = definition.method !== "GET";
+
   const handler: NextRouteHandler = async (request, context) => {
     try {
+      if (ecrit && !isTrustedOrigin(request.headers.get("origin"))) {
+        throw ApiError.forbidden("Origine non autorisee pour une requete d'ecriture.");
+      }
+
       const session = definition.access
         ? await requireAccess(request, definition.access)
         : null;
@@ -70,6 +84,16 @@ export function defineRoute<
     } catch (error) {
       if (error instanceof ApiError) {
         return Response.json(error.toJSON(), { status: error.status });
+      }
+
+      if (baseIndisponible(error)) {
+        console.error(`[api] ${definition.method} ${definition.path} : base verrouillee`, error);
+        return Response.json(
+          ApiError.unavailable(
+            "Le service est momentanement indisponible : la base est occupee. Reessayez.",
+          ).toJSON(),
+          { status: 503, headers: { "Retry-After": "2" } },
+        );
       }
 
       console.error(`[api] ${definition.method} ${definition.path} :`, error);

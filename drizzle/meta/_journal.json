@@ -78,6 +78,20 @@
       "when": 1788800000000,
       "tag": "0010_opaque_video_reference",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1788906432274,
+      "tag": "0011_flowery_celestials",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1788937108584,
+      "tag": "0012_faulty_fenris",
+      "breakpoints": true
     }
   ]
 }

@@ -5,6 +5,7 @@ import { nextCookies } from "better-auth/next-js";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 import { MINIMUM_AGE, isAllowedToRegister } from "@/lib/age";
+import { trustedOrigins } from "@/lib/origins";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -89,15 +90,7 @@ export const auth = betterAuth({
     },
   },
 
-  trustedOrigins: Array.from(
-    new Set([
-      process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
-      "http://localhost:3000",
-      "http://127.0.0.1:3000",
-      `http://localhost:${process.env.PORT ?? 3000}`,
-      `http://127.0.0.1:${process.env.PORT ?? 3000}`,
-    ]),
-  ),
+  trustedOrigins: trustedOrigins(),
 
   advanced: {
 

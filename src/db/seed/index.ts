@@ -3,6 +3,7 @@ import { setting } from "@/db/schema";
 import { DEFAULT_CERTIFICATION_THRESHOLD, DEFAULT_PAGE_SIZE } from "@/lib/vocabulary";
 import { getQuestionnaire } from "@/server/services/questionnaire";
 import { createAccount, DEMO_PASSWORD } from "./accounts";
+import { seedCertificationAttempts } from "./certification";
 import { seedRecruiterCompany } from "./company";
 import { seedProfiles } from "./profiles";
 import { seedRecruiterActivity } from "./recruiter-activity";
@@ -52,6 +53,9 @@ async function seed() {
     "1972-06-09",
   );
 
+  console.log("[seed] passations de certification…");
+  const passations = await seedCertificationAttempts(DEFAULT_CERTIFICATION_THRESHOLD);
+
   console.log("[seed] modération des vidéos…");
   await seedVideoModeration(adminId);
 
@@ -66,7 +70,7 @@ async function seed() {
   }
 
   console.log(
-    `[seed] terminé — ${profiles.count} profils, ` +
+    `[seed] terminé — ${profiles.count} profils, ${passations.attempts} passations v${passations.version}, ` +
       `questionnaire v${questionnaire.version} (${questionnaire.questions.length} questions).`,
   );
   console.log(`[seed] comptes de démonstration (mot de passe « ${DEMO_PASSWORD} ») :`);

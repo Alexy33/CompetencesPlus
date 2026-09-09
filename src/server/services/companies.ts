@@ -2,6 +2,7 @@ import { and, eq, ne } from "drizzle-orm";
 import { db } from "@/db";
 import { company } from "@/db/schema";
 import type { Sector } from "@/lib/vocabulary";
+import { toIso } from "@/lib/dates";
 
 export interface CompanyView {
   id: string;
@@ -44,8 +45,8 @@ function toView(row: CompanyRow): CompanyView {
     sector: row.sector,
     phone: row.phone,
     website: row.website,
-    createdAt: row.createdAt.toISOString(),
-    updatedAt: row.updatedAt.toISOString(),
+    createdAt: toIso(row.createdAt),
+    updatedAt: toIso(row.updatedAt),
   };
 }
 

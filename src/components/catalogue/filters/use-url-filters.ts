@@ -8,6 +8,7 @@ export interface UrlFilters {
   sector: string;
   city: string;
   certifiedOnly: boolean;
+  availability: string;
   skills: string[];
   hasAny: boolean;
   pending: boolean;
@@ -29,6 +30,7 @@ export function useUrlFilters(): UrlFilters {
   const sector = searchParams.get("sector") ?? "";
   const city = searchParams.get("city") ?? "";
   const certifiedOnly = searchParams.get("certified") === "true";
+  const availability = searchParams.get("availability") ?? "";
   const skills = searchParams.getAll("skills");
 
   const [draftQuery, setDraftQuery] = useState(query);
@@ -55,8 +57,9 @@ export function useUrlFilters(): UrlFilters {
     sector,
     city,
     certifiedOnly,
+    availability,
     skills,
-    hasAny: Boolean(query || sector || city || certifiedOnly || skills.length),
+    hasAny: Boolean(query || sector || city || certifiedOnly || availability || skills.length),
     pending,
     draftQuery,
     setDraftQuery,

@@ -74,12 +74,14 @@ export function SelectFilter({
   value,
   placeholder,
   options,
+  labels,
   onChange,
 }: {
   id: string;
   value: string;
   placeholder: string;
   options: readonly string[];
+  labels?: Record<string, string>;
   onChange: (value: string) => void;
 }) {
   return (
@@ -92,7 +94,7 @@ export function SelectFilter({
       <option value="">{placeholder}</option>
       {options.map((option) => (
         <option key={option} value={option}>
-          {option}
+          {labels?.[option] ?? option}
         </option>
       ))}
     </select>

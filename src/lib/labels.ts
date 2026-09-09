@@ -1,4 +1,4 @@
-import type { ProfileStatus, UserRole, VideoStatus } from "@/lib/vocabulary";
+import type { Availability, ProfileStatus, UserRole, VideoStatus } from "@/lib/vocabulary";
 
 export const PROFILE_STATUS_LABELS: Record<ProfileStatus, string> = {
   pending: "En attente",
@@ -22,4 +22,16 @@ export const ROLE_WORKSPACE: Record<UserRole, string> = {
   candidate: "/candidate",
   recruiter: "/recruiter",
   admin: "/admin",
+};
+
+export const AVAILABILITY_LABELS: Record<Availability, string> = {
+  immediate: "Disponible immédiatement",
+  sous_preavis: "Disponible sous préavis",
+  non_disponible: "Pas en recherche active",
+};
+
+export const AVAILABILITY_SHORT_LABELS: Record<Availability, string> = {
+  immediate: "Immédiate",
+  sous_preavis: "Sous préavis",
+  non_disponible: "Non disponible",
 };

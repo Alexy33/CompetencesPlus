@@ -17,3 +17,18 @@ export function formatDay(value: string | Date | null | undefined): string {
   const date = value instanceof Date ? value : new Date(value);
   return Number.isNaN(date.getTime()) ? "—" : DAY.format(date);
 }
+
+export function toIsoOrNull(value: Date | null | undefined): string | null {
+  if (!value) return null;
+  return Number.isNaN(value.getTime()) ? null : value.toISOString();
+}
+
+const EPOQUE = new Date(0).toISOString();
+
+export function toIso(value: Date): string {
+  if (Number.isNaN(value.getTime())) {
+    console.error("[dates] horodatage illisible en base, replié sur l'époque Unix");
+    return EPOQUE;
+  }
+  return value.toISOString();
+}

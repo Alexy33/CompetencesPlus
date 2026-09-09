@@ -1,6 +1,13 @@
 import { z } from "zod";
 import { named } from "../openapi/schemas";
 import {
+  CATALOG_ORDERS,
+  CATALOG_ORDER_DESCRIPTIONS,
+  DEFAULT_CATALOG_ORDER,
+} from "@/lib/catalog-order";
+import { mutable } from "@/lib/vocabulary";
+import {
+  AvailabilitySchema,
   CitySchema,
   PaginationQuery,
   ProfileStatusSchema,
@@ -95,6 +102,7 @@ export const ProfileCardSchema = named(
     title: z.string(),
     sector: SectorSchema,
     city: CitySchema,
+    availability: AvailabilitySchema,
     skills: z.array(SkillSchema),
     certified: z.boolean(),
     score: z.number().int().nullable().meta({ description: "Nul tant que la certification n'est pas obtenue." }),
@@ -129,7 +137,20 @@ export const MyProfileSchema = named(
 
 export const ProfilePageSchema = pageOf("ProfilePage", ProfileCardSchema);
 
+export const CatalogOrderSchema = named(
+  "CatalogOrder",
+  z.enum(mutable(CATALOG_ORDERS)).meta({
+    description: Object.entries(CATALOG_ORDER_DESCRIPTIONS)
+      .map(([cle, texte]) => `${cle} : ${texte}`)
+      .join(" "),
+  }),
+);
+
 export const CatalogQuery = PaginationQuery.extend({
+  order: CatalogOrderSchema.default(DEFAULT_CATALOG_ORDER).meta({
+    description:
+      "Ordre de presentation. Tous les ordres se terminent par l'identifiant du profil, ce qui rend la pagination deterministe. Aucun critere de popularite n'est propose.",
+  }),
   q: z
     .string()
     .trim()
@@ -137,6 +158,9 @@ export const CatalogQuery = PaginationQuery.extend({
     .meta({ description: "Recherche libre sur l'intitulé, le secteur, la ville et les compétences." }),
   sector: SectorSchema.optional(),
   city: CitySchema.optional(),
+  availability: AvailabilitySchema.optional().meta({
+    description: "Filtre sur la disponibilite declaree par le candidat.",
+  }),
   certified: QueryBoolean.optional().meta({
     description: "true : uniquement les profils dont l'évaluation est validée.",
   }),
@@ -156,6 +180,7 @@ export const UpdateMyProfileBody = named(
     title: z.string().trim().max(120).optional(),
     sector: SectorSchema.optional(),
     city: CitySchema.optional(),
+    availability: AvailabilitySchema.optional(),
     bio: z.string().trim().max(2000).optional(),
     videoUrl: z
       .string()

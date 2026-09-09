@@ -8,6 +8,7 @@ import { STORED_EXTENSIONS, extensionForMime, mimeForExtension } from "./mime";
 import {
   EmptyVideoError,
   UnsupportedVideoTypeError,
+  VideoProviderUnavailableError,
   VideoTooLargeError,
   type StoredVideo,
   type VideoByteRange,
@@ -41,6 +42,13 @@ export interface LocalVideoProviderOptions {
 }
 
 const ID_BYTES = 16;
+
+const ERREURS_STOCKAGE = new Set(["EACCES", "EPERM", "EROFS", "ENOSPC", "EMFILE", "ENFILE", "EDQUOT"]);
+
+function estPanneDeStockage(error: unknown): boolean {
+  const code = (error as { code?: unknown } | null)?.code;
+  return typeof code === "string" && ERREURS_STOCKAGE.has(code);
+}
 
 export class LocalVideoProvider implements VideoProvider {
   readonly name = "local" as const;
@@ -116,14 +124,31 @@ export class LocalVideoProvider implements VideoProvider {
     const finalPath = this.pathFor(videoId, extension);
     const partPath = `${finalPath}.part`;
 
-    await mkdir(/*turbopackIgnore: true*/ dirname(finalPath), { recursive: true });
+    try {
+      await mkdir(/*turbopackIgnore: true*/ dirname(finalPath), { recursive: true });
+    } catch (error) {
+      if (estPanneDeStockage(error)) {
+        console.error("[video] stockage local inaccessible :", error);
+        throw new VideoProviderUnavailableError(this.name, "Le stockage est inaccessible.");
+      }
+      throw error;
+    }
 
     const out = createWriteStream(/*turbopackIgnore: true*/ partPath);
     let bytes = 0;
 
+    let erreurFlux: Error | null = null;
+    out.on("error", (error: Error) => {
+      erreurFlux = error;
+    });
+    const verifierFlux = () => {
+      if (erreurFlux) throw erreurFlux;
+    };
+
     try {
       const reader = upload.body.getReader();
       for (;;) {
+        verifierFlux();
         const { done, value } = await reader.read();
         if (done) break;
 
@@ -131,13 +156,22 @@ export class LocalVideoProvider implements VideoProvider {
         if (bytes > upload.maxBytes) throw new VideoTooLargeError(upload.maxBytes);
 
         if (!out.write(value)) {
-          await new Promise<void>((ok) => out.once("drain", ok));
+          await new Promise<void>((ok, ko) => {
+            out.once("drain", ok);
+            out.once("error", ko);
+          });
         }
       }
+      verifierFlux();
       await new Promise<void>((ok, ko) => out.end((error?: Error | null) => (error ? ko(error) : ok())));
     } catch (error) {
       out.destroy();
-      await rm(/*turbopackIgnore: true*/ partPath, { force: true });
+      await rm(/*turbopackIgnore: true*/ partPath, { force: true }).catch(() => {});
+
+      if (estPanneDeStockage(error)) {
+        console.error("[video] ecriture impossible sur le stockage local :", error);
+        throw new VideoProviderUnavailableError(this.name, "Le stockage est inaccessible.");
+      }
       throw error;
     }
 
