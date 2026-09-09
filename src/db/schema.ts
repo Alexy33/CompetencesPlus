@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { desc, sql } from "drizzle-orm";
 import { index, integer, primaryKey, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
 import {
   CITIES,
@@ -144,7 +144,13 @@ export const profile = sqliteTable(
       .notNull()
       .default(sql`(unixepoch())`),
   },
-  (table) => [index("profile_video_id_idx").on(table.videoId)],
+  (table) => [
+    index("profile_video_id_idx").on(table.videoId),
+    index("profile_catalogue_idx").on(table.status, desc(table.updatedAt), table.id),
+    index("profile_sector_idx").on(table.status, table.sector),
+    index("profile_city_idx").on(table.status, table.city),
+    index("profile_certified_idx").on(table.status, table.certifiedAt),
+  ],
 );
 
 export const profileSkill = sqliteTable(
