@@ -1,16 +1,16 @@
 "use client";
 
-import { AlertTriangle, BadgeCheck } from "lucide-react";
-
 import { ActionLink } from "@/components/common/action";
 import { Surface, SurfaceHeading } from "@/components/common/surface";
-import type { CertificationSummary } from "./types";
+import { AlertTriangle, BadgeCheck } from "lucide-react";
+import type { CertificationPanelProps, CertificationSummary } from "./types";
 
 function summaryText(certification: CertificationSummary | null): string {
   if (certification?.status === "in_progress") {
     return `Questionnaire en cours : ${certification.answered}/${certification.questionCount} réponses.`;
   }
-  if (certification?.passed) return "Badge de certification obtenu et visible sur votre profil public.";
+  if (certification?.passed)
+    return "Badge de certification obtenu et visible sur votre profil public.";
   return "Passez le questionnaire pour certifier vos aptitudes professionnelles.";
 }
 
@@ -21,13 +21,7 @@ function callToAction(certification: CertificationSummary | null): string {
   return "Commencer le questionnaire";
 }
 
-export function CertificationPanel({
-  certification,
-  fallbackScore,
-}: {
-  certification: CertificationSummary | null;
-  fallbackScore: number | null;
-}) {
+export function CertificationPanel({ certification, fallbackScore }: CertificationPanelProps) {
   const score = certification?.score ?? fallbackScore;
 
   return (
@@ -50,9 +44,8 @@ export function CertificationPanel({
           <p className="leading-relaxed">
             <strong>Certification à mettre à jour.</strong> Vous l’avez obtenue avec la version{" "}
             {certification.questionnaireVersion} du questionnaire, or la version{" "}
-            {certification.currentQuestionnaireVersion} est désormais en vigueur. Vous ne
-            répondrez qu’aux questions qui ont changé. Votre badge reste visible des recruteurs en
-            attendant.
+            {certification.currentQuestionnaireVersion} est désormais en vigueur. Vous ne répondrez
+            qu’aux questions qui ont changé. Votre badge reste visible des recruteurs en attendant.
           </p>
         </div>
       ) : null}

@@ -2,12 +2,9 @@ import { AuthPopup } from "@/components/auth/auth-popup";
 import { MentionDroits } from "@/components/layout/mention-droits";
 import { ProductName } from "@/components/layout/product-name";
 import { PublicNotice } from "@/components/layout/public-notice";
+import type { LayoutProps } from "@/types/pages";
 
-export default function AuthLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function AuthLayout({ children }: LayoutProps) {
   return (
     <div className="flex min-h-screen flex-col bg-canvas text-ink">
       <MentionDroits className="relative z-20" />

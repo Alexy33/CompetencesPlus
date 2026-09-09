@@ -1,9 +1,9 @@
-import { Info } from "lucide-react";
-
 import { MENTION_DROITS_ALLOCATIONS } from "@/lib/mentions";
 import { cn } from "@/lib/utils";
+import { Info } from "lucide-react";
+import type { MentionDroitsProps } from "./types";
 
-export function MentionDroits({ className }: { className?: string }) {
+export function MentionDroits({ className }: MentionDroitsProps) {
   return (
     <div
       role="note"

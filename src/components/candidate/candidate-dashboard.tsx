@@ -1,18 +1,18 @@
 "use client";
 
-import { BadgeCheck, Eye, FileVideo, MessageSquare } from "lucide-react";
-
 import { ActionLink } from "@/components/common/action";
 import { StatusMessage } from "@/components/common/feedback";
 import { PageHeader } from "@/components/common/page-header";
-import { StatGrid, type Stat } from "@/components/common/stat-card";
+import { StatGrid } from "@/components/common/stat-card";
+import type { Stat } from "@/components/common/types";
 import { PROFILE_STATUS_LABELS } from "@/lib/labels";
-import type { City, Sector, Skill } from "@/lib/vocabulary";
 import type { OwnProfile } from "@/server/services/profiles";
+import { BadgeCheck, Eye, FileVideo, MessageSquare } from "lucide-react";
 import { CertificationPanel } from "./certification-panel";
 import { ConsentSummary } from "./consent-summary";
 import { NotificationsPanel } from "./notifications-panel";
 import { ProfileForm } from "./profile-form";
+import type { CandidateDashboardProps } from "./types";
 import { useCandidateDashboard } from "./use-candidate-dashboard";
 import { VideoManager } from "./video-manager";
 import { VideoModerationNotice } from "./video-moderation-notice";
@@ -37,14 +37,7 @@ export function CandidateDashboard({
   cities,
   skills,
   embedEnabled,
-}: {
-  initialProfile: OwnProfile;
-  sectors: readonly Sector[];
-  cities: readonly City[];
-  skills: readonly Skill[];
-  /** Hébergement par lien tiers activé sur ce déploiement (éteint par défaut). */
-  embedEnabled: boolean;
-}) {
+}: CandidateDashboardProps) {
   const dashboard = useCandidateDashboard(initialProfile, embedEnabled);
   const { profile, draft, busy } = dashboard;
 

@@ -1,6 +1,5 @@
-import type { ReactNode } from "react";
-
 import { cn } from "@/lib/utils";
+import type { PageHeaderProps } from "./types";
 
 export function PageHeader({
   eyebrow,
@@ -9,14 +8,7 @@ export function PageHeader({
   description,
   action,
   className,
-}: {
-  eyebrow?: string;
-  title: string;
-  highlight?: string;
-  description?: string;
-  action?: ReactNode;
-  className?: string;
-}) {
+}: PageHeaderProps) {
   return (
     <header
       className={cn(

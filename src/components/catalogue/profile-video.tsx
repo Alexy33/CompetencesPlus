@@ -1,8 +1,11 @@
-import { AlertTriangle, Loader2, PlayCircle } from "lucide-react";
-import type { ReactNode } from "react";
-
 import { VIDEO_NONE_MESSAGE } from "@/lib/vocabulary";
-import type { VideoView } from "@/server/video/presentation";
+import { AlertTriangle, Loader2, PlayCircle } from "lucide-react";
+import type {
+  PlaceholderTextProps,
+  ProfileVideoProps,
+  VideoFrameProps,
+  VideoPlaceholderProps,
+} from "./types";
 
 /**
  * Lecteur de la video d'un profil.
@@ -13,7 +16,7 @@ import type { VideoView } from "@/server/video/presentation";
  * elle, reste entiere.
  */
 
-function VideoFrame({ children }: { children: ReactNode }) {
+function VideoFrame({ children }: VideoFrameProps) {
   return (
     <div className="relative overflow-hidden rounded-3xl border border-brand-300 bg-panel">
       {children}
@@ -21,13 +24,7 @@ function VideoFrame({ children }: { children: ReactNode }) {
   );
 }
 
-function VideoPlaceholder({
-  icon,
-  children,
-}: {
-  icon: ReactNode;
-  children: ReactNode;
-}) {
+function VideoPlaceholder({ icon, children }: VideoPlaceholderProps) {
   return (
     <VideoFrame>
       <div className="flex aspect-video w-full flex-col items-center justify-center bg-brand-100 px-6 text-center">
@@ -40,7 +37,7 @@ function VideoPlaceholder({
   );
 }
 
-function PlaceholderText({ children }: { children: ReactNode }) {
+function PlaceholderText({ children }: PlaceholderTextProps) {
   return (
     <p className="mt-4 max-w-md font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-brand-800">
       {children}
@@ -48,7 +45,7 @@ function PlaceholderText({ children }: { children: ReactNode }) {
   );
 }
 
-export function ProfileVideo({ video, name }: { video: VideoView; name: string }) {
+export function ProfileVideo({ video, name }: ProfileVideoProps) {
   if (video.state === "processing") {
     return (
       <VideoPlaceholder
@@ -61,9 +58,7 @@ export function ProfileVideo({ video, name }: { video: VideoView; name: string }
 
   if (video.state === "unavailable") {
     return (
-      <VideoPlaceholder
-        icon={<AlertTriangle aria-hidden="true" className="size-7 stroke-[1.6]" />}
-      >
+      <VideoPlaceholder icon={<AlertTriangle aria-hidden="true" className="size-7 stroke-[1.6]" />}>
         <PlaceholderText>{video.message}</PlaceholderText>
       </VideoPlaceholder>
     );

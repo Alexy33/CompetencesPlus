@@ -1,13 +1,6 @@
-import { ArrowLeft, LayoutGrid, Shield, UserRound, Users } from "lucide-react";
-import type { ComponentType } from "react";
-
 import type { UserRole } from "@/lib/vocabulary";
-
-export interface NavLink {
-  href: string;
-  label: string;
-  icon: ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
-}
+import { ArrowLeft, LayoutGrid, Shield, UserRound, Users } from "lucide-react";
+import type { NavLink } from "./types";
 
 const PUBLIC_LINKS: NavLink[] = [
   { href: "/", label: "Accueil", icon: ArrowLeft },

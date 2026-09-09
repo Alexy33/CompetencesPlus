@@ -1,5 +1,4 @@
 import { ArrowRight } from "lucide-react";
-
 import { STEPS } from "./landing-content";
 
 export function StepsSection() {
@@ -7,15 +6,14 @@ export function StepsSection() {
     <section id="fonctionnement" className="py-20 md:py-28">
       <div className="mx-auto max-w-7xl px-6 md:px-10">
         <div className="mx-auto max-w-3xl text-center">
-
           <h2 className="mt-5 text-3xl font-bold uppercase tracking-tight text-ink md:text-5xl">
             Votre profil en
             <span className="text-brand"> 3 étapes.</span>
           </h2>
 
           <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-ink-muted">
-            Créez votre profil, valorisez vos compétences et rendez-vous visible
-            auprès des recruteurs.
+            Créez votre profil, valorisez vos compétences et rendez-vous visible auprès des
+            recruteurs.
           </p>
         </div>
 

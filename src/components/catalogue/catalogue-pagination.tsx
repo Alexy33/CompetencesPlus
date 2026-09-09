@@ -1,12 +1,6 @@
-import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-
-interface CataloguePaginationProps {
-  page: number;
-  totalPages: number;
-
-  params: URLSearchParams;
-}
+import Link from "next/link";
+import type { CataloguePaginationProps } from "./types";
 
 export function CataloguePagination({ page, totalPages, params }: CataloguePaginationProps) {
   if (totalPages <= 1) return null;

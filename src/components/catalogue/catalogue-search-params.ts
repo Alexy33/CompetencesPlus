@@ -1,8 +1,6 @@
-import { CatalogQuery } from "@/server/contracts/profile";
 import { normalizeSetting } from "@/server/services/settings";
-
-export type SearchParams = Record<string, string | string[] | undefined>;
-export type CatalogFilters = ReturnType<typeof CatalogQuery.parse>;
+import { CatalogQuery } from "@/server/contracts/profile";
+import type { CatalogFilters, SearchParams } from "./types";
 
 export function parseCatalogFilters(raw: SearchParams, defaultPageSize: number): CatalogFilters {
   const pageSize = normalizeSetting("catalogPageSize", defaultPageSize);

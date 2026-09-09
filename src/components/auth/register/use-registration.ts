@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
-
-import { apiSend } from "@/lib/api-client";
 import { MAJORITY_AGE, MINIMUM_AGE, ageOn } from "@/lib/age";
+import { apiSend } from "@/lib/api-client";
 import { authClient } from "@/lib/auth-client";
 import { isValidSiren, normalizeSiren } from "@/lib/siren";
-import { EMPTY_COMPANY, type CompanyDraft, type RegistrationRole } from "./types";
+import { useRouter } from "next/navigation";
+import { useState, type FormEvent } from "react";
+import { EMPTY_COMPANY } from "./constants";
+import type { CompanyDraft, RegistrationRole } from "./types";
 
 const SIREN_LENGTH = 9;
 
@@ -75,11 +75,7 @@ export function useRegistration() {
     setLoading(true);
 
     try {
-      const result = await apiSend<{ role: RegistrationRole }>(
-        "POST",
-        "/api/register",
-        payload(),
-      );
+      const result = await apiSend<{ role: RegistrationRole }>("POST", "/api/register", payload());
 
       if (!result.ok) {
         setError(result.message);

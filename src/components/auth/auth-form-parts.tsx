@@ -1,13 +1,12 @@
 "use client";
 
-import Link from "next/link";
-import { Loader2 } from "lucide-react";
-import type { ComponentProps, ReactNode } from "react";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
+import Link from "next/link";
+import type { AuthFieldProps, AuthSubmitProps, AuthSwitchProps } from "./types";
 
 export const authControl =
   "h-11 rounded-xl border-0 bg-canvas px-3.5 text-base shadow-pressed-sm placeholder:text-ink-muted focus-visible:border-0 focus-visible:ring-2 focus-visible:ring-brand/30 md:text-base";
@@ -20,13 +19,7 @@ export function AuthField({
   className,
   children,
   ...props
-}: ComponentProps<typeof Input> & {
-  id: string;
-  label: ReactNode;
-  hint?: ReactNode;
-  error?: ReactNode;
-  children?: ReactNode;
-}) {
+}: AuthFieldProps) {
   return (
     <div className="grid gap-2">
       <Label htmlFor={id} className="text-sm text-ink">
@@ -48,15 +41,7 @@ export function AuthField({
   );
 }
 
-export function AuthSubmit({
-  loading,
-  disabled,
-  children,
-}: {
-  loading: boolean;
-  disabled?: boolean;
-  children: ReactNode;
-}) {
+export function AuthSubmit({ loading, disabled, children }: AuthSubmitProps) {
   return (
     <Button
       type="submit"
@@ -70,15 +55,7 @@ export function AuthSubmit({
   );
 }
 
-export function AuthSwitch({
-  prompt,
-  href,
-  label,
-}: {
-  prompt: string;
-  href: string;
-  label: string;
-}) {
+export function AuthSwitch({ prompt, href, label }: AuthSwitchProps) {
   return (
     <p className="text-center text-base text-ink-muted">
       {prompt}{" "}

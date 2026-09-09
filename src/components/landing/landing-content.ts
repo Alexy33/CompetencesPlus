@@ -1,16 +1,6 @@
-import type { ComponentType } from "react";
-import { LuUserRound } from "react-icons/lu";
 import { BadgeCheck, FileVideo, Search } from "lucide-react";
-
-interface LandingItem {
-  icon: ComponentType<{ className?: string; "aria-hidden"?: boolean | "true" }>;
-  title: string;
-  description: string;
-}
-
-export interface LandingStep extends LandingItem {
-  number: string;
-}
+import { LuUserRound } from "react-icons/lu";
+import type { DemoAccount, LandingItem, LandingStep } from "./types";
 
 export const STEPS: LandingStep[] = [
   {
@@ -60,13 +50,6 @@ export const PROFILE_MODULES: LandingItem[] = [
 ];
 
 export const DEMO_PASSWORD = "demo1234";
-
-export interface DemoAccount {
-  role: string;
-  email: string;
-  chipClassName: string;
-  destination: "/candidate" | "/recruiter" | "/admin";
-}
 
 export const DEMO_ACCOUNTS: DemoAccount[] = [
   {

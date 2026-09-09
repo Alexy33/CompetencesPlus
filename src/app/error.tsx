@@ -1,18 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
-import { RotateCcw } from "lucide-react";
-
 import { Action, ActionLink } from "@/components/common/action";
 import { ErrorPageShell } from "@/components/layout/error-page-shell";
+import type { ErrorBoundaryProps } from "@/types/pages";
+import { RotateCcw } from "lucide-react";
+import { useEffect } from "react";
 
-export default function AppError({
-  error,
-  reset,
-}: {
-  error: Error & { digest?: string };
-  reset: () => void;
-}) {
+export default function AppError({ error, reset }: ErrorBoundaryProps) {
   useEffect(() => {
     console.error("[app] erreur non rattrapee :", error);
   }, [error]);

@@ -1,26 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-
 import { apiLoad, apiSend } from "@/lib/api-client";
 import type { ProfileStatus } from "@/lib/vocabulary";
-import type { VideoRow } from "./video-moderation";
+import type { Collection, VersionedCollection } from "@/types/api";
+import { useCallback, useEffect, useState } from "react";
 import type {
   AdminStats,
   EditableQuestion,
   ModeratedProfile,
   PlatformSettings,
+  VideoRow,
 } from "./types";
-
-interface Collection<T> {
-  items: T[];
-}
-
-/** Le questionnaire est servi avec la version du fichier en vigueur. */
-interface VersionedCollection<T> extends Collection<T> {
-  version: number;
-  versions: number[];
-}
 
 export function useAdminConsole() {
   const [stats, setStats] = useState<AdminStats | null>(null);
@@ -97,11 +87,7 @@ export function useAdminConsole() {
     setMessage("Réglages enregistrés.");
   }
 
-  async function decideVideo(
-    profileId: string,
-    decision: "approved" | "rejected",
-    reason: string,
-  ) {
+  async function decideVideo(profileId: string, decision: "approved" | "rejected", reason: string) {
     const result = await apiSend<VideoRow>(
       "PATCH",
       `/api/admin/videos/${profileId}`,

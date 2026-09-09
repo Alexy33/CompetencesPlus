@@ -1,15 +1,15 @@
 "use client";
 
 import { Menu } from "lucide-react";
-
 import { ProductName } from "./product-name";
 import { SidebarPanel } from "./sidebar/sidebar-panel";
-import { useModalDrawer } from "./sidebar/use-modal-drawer";
 import type { SidebarSession } from "./sidebar/types";
+import { useModalDrawer } from "./sidebar/use-modal-drawer";
+import type { SiteSidebarProps } from "./types";
 
 export type { SidebarSession };
 
-export function SiteSidebar({ session }: { session: SidebarSession | null }) {
+export function SiteSidebar({ session }: SiteSidebarProps) {
   const { open, setOpen } = useModalDrawer();
 
   return (

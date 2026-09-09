@@ -1,12 +1,8 @@
+import { getCurrentSession } from "@/lib/auth-session";
+import type { LayoutProps } from "@/types/pages";
 import { redirect } from "next/navigation";
 
-import { getCurrentSession } from "@/lib/auth-session";
-
-export default async function AdminLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default async function AdminLayout({ children }: LayoutProps) {
   const session = await getCurrentSession();
 
   if (!session?.user) {

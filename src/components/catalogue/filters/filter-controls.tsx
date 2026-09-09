@@ -1,22 +1,19 @@
 "use client";
 
-import { Search } from "lucide-react";
-import type { ReactNode } from "react";
-
 import { FieldLegend } from "@/components/common/field";
+import { Search } from "lucide-react";
+import type {
+  ChipFilterProps,
+  FilterGroupProps,
+  SearchFilterProps,
+  SelectFilterProps,
+  ToggleFilterProps,
+} from "./types";
 
 const CONTROL =
   "h-12 w-full rounded-2xl border-0 bg-canvas text-sm text-ink outline-none transition-all shadow-pressed-sm focus-visible:ring-2 focus-visible:ring-brand/30";
 
-export function FilterGroup({
-  label,
-  htmlFor,
-  children,
-}: {
-  label: string;
-  htmlFor?: string;
-  children: ReactNode;
-}) {
+export function FilterGroup({ label, htmlFor, children }: FilterGroupProps) {
   return (
     <div className="mt-6">
       {htmlFor ? (
@@ -34,15 +31,7 @@ export function FilterGroup({
   );
 }
 
-export function SearchFilter({
-  value,
-  onChange,
-  onSubmit,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-  onSubmit: () => void;
-}) {
+export function SearchFilter({ value, onChange, onSubmit }: SearchFilterProps) {
   return (
     <form
       className="contents"
@@ -76,14 +65,7 @@ export function SelectFilter({
   options,
   labels,
   onChange,
-}: {
-  id: string;
-  value: string;
-  placeholder: string;
-  options: readonly string[];
-  labels?: Record<string, string>;
-  onChange: (value: string) => void;
-}) {
+}: SelectFilterProps) {
   return (
     <select
       id={id}
@@ -101,17 +83,7 @@ export function SelectFilter({
   );
 }
 
-export function ToggleFilter({
-  active,
-  offLabel,
-  onLabel,
-  onChange,
-}: {
-  active: boolean;
-  offLabel: string;
-  onLabel: string;
-  onChange: (active: boolean) => void;
-}) {
+export function ToggleFilter({ active, offLabel, onLabel, onChange }: ToggleFilterProps) {
   const base = "h-10 rounded-xl text-sm font-semibold transition-all";
   const idle = "text-ink-soft hover:text-brand-700";
 
@@ -137,15 +109,7 @@ export function ToggleFilter({
   );
 }
 
-export function ChipFilter({
-  options,
-  selected,
-  onToggle,
-}: {
-  options: readonly string[];
-  selected: string[];
-  onToggle: (value: string) => void;
-}) {
+export function ChipFilter({ options, selected, onToggle }: ChipFilterProps) {
   return (
     <div className="mt-3 flex flex-wrap gap-2">
       {options.map((option) => {

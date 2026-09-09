@@ -1,7 +1,6 @@
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 export function CtaSection() {
   return (
@@ -10,29 +9,22 @@ export function CtaSection() {
         <div className="p-8 md:p-12 lg:p-14">
           <div className="grid items-center gap-10 lg:grid-cols-[1fr_auto]">
             <div>
-
               <h2 className="mt-6 max-w-3xl text-3xl font-bold uppercase leading-tight tracking-tight text-ink md:text-5xl">
                 Montrez ce que votre CV
                 <span className="text-brand"> ne peut pas montrer.</span>
               </h2>
 
               <p className="mt-5 max-w-2xl text-base leading-relaxed text-ink-muted">
-                Créez votre profil, mettez en avant vos compétences et commencez
-                votre parcours de certification.
+                Créez votre profil, mettez en avant vos compétences et commencez votre parcours de
+                certification.
               </p>
 
               <div className="mt-8 flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-wider text-ink-muted">
-                <span className="transition-colors duration-300 hover:text-brand">
-                  Créer
-                </span>
+                <span className="transition-colors duration-300 hover:text-brand">Créer</span>
                 <ArrowRight className="size-4 text-brand/50" />
-                <span className="transition-colors duration-300 hover:text-brand">
-                  Compléter
-                </span>
+                <span className="transition-colors duration-300 hover:text-brand">Compléter</span>
                 <ArrowRight className="size-4 text-brand/50" />
-                <span className="transition-colors duration-300 hover:text-brand">
-                  Certifier
-                </span>
+                <span className="transition-colors duration-300 hover:text-brand">Certifier</span>
                 <ArrowRight className="size-4 text-brand/50" />
                 <span className="text-brand">Être visible</span>
               </div>
@@ -60,7 +52,6 @@ export function CtaSection() {
               </Button>
             </div>
           </div>
-
         </div>
       </div>
     </section>

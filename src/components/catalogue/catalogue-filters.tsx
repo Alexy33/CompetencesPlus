@@ -1,9 +1,9 @@
 "use client";
 
-import { Loader2, RotateCcw, SlidersHorizontal } from "lucide-react";
-
-import { AVAILABILITIES, type City, type Sector, type Skill } from "@/lib/vocabulary";
+import { AVAILABILITIES } from "@/lib/vocabulary";
 import { AVAILABILITY_LABELS } from "@/lib/labels";
+
+import { Loader2, RotateCcw, SlidersHorizontal } from "lucide-react";
 import {
   ChipFilter,
   FilterGroup,
@@ -12,16 +12,9 @@ import {
   ToggleFilter,
 } from "./filters/filter-controls";
 import { useUrlFilters } from "./filters/use-url-filters";
+import type { CatalogueFiltersProps } from "./types";
 
-export function CatalogueFilters({
-  sectors,
-  cities,
-  skills,
-}: {
-  sectors: readonly Sector[];
-  cities: readonly City[];
-  skills: readonly Skill[];
-}) {
+export function CatalogueFilters({ sectors, cities, skills }: CatalogueFiltersProps) {
   const filters = useUrlFilters();
 
   return (

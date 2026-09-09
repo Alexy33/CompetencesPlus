@@ -1,22 +1,13 @@
 "use client";
 
-import { Save } from "lucide-react";
-
 import { Action } from "@/components/common/action";
 import { Field, fieldControl } from "@/components/common/field";
 import { Surface } from "@/components/common/surface";
 import { MAX_PAGE_SIZE } from "@/lib/vocabulary";
-import type { PlatformSettings } from "./types";
+import { Save } from "lucide-react";
+import type { SettingsFormProps } from "./types";
 
-export function SettingsForm({
-  settings,
-  onChange,
-  onSave,
-}: {
-  settings: PlatformSettings | null;
-  onChange: (settings: PlatformSettings) => void;
-  onSave: () => void;
-}) {
+export function SettingsForm({ settings, onChange, onSave }: SettingsFormProps) {
   return (
     <Surface>
       <h2 className="text-xl font-bold uppercase text-ink">Réglages</h2>

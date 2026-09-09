@@ -1,21 +1,14 @@
 "use client";
 
+import { ProductName } from "@/components/layout/product-name";
+import { X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { X } from "lucide-react";
-
 import { isActivePath, navigationFor } from "./navigation";
-import { ProductName } from "../product-name";
 import { SidebarSessionCard } from "./sidebar-session";
-import type { SidebarSession } from "./types";
+import type { SidebarPanelProps } from "./types";
 
-export function SidebarPanel({
-  session,
-  onClose,
-}: {
-  session: SidebarSession | null;
-  onClose?: () => void;
-}) {
+export function SidebarPanel({ session, onClose }: SidebarPanelProps) {
   const pathname = usePathname();
   const links = navigationFor(session?.role ?? null);
 
