@@ -8,6 +8,7 @@ import type { Stat } from "@/components/common/types";
 import { PROFILE_STATUS_LABELS } from "@/lib/labels";
 import type { OwnProfile } from "@/server/services/profiles";
 import { BadgeCheck, Eye, FileVideo, MessageSquare } from "lucide-react";
+import { CatalogueVisibility } from "./catalogue-visibility";
 import { CertificationPanel } from "./certification-panel";
 import { ConsentSummary } from "./consent-summary";
 import { NotificationsPanel } from "./notifications-panel";
@@ -96,6 +97,12 @@ export function CandidateDashboard({
           <CertificationPanel
             certification={dashboard.certification}
             fallbackScore={profile.score}
+          />
+          <CatalogueVisibility
+            profile={profile}
+            busy={busy === "visibility"}
+            disabled={busy !== null}
+            onSetListed={dashboard.setListed}
           />
           <NotificationsPanel notifications={dashboard.notifications} />
         </aside>

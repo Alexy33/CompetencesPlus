@@ -13,6 +13,7 @@ import {
 import { ModerateProfileBody, ModerationRowSchema } from "@/server/contracts/admin";
 import { notify } from "@/server/services/notifications";
 import { deleteProfileVideo } from "@/server/services/video";
+import { clearSelfWithdrawal } from "@/server/services/profiles";
 
 export const dynamic = "force-dynamic";
 
@@ -45,6 +46,11 @@ export const { PATCH } = defineRoute({
       .returning();
 
     if (!updated) throw ApiError.notFound("Ce profil n'existe pas.");
+
+    // Une decision de moderation prime sur le retrait autonome : sans cela, un
+    // titulaire retire par l'administration pourrait la defaire en se
+    // republiant lui-meme.
+    await clearSelfWithdrawal(updated.id);
 
     await notify(updated.userId, "moderation", MESSAGES[body.status]);
 

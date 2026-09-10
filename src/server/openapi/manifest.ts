@@ -8,6 +8,8 @@ import "@/app/api/profiles/[id]/contact/route";
 
 import "@/app/api/me/profile/route";
 import "@/app/api/me/profile/video/consent/route";
+import "@/app/api/me/profile/withdraw/route";
+import "@/app/api/me/profile/restore/route";
 import "@/app/api/me/stats/route";
 import "@/app/api/me/notifications/route";
 import "@/app/api/me/notifications/read/route";

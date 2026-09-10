@@ -116,6 +116,10 @@ export const NOT_FOUND_RESPONSE = {
   "404": errorResponse("Ressource introuvable.", ERROR_BODY.notFound),
 } as const;
 
+export const CONFLICT_RESPONSE = {
+  "409": errorResponse("L'etat actuel de la ressource ne permet pas cette operation."),
+} as const;
+
 export const PaginationQuery = z.object({
   page: z.coerce.number().int().min(1).default(1).meta({ description: "Numero de page, a partir de 1." }),
   pageSize: z.coerce
