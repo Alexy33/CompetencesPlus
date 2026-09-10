@@ -2297,6 +2297,91 @@
         ]
       }
     },
+    "/api/me/profile/restore": {
+      "post": {
+        "tags": [
+          "Espace demandeur"
+        ],
+        "summary": "Republier mon profil apres un retrait",
+        "description": "Leve un retrait prononce par le titulaire et retablit le statut d'origine. Un profil retire alors qu'il attendait la moderation revient **en attente**, jamais directement au catalogue : le retrait n'est pas un raccourci vers la publication.\n\nSans retrait autonome en cours, la route repond 409 — un retrait decide par l'administration ne se leve pas ici.",
+        "operationId": "postMeProfileRestore",
+        "responses": {
+          "200": {
+            "description": "Profil republie.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyProfile"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Aucune session valide.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "error": {
+                    "code": "unauthorized",
+                    "message": "Authentification requise."
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Session valide, mais role insuffisant.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "error": {
+                    "code": "forbidden",
+                    "message": "Cette ressource est reservee au role « candidate »."
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ressource introuvable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "error": {
+                    "code": "not_found",
+                    "message": "Ressource introuvable."
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "L'etat actuel de la ressource ne permet pas cette operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ]
+      }
+    },
     "/api/me/profile/video": {
       "put": {
         "tags": [
@@ -2689,6 +2774,91 @@
         ]
       }
     },
+    "/api/me/profile/withdraw": {
+      "post": {
+        "tags": [
+          "Espace demandeur"
+        ],
+        "summary": "Retirer mon profil du catalogue",
+        "description": "Retire le profil du catalogue sans intervention de l'administration. Le profil cesse d'etre consultable, video comprise, y compris par son adresse directe. **Rien n'est efface** : le titulaire peut republier lui-meme via `POST /api/me/profile/restore`, ce qui retablit le statut d'origine.\n\nUn profil deja retire par l'administration ne releve pas de cette route : lever une decision de moderation n'appartient pas au titulaire.",
+        "operationId": "postMeProfileWithdraw",
+        "responses": {
+          "200": {
+            "description": "Profil retire du catalogue.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyProfile"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Aucune session valide.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "error": {
+                    "code": "unauthorized",
+                    "message": "Authentification requise."
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Session valide, mais role insuffisant.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "error": {
+                    "code": "forbidden",
+                    "message": "Cette ressource est reservee au role « candidate »."
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ressource introuvable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                },
+                "example": {
+                  "error": {
+                    "code": "not_found",
+                    "message": "Ressource introuvable."
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "L'etat actuel de la ressource ne permet pas cette operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ]
+      }
+    },
     "/api/me/stats": {
       "get": {
         "tags": [
@@ -2780,6 +2950,24 @@
             "description": "Nombre d'elements par page (plafond reglementaire : 20)."
           },
           {
+            "name": "order",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "default": "recent",
+              "type": "string",
+              "enum": [
+                "recent",
+                "ancien",
+                "certification",
+                "disponibilite",
+                "secteur",
+                "localisation"
+              ]
+            },
+            "description": "Ordre de presentation. Tous les ordres se terminent par l'identifiant du profil, ce qui rend la pagination deterministe. Aucun critere de popularite n'est propose."
+          },
+          {
             "name": "q",
             "in": "query",
             "required": false,
@@ -2822,6 +3010,20 @@
                 "Toulouse"
               ]
             }
+          },
+          {
+            "name": "availability",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "immediate",
+                "sous_preavis",
+                "non_disponible"
+              ]
+            },
+            "description": "Filtre sur la disponibilite declaree par le candidat."
           },
           {
             "name": "certified",
@@ -3376,6 +3578,15 @@
           "Écarté"
         ]
       },
+      "Availability": {
+        "type": "string",
+        "enum": [
+          "immediate",
+          "sous_preavis",
+          "non_disponible"
+        ],
+        "description": "immediate : peut prendre un poste tout de suite. sous_preavis : disponible apres un preavis. non_disponible : pas en recherche active."
+      },
       "UserRole": {
         "type": "string",
         "enum": [
@@ -3797,6 +4008,9 @@
           "city": {
             "$ref": "#/components/schemas/City"
           },
+          "availability": {
+            "$ref": "#/components/schemas/Availability"
+          },
           "skills": {
             "type": "array",
             "items": {
@@ -3819,6 +4033,7 @@
           "title",
           "sector",
           "city",
+          "availability",
           "skills",
           "certified",
           "score"
@@ -3848,6 +4063,9 @@
           "city": {
             "$ref": "#/components/schemas/City"
           },
+          "availability": {
+            "$ref": "#/components/schemas/Availability"
+          },
           "skills": {
             "type": "array",
             "items": {
@@ -3888,6 +4106,7 @@
           "title",
           "sector",
           "city",
+          "availability",
           "skills",
           "certified",
           "score",
@@ -3896,6 +4115,36 @@
           "status",
           "certifiedAt",
           "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "ProfileWithdrawal": {
+        "type": "object",
+        "properties": {
+          "withdrawn": {
+            "type": "boolean",
+            "description": "true si le titulaire s'est retire lui-meme du catalogue. Un retrait prononce par l'administration ne compte pas ici : lui seul peut le lever."
+          },
+          "at": {
+            "nullable": true,
+            "type": "string",
+            "format": "date-time",
+            "description": "Horodatage du retrait autonome, conserve comme trace."
+          },
+          "restoresTo": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProfileStatus"
+              }
+            ],
+            "nullable": true,
+            "description": "Statut retabli par une republication. Un profil retire alors qu'il etait en attente y revient : le retrait n'est pas un raccourci vers la publication."
+          }
+        },
+        "required": [
+          "withdrawn",
+          "at",
+          "restoresTo"
         ],
         "additionalProperties": false
       },
@@ -3922,6 +4171,9 @@
           "city": {
             "$ref": "#/components/schemas/City"
           },
+          "availability": {
+            "$ref": "#/components/schemas/Availability"
+          },
           "skills": {
             "type": "array",
             "items": {
@@ -3954,6 +4206,9 @@
             "type": "string",
             "format": "date-time"
           },
+          "withdrawal": {
+            "$ref": "#/components/schemas/ProfileWithdrawal"
+          },
           "contactCount": {
             "type": "integer",
             "description": "Nombre de sollicitations recues. Compteur d'engagement : visible du seul titulaire, jamais du public ni d'un recruteur."
@@ -3976,6 +4231,7 @@
           "title",
           "sector",
           "city",
+          "availability",
           "skills",
           "certified",
           "score",
@@ -3984,6 +4240,7 @@
           "status",
           "certifiedAt",
           "createdAt",
+          "withdrawal",
           "contactCount",
           "views",
           "videoConsent",
@@ -4010,6 +4267,18 @@
         ],
         "additionalProperties": false
       },
+      "CatalogOrder": {
+        "type": "string",
+        "enum": [
+          "recent",
+          "ancien",
+          "certification",
+          "disponibilite",
+          "secteur",
+          "localisation"
+        ],
+        "description": "recent : Date de dernière mise à jour du profil, la plus récente en tête. ancien : Date de dernière mise à jour du profil, la plus ancienne en tête. certification : Profils dont l'évaluation est validée d'abord, puis par date de mise à jour décroissante. disponibilite : Disponibles immédiatement, puis sous préavis, puis non disponibles ; ensuite par date de mise à jour décroissante. secteur : Secteur par ordre alphabétique, puis par date de mise à jour décroissante. localisation : Localisation par ordre alphabétique, puis par date de mise à jour décroissante."
+      },
       "UpdateProfileInput": {
         "type": "object",
         "properties": {
@@ -4027,6 +4296,9 @@
           },
           "city": {
             "$ref": "#/components/schemas/City"
+          },
+          "availability": {
+            "$ref": "#/components/schemas/Availability"
           },
           "bio": {
             "type": "string",

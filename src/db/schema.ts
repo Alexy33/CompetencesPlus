@@ -136,6 +136,21 @@ export const profile = sqliteTable(
       .notNull()
       .default("pending"),
 
+    /**
+     * Retrait autonome du catalogue, prononce PAR LE TITULAIRE.
+     *
+     * Non nul = c'est le titulaire qui s'est retire ; il peut donc revenir sur
+     * sa decision seul. Un retrait prononce par l'administration laisse ces
+     * deux colonnes nulles, et une decision de moderation posterieure les
+     * remet a zero : on ne defait pas une moderation en se republiant.
+     *
+     * `withdrawnFrom` retient l'etat a restaurer. Un profil retire alors qu'il
+     * etait encore `pending` revient a `pending`, jamais a `published` : le
+     * retrait ne doit pas servir de raccourci vers la publication.
+     */
+    withdrawnAt: integer("withdrawn_at", { mode: "timestamp" }),
+    withdrawnFrom: text("withdrawn_from", { enum: mutable(PROFILE_STATUSES) }),
+
     score: integer("score"),
     certifiedAt: integer("certified_at", { mode: "timestamp" }),
 
