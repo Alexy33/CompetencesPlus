@@ -120,9 +120,28 @@ export const ProfileSchema = named(
   }),
 );
 
+export const ProfileWithdrawalSchema = named(
+  "ProfileWithdrawal",
+  z.object({
+    withdrawn: z.boolean().meta({
+      description:
+        "true si le titulaire s'est retire lui-meme du catalogue. Un retrait prononce par l'administration ne compte pas ici : lui seul peut le lever.",
+    }),
+    at: z.iso
+      .datetime()
+      .nullable()
+      .meta({ description: "Horodatage du retrait autonome, conserve comme trace." }),
+    restoresTo: ProfileStatusSchema.nullable().meta({
+      description:
+        "Statut retabli par une republication. Un profil retire alors qu'il etait en attente y revient : le retrait n'est pas un raccourci vers la publication.",
+    }),
+  }),
+);
+
 export const MyProfileSchema = named(
   "MyProfile",
   ProfileSchema.extend({
+    withdrawal: ProfileWithdrawalSchema,
     contactCount: z.number().int().meta({
       description:
         "Nombre de sollicitations recues. Compteur d'engagement : visible du seul titulaire, jamais du public ni d'un recruteur.",

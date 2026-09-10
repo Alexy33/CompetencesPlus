@@ -37,7 +37,7 @@ export function useCandidateDashboard(initialProfile: OwnProfile, embedEnabled: 
   const [draft, setDraft] = useState<ProfileDraft>(() => draftFrom(initialProfile));
   const [certification, setCertification] = useState<CertificationSummary | null>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [busy, setBusy] = useState<"save" | "upload" | "remove" | null>(null);
+  const [busy, setBusy] = useState<"save" | "upload" | "remove" | "visibility" | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -130,6 +130,33 @@ export function useCandidateDashboard(initialProfile: OwnProfile, embedEnabled: 
     setBusy(null);
   }
 
+  /**
+   * Retrait autonome du catalogue, et retour. Une seule fonction pour les deux
+   * sens : c'est la meme decision, prise dans un sens ou dans l'autre, et
+   * l'ecran n'a jamais a choisir laquelle des deux routes appeler.
+   */
+  async function setListed(listed: boolean) {
+    setBusy("visibility");
+    setMessage(null);
+
+    const result = await apiSend<OwnProfile>(
+      "POST",
+      listed ? "/api/me/profile/restore" : "/api/me/profile/withdraw",
+    );
+
+    if (result.ok) {
+      setProfile(result.data);
+      setMessage(
+        listed
+          ? "Profil republié."
+          : "Profil retiré du catalogue. Vous pouvez le republier à tout moment.",
+      );
+    } else {
+      setMessage(result.message);
+    }
+    setBusy(null);
+  }
+
   return {
     profile,
     draft,
@@ -142,5 +169,6 @@ export function useCandidateDashboard(initialProfile: OwnProfile, embedEnabled: 
     save,
     uploadVideo,
     removeVideo,
+    setListed,
   };
 }

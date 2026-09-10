@@ -9,6 +9,7 @@ import { StatGrid, type Stat } from "@/components/common/stat-card";
 import { PROFILE_STATUS_LABELS } from "@/lib/labels";
 import type { City, Sector, Skill } from "@/lib/vocabulary";
 import type { OwnProfile } from "@/server/services/profiles";
+import { CatalogueVisibility } from "./catalogue-visibility";
 import { CertificationPanel } from "./certification-panel";
 import { ConsentSummary } from "./consent-summary";
 import { NotificationsPanel } from "./notifications-panel";
@@ -103,6 +104,12 @@ export function CandidateDashboard({
           <CertificationPanel
             certification={dashboard.certification}
             fallbackScore={profile.score}
+          />
+          <CatalogueVisibility
+            profile={profile}
+            busy={busy === "visibility"}
+            disabled={busy !== null}
+            onSetListed={dashboard.setListed}
           />
           <NotificationsPanel notifications={dashboard.notifications} />
         </aside>

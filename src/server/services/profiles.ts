@@ -1,5 +1,6 @@
 import { and, asc, desc, eq, inArray, isNotNull, like, or, sql, type SQL } from "drizzle-orm";
 import { db } from "@/db";
+import { ApiError } from "@/server/http";
 import { profile, profileSkill, user } from "@/db/schema";
 import type { Availability, City, ProfileStatus, Sector, Skill, VideoStatus } from "@/lib/vocabulary";
 import { MAJORITY_AGE, isMinor } from "@/lib/age";
@@ -65,6 +66,20 @@ export interface OwnProfile extends FullProfile {
   videoConsent: VideoConsentView;
 
   videoModeration: VideoModerationView;
+
+  withdrawal: ProfileWithdrawalView;
+}
+
+/**
+ * Retrait autonome, tel qu'il est presente a son titulaire. `withdrawn` ne dit
+ * pas « le profil est hors catalogue » — un profil retire par l'administration
+ * l'est aussi — mais « c'est vous qui l'avez retire, vous pouvez revenir
+ * dessus ».
+ */
+export interface ProfileWithdrawalView {
+  withdrawn: boolean;
+  at: string | null;
+  restoresTo: ProfileStatus | null;
 }
 
 export function initialsOf(name: string): string {
@@ -325,6 +340,11 @@ async function findOne(
       decidedBy,
       decidedAt: toIsoOrNull(row.profile.videoReviewedAt),
     },
+    withdrawal: {
+      withdrawn: row.profile.withdrawnAt !== null,
+      at: toIsoOrNull(row.profile.withdrawnAt),
+      restoresTo: row.profile.withdrawnFrom ?? null,
+    },
   };
 }
 
@@ -342,6 +362,7 @@ export async function findProfileById(
     contactCount: _contacts,
     videoConsent: _consent,
     videoModeration: _moderation,
+    withdrawal: _withdrawal,
     ...pub
   } = found;
   return pub;
@@ -349,6 +370,97 @@ export async function findProfileById(
 
 export function findProfileByUserId(userId: string, session?: SessionLike): Promise<OwnProfile | null> {
   return findOne(eq(profile.userId, userId), session ?? OWNER_OF(userId));
+}
+
+/**
+ * Retrait autonome du catalogue par le titulaire.
+ *
+ * Le profil passe a `removed` — statut deja exclu du catalogue et deja
+ * suffisant pour que la route video reponde 404 a tout autre visiteur. Rien
+ * n'est detruit : c'est un retrait, pas un effacement.
+ *
+ * Le statut d'origine est memorise pour que la republication le retablisse a
+ * l'identique. Un profil retire alors qu'il attendait encore la moderation
+ * revient en attente, jamais directement au catalogue.
+ */
+export async function withdrawOwnProfile(userId: string): Promise<void> {
+  const [current] = await db
+    .select({ id: profile.id, status: profile.status, withdrawnAt: profile.withdrawnAt })
+    .from(profile)
+    .where(eq(profile.userId, userId))
+    .limit(1);
+
+  if (!current) throw ApiError.notFound("Aucun profil rattache a ce compte.");
+
+  if (current.withdrawnAt !== null) {
+    throw ApiError.conflict("Votre profil est deja retire du catalogue.");
+  }
+
+  // Un retrait prononce par l'administration ne se contourne pas en le
+  // rejouant a son compte : le titulaire pourrait alors le republier seul.
+  if (current.status === "removed") {
+    throw ApiError.conflict(
+      "Votre profil a ete retire par l'administration : ce retrait ne peut pas etre repris ici.",
+    );
+  }
+
+  await db
+    .update(profile)
+    .set({
+      status: "removed",
+      withdrawnAt: new Date(),
+      withdrawnFrom: current.status,
+      updatedAt: new Date(),
+    })
+    .where(eq(profile.id, current.id));
+}
+
+/**
+ * Republication par le titulaire de ce qu'il avait lui-meme retire.
+ *
+ * Reservee au retrait autonome : `withdrawnAt` nul signifie soit un profil en
+ * ligne, soit un retrait decide par l'administration. Dans les deux cas il n'y
+ * a rien a lever ici.
+ */
+export async function restoreOwnProfile(userId: string): Promise<void> {
+  const [current] = await db
+    .select({
+      id: profile.id,
+      withdrawnAt: profile.withdrawnAt,
+      withdrawnFrom: profile.withdrawnFrom,
+    })
+    .from(profile)
+    .where(eq(profile.userId, userId))
+    .limit(1);
+
+  if (!current) throw ApiError.notFound("Aucun profil rattache a ce compte.");
+
+  if (current.withdrawnAt === null) {
+    throw ApiError.conflict("Votre profil n'a pas ete retire par vos soins.");
+  }
+
+  await db
+    .update(profile)
+    .set({
+      status: current.withdrawnFrom ?? "pending",
+      withdrawnAt: null,
+      withdrawnFrom: null,
+      updatedAt: new Date(),
+    })
+    .where(eq(profile.id, current.id));
+}
+
+/**
+ * Efface les marqueurs de retrait autonome.
+ *
+ * Appelee par la moderation : une decision de l'administration prime sur le
+ * retrait du titulaire, qui ne doit plus pouvoir la defaire en se republiant.
+ */
+export async function clearSelfWithdrawal(profileId: string): Promise<void> {
+  await db
+    .update(profile)
+    .set({ withdrawnAt: null, withdrawnFrom: null })
+    .where(eq(profile.id, profileId));
 }
 
 export async function recordProfileView(id: string): Promise<void> {
