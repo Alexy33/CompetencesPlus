@@ -96,21 +96,46 @@ export async function currentAttempt(userId: string) {
   return last ?? null;
 }
 
+/**
+ * Vrai si l'erreur est le refus, par l'index partiel
+ * `certification_attempt_one_in_progress`, d'une seconde tentative en cours.
+ */
+function isDuplicateAttempt(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    (error as { code?: unknown }).code === "SQLITE_CONSTRAINT_UNIQUE"
+  );
+}
+
 export async function openAttempt(userId: string) {
   const existing = await currentAttempt(userId);
   if (existing && existing.status === "in_progress") return existing;
 
-  const [created] = await db
-    .insert(certificationAttempt)
-    .values({
-      id: crypto.randomUUID(),
-      userId,
-      status: "in_progress",
-      // Figee ici, jamais recalculee ensuite.
-      questionnaireVersion: questionnaireVersion(),
-    })
-    .returning();
-  return created;
+  try {
+    const [created] = await db
+      .insert(certificationAttempt)
+      .values({
+        id: crypto.randomUUID(),
+        userId,
+        status: "in_progress",
+        // Figee ici, jamais recalculee ensuite.
+        questionnaireVersion: questionnaireVersion(),
+      })
+      .returning();
+    return created;
+  } catch (error) {
+    // Course perdue : un autre appel a insere entre notre lecture et notre
+    // ecriture. L'index a fait son travail — il reste a relire la tentative
+    // gagnante et a la rendre, comme si nous l'avions trouvee du premier coup.
+    // Repondre 500 ici transformerait une concurrence normale en panne.
+    if (!isDuplicateAttempt(error)) throw error;
+
+    const winner = await currentAttempt(userId);
+    if (winner && winner.status === "in_progress") return winner;
+    throw error;
+  }
 }
 
 /** Reponses enregistrees : identifiant de question -> option choisie. */

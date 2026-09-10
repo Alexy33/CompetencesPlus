@@ -1,5 +1,5 @@
 import { desc, sql } from "drizzle-orm";
-import { index, integer, primaryKey, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
+import { index, integer, primaryKey, sqliteTable, text, unique, uniqueIndex } from "drizzle-orm/sqlite-core";
 import {
   AVAILABILITIES,
   CITIES,
@@ -243,32 +243,53 @@ export const questionOption = sqliteTable("question_option", {
   position: integer("position").notNull().default(0),
 });
 
-export const certificationAttempt = sqliteTable("certification_attempt", {
-  id: text("id").primaryKey(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  status: text("status", { enum: ["in_progress", "submitted"] })
-    .notNull()
-    .default("in_progress"),
+export const certificationAttempt = sqliteTable(
+  "certification_attempt",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    status: text("status", { enum: ["in_progress", "submitted"] })
+      .notNull()
+      .default("in_progress"),
 
-  // Version du questionnaire sous laquelle la tentative a ete ouverte.
-  // Figee a la creation : une tentative v1 reste v1 apres le passage a v2.
-  questionnaireVersion: integer("questionnaire_version").notNull(),
+    // Version du questionnaire sous laquelle la tentative a ete ouverte.
+    // Figee a la creation : une tentative v1 reste v1 apres le passage a v2.
+    questionnaireVersion: integer("questionnaire_version").notNull(),
 
-  // Rattrapage : tentative ouverte pour une mise a jour de certification, ou
-  // seules les questions modifiees sont reposees. Marque explicitement, et non
-  // deduit des reponses reportees : une version peut tout modifier a la fois,
-  // auquel cas aucune reponse n'est reportee.
-  catchUp: integer("catch_up", { mode: "boolean" }).notNull().default(false),
+    // Rattrapage : tentative ouverte pour une mise a jour de certification, ou
+    // seules les questions modifiees sont reposees. Marque explicitement, et non
+    // deduit des reponses reportees : une version peut tout modifier a la fois,
+    // auquel cas aucune reponse n'est reportee.
+    catchUp: integer("catch_up", { mode: "boolean" }).notNull().default(false),
 
-  score: integer("score"),
-  passed: integer("passed", { mode: "boolean" }),
-  submittedAt: integer("submitted_at", { mode: "timestamp" }),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .notNull()
-    .default(sql`(unixepoch())`),
-});
+    score: integer("score"),
+    passed: integer("passed", { mode: "boolean" }),
+    submittedAt: integer("submitted_at", { mode: "timestamp" }),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .default(sql`(unixepoch())`),
+  },
+  (table) => [
+    /**
+     * Une seule tentative en cours par candidat, verrouillee EN BASE.
+     *
+     * `openAttempt` lit puis insere : entre les deux, rien n'empechait un
+     * second appel d'inserer aussi. Le pilote better-sqlite3 etant synchrone,
+     * la fenetre ne s'ouvre pas dans un processus unique — mais c'est une
+     * propriete du deploiement, pas une garantie. Deux processus sur le meme
+     * fichier produisent bien deux lignes.
+     *
+     * L'index est PARTIEL : il ne contraint que les tentatives en cours. Un
+     * candidat conserve autant de tentatives `submitted` qu'il en a passees,
+     * ce dont dependent le versionnement et le rattrapage.
+     */
+    uniqueIndex("certification_attempt_one_in_progress")
+      .on(table.userId)
+      .where(sql`${table.status} = 'in_progress'`),
+  ],
+);
 
 export const certificationAnswer = sqliteTable(
   "certification_answer",
