@@ -1,35 +1,17 @@
 "use client";
 
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { ArrowLeft, FileQuestion } from "lucide-react";
-
 import { QuestionStep } from "./certification/question-step";
 import { ResultCard } from "./certification/result-card";
+import { UnavailableNotice } from "./certification/unavailable-notice";
 import { useCertification } from "./certification/use-certification";
-import type { CertificationQuestion, CertificationState } from "./certification/types";
-
-function UnavailableNotice() {
-  return (
-    <main className="mx-auto flex min-h-screen max-w-3xl flex-col items-center justify-center px-6 text-center">
-      <FileQuestion aria-hidden="true" className="size-10 text-brand" />
-      <h1 className="mt-5 text-2xl font-bold text-ink">Questionnaire indisponible</h1>
-      <p className="mt-3 text-ink-soft">
-        Aucune question n’est configurée. Demandez à un administrateur d’ajouter le questionnaire.
-      </p>
-      <Link href="/candidate" className="mt-6 font-semibold text-brand hover:text-brand-700">
-        Retour à mon espace
-      </Link>
-    </main>
-  );
-}
+import type { CertificationQuestionnaireProps } from "./types";
 
 export function CertificationQuestionnaire({
   initialQuestions,
   initialState,
-}: {
-  initialQuestions: CertificationQuestion[];
-  initialState: CertificationState;
-}) {
+}: CertificationQuestionnaireProps) {
   const certification = useCertification(initialQuestions, initialState);
   // Rattrapage : le candidat ne repond qu'aux questions qui ont change.
   const catchingUp = initialState.catchUp;

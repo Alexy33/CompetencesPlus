@@ -1,9 +1,10 @@
 import { getCurrentSession } from "@/lib/auth-session";
 import type { UserRole } from "@/lib/vocabulary";
-import { SiteSidebar } from "./site-sidebar";
 import { PublicNotice } from "./public-notice";
+import { SiteSidebar } from "./site-sidebar";
+import type { SiteShellProps } from "./types";
 
-export async function SiteShell({ children }: { children: React.ReactNode }) {
+export async function SiteShell({ children }: SiteShellProps) {
   const session = await getCurrentSession();
   const user = session?.user;
 
@@ -13,11 +14,7 @@ export async function SiteShell({ children }: { children: React.ReactNode }) {
         Aller au contenu principal
       </a>
       <SiteSidebar
-        session={
-          user
-            ? { name: user.name, role: (user.role ?? "candidate") as UserRole }
-            : null
-        }
+        session={user ? { name: user.name, role: (user.role ?? "candidate") as UserRole } : null}
       />
       <div id="contenu" tabIndex={-1} className="lg:pl-64">
         {children}

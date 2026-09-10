@@ -1,19 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-
 import { apiLoad, apiSend } from "@/lib/api-client";
 import type { ContactStatus } from "@/lib/vocabulary";
+import type { Collection } from "@/types/api";
+import { useCallback, useEffect, useState } from "react";
 import type {
   RecruiterCompany,
   RecruiterContact,
   RecruiterFavorite,
   RecruiterStats,
 } from "./types";
-
-interface Collection<T> {
-  items: T[];
-}
 
 export function useRecruiterConsole() {
   const [contacts, setContacts] = useState<RecruiterContact[]>([]);

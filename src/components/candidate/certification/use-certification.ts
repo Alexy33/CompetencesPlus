@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
-
 import { apiSend } from "@/lib/api-client";
-import type { CertificationResult, CertificationState, CertificationQuestion } from "./types";
+import { useState } from "react";
+import type { CertificationQuestion, CertificationResult, CertificationState } from "./types";
 
 function resultFrom(state: CertificationState): CertificationResult | null {
   if (state.status !== "submitted" || state.score === null) return null;
@@ -64,9 +63,7 @@ export function useCertification(
   }
 
   async function submit() {
-    const outcome = await run(
-      apiSend<CertificationResult>("POST", "/api/me/certification/submit"),
-    );
+    const outcome = await run(apiSend<CertificationResult>("POST", "/api/me/certification/submit"));
     if (outcome) setResult(outcome);
   }
 

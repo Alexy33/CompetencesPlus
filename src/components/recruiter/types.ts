@@ -1,4 +1,5 @@
 import type { ContactStatus } from "@/lib/vocabulary";
+import type { ReactNode } from "react";
 
 export interface RecruiterProfile {
   id: string;
@@ -40,3 +41,22 @@ export interface RecruiterCompany {
   phone: string | null;
   website: string | null;
 }
+
+export type RowProps = { label: string; children: ReactNode };
+
+export type CompanyPanelProps = { company: RecruiterCompany | null };
+
+export type ContactPipelineProps = {
+  contacts: RecruiterContact[];
+  onStatusChange: (id: string, status: ContactStatus) => void;
+};
+
+export type ContactRowProps = {
+  contact: RecruiterContact;
+  onStatusChange: (status: ContactStatus) => void;
+};
+
+export type FavoritesPanelProps = {
+  favorites: RecruiterFavorite[];
+  onRemove: (profileId: string) => void;
+};

@@ -1,13 +1,9 @@
-import { redirect } from "next/navigation";
-
 import { MentionDroits } from "@/components/layout/mention-droits";
 import { getCurrentSession } from "@/lib/auth-session";
+import type { LayoutProps } from "@/types/pages";
+import { redirect } from "next/navigation";
 
-export default async function CandidateLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default async function CandidateLayout({ children }: LayoutProps) {
   const session = await getCurrentSession();
 
   if (!session?.user) {

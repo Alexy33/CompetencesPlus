@@ -1,7 +1,6 @@
-import Link from "next/link";
-import { ArrowRight, BriefcaseBusiness, ShieldCheck } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
+import { ArrowRight, BriefcaseBusiness, ShieldCheck } from "lucide-react";
+import Link from "next/link";
 
 export function RecruiterSection() {
   return (
@@ -16,9 +15,8 @@ export function RecruiterSection() {
               </h2>
 
               <p className="mt-6 max-w-xl text-base leading-relaxed text-ink-muted">
-                Recherchez des candidats selon leurs compétences, leur secteur et
-                leur localisation, puis consultez directement les profils qui
-                correspondent à vos besoins.
+                Recherchez des candidats selon leurs compétences, leur secteur et leur localisation,
+                puis consultez directement les profils qui correspondent à vos besoins.
               </p>
 
               <div className="mt-8">
@@ -49,8 +47,8 @@ export function RecruiterSection() {
                 </h3>
 
                 <p className="mt-3 text-sm leading-relaxed text-ink-muted">
-                  Filtrez les profils par secteur, localisation et compétences pour
-                  aller directement aux candidats les plus pertinents.
+                  Filtrez les profils par secteur, localisation et compétences pour aller
+                  directement aux candidats les plus pertinents.
                 </p>
 
                 <div className="mt-8 h-px overflow-hidden bg-brand/15">
@@ -72,8 +70,8 @@ export function RecruiterSection() {
                 </h3>
 
                 <p className="mt-3 text-sm leading-relaxed text-ink-muted">
-                  Identifiez rapidement les candidats ayant validé leur
-                  certification et consultez leurs aptitudes professionnelles.
+                  Identifiez rapidement les candidats ayant validé leur certification et consultez
+                  leurs aptitudes professionnelles.
                 </p>
 
                 <div className="mt-8 h-px overflow-hidden bg-brand/15">
@@ -85,17 +83,11 @@ export function RecruiterSection() {
 
           <div className="border-t border-brand/10 px-8 py-5 md:px-12">
             <div className="flex flex-wrap items-center gap-4 text-xs font-semibold uppercase tracking-wider text-ink-muted">
-              <span className="transition-colors hover:text-brand">
-                Rechercher
-              </span>
+              <span className="transition-colors hover:text-brand">Rechercher</span>
               <ArrowRight className="size-4 text-brand/50" />
-              <span className="transition-colors hover:text-brand">
-                Comparer
-              </span>
+              <span className="transition-colors hover:text-brand">Comparer</span>
               <ArrowRight className="size-4 text-brand/50" />
-              <span className="transition-colors hover:text-brand">
-                Consulter
-              </span>
+              <span className="transition-colors hover:text-brand">Consulter</span>
               <ArrowRight className="size-4 text-brand/50" />
               <span className="text-brand">Contacter</span>
             </div>

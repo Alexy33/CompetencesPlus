@@ -1,11 +1,10 @@
-import { notFound } from "next/navigation";
-
 import { CandidateDashboard } from "@/components/candidate/candidate-dashboard";
 import { SiteShell } from "@/components/layout/site-shell";
 import { getCurrentSession } from "@/lib/auth-session";
 import { CITIES, SECTORS, SKILLS } from "@/lib/vocabulary";
 import { findProfileByUserId } from "@/server/services/profiles";
 import { videoConfig } from "@/server/video/registry";
+import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 

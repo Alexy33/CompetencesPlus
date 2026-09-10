@@ -1,16 +1,16 @@
 "use client";
 
-import { BriefcaseBusiness, CalendarCheck, Heart, Search } from "lucide-react";
-
 import { ActionLink } from "@/components/common/action";
 import { LoadingBlock } from "@/components/common/feedback";
 import { PageHeader } from "@/components/common/page-header";
-import { StatGrid, type Stat } from "@/components/common/stat-card";
+import { StatGrid } from "@/components/common/stat-card";
+import type { Stat } from "@/components/common/types";
+import { BriefcaseBusiness, CalendarCheck, Heart, Search } from "lucide-react";
 import { CompanyPanel } from "./company-panel";
 import { ContactPipeline } from "./contact-pipeline";
 import { FavoritesPanel } from "./favorites-panel";
-import { useRecruiterConsole } from "./use-recruiter-console";
 import type { RecruiterStats } from "./types";
+import { useRecruiterConsole } from "./use-recruiter-console";
 
 function statsOf(stats: RecruiterStats | null): Stat[] {
   return [

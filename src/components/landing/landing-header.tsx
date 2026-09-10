@@ -1,10 +1,10 @@
-import Link from "next/link";
-
-import { ProductName } from "@/components/layout/product-name";
 import { LandingSessionActions } from "@/components/layout/landing-session-actions";
+import { ProductName } from "@/components/layout/product-name";
+import Link from "next/link";
 import { NAV_LINKS } from "./landing-content";
+import type { LandingHeaderProps } from "./types";
 
-export function LandingHeader({ connected }: { connected: boolean }) {
+export function LandingHeader({ connected }: LandingHeaderProps) {
   return (
     <header className="sticky top-0 z-50 bg-canvas/80 backdrop-blur-md">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 md:px-10">

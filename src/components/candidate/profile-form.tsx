@@ -1,13 +1,12 @@
 "use client";
 
-import { Loader2, Save } from "lucide-react";
-
 import { Action } from "@/components/common/action";
 import { Field, fieldControl } from "@/components/common/field";
 import { Surface, SurfaceHeading } from "@/components/common/surface";
-import { AVAILABILITIES, type Availability, type City, type Sector, type Skill } from "@/lib/vocabulary";
+import { AVAILABILITIES, type Availability, type City, type Sector } from "@/lib/vocabulary";
 import { AVAILABILITY_LABELS } from "@/lib/labels";
-import type { ProfileDraft } from "./types";
+import { Loader2, Save } from "lucide-react";
+import type { ProfileFormProps } from "./types";
 
 export function ProfileForm({
   draft,
@@ -19,17 +18,7 @@ export function ProfileForm({
   onPatch,
   onToggleSkill,
   onSave,
-}: {
-  draft: ProfileDraft;
-  sectors: readonly Sector[];
-  cities: readonly City[];
-  skills: readonly Skill[];
-  saving: boolean;
-  disabled: boolean;
-  onPatch: (patch: Partial<ProfileDraft>) => void;
-  onToggleSkill: (skill: Skill) => void;
-  onSave: () => void;
-}) {
+}: ProfileFormProps) {
   return (
     <Surface tone="elevated" padding="responsive">
       <SurfaceHeading

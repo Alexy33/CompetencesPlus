@@ -1,4 +1,4 @@
-import type { CertificationStatus } from "../types";
+import type { CertificationStatus } from "@/components/candidate/types";
 
 export interface CertificationQuestion {
   id: string;
@@ -33,3 +33,29 @@ export interface CertificationResult {
   currentQuestionnaireVersion: number;
   outdated: boolean;
 }
+
+export type OptionButtonProps = {
+  label: string;
+  active: boolean;
+  disabled: boolean;
+  onSelect: () => void;
+};
+
+export type QuestionStepProps = {
+  question: CertificationQuestion;
+  position: number;
+  total: number;
+  selected: string | undefined;
+  busy: boolean;
+  error: string | null;
+  onAnswer: (optionId: string) => void;
+  onPrevious: () => void;
+  onNext: () => void;
+  onSubmit: () => void;
+};
+
+export type ResultCardProps = {
+  result: CertificationResult;
+  busy: boolean;
+  onRestart: () => void;
+};

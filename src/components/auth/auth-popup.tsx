@@ -1,19 +1,13 @@
 "use client";
 
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { AnimatePresence, LazyMotion, MotionConfig, domAnimation, m } from "framer-motion";
 import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  AnimatePresence,
-  LazyMotion,
-  MotionConfig,
-  domAnimation,
-  m,
-} from "framer-motion";
+import type { AuthPopupProps } from "./types";
 
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-
-export function AuthPopup({ children }: Readonly<{ children: React.ReactNode }>) {
+export function AuthPopup({ children }: AuthPopupProps) {
   const pathname = usePathname();
 
   return (
@@ -32,7 +26,9 @@ export function AuthPopup({ children }: Readonly<{ children: React.ReactNode }>)
         >
           <Card className="w-full gap-0 rounded-3xl border-0 bg-canvas py-0 shadow-raised-3xl ring-1 ring-brand/10">
             <CardHeader className="flex flex-row items-center justify-between border-b border-brand/12 px-8 py-6 sm:px-12">
-              <span className="font-heading text-lg font-bold tracking-tight text-brand">ProfilsActifs</span>
+              <span className="font-heading text-lg font-bold tracking-tight text-brand">
+                ProfilsActifs
+              </span>
               <Link
                 href="/"
                 aria-label="Retourner à l'accueil"

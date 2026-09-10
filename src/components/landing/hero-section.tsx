@@ -1,8 +1,7 @@
+import { Button } from "@/components/ui/button";
+import { ArrowRight, Check } from "lucide-react";
 import Link from "next/link";
 import { LuUserRound } from "react-icons/lu";
-import { ArrowRight, Check } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
 import { PROFILE_MODULES } from "./landing-content";
 
 export function HeroSection() {
@@ -10,7 +9,6 @@ export function HeroSection() {
     <section id="concept" className="py-12 md:py-20">
       <div className="mx-auto grid max-w-[1440px] gap-12 px-6 md:px-10 lg:grid-cols-2 lg:items-center lg:gap-24 xl:gap-40">
         <div className="flex flex-col justify-center">
-
           <h1 className="text-4xl font-extrabold uppercase leading-tight tracking-tight text-ink sm:text-6xl lg:text-7xl">
             La compétence
             <br />
@@ -20,10 +18,9 @@ export function HeroSection() {
           </h1>
 
           <p className="mt-6 max-w-xl text-base leading-relaxed text-ink-muted md:text-lg">
-            ProfilsActifs transforme le CV traditionnel en une présentation
-            professionnelle plus vivante : compétences, vidéo et
-            certification réunies dans un profil clair et accessible aux
-            recruteurs.
+            ProfilsActifs transforme le CV traditionnel en une présentation professionnelle plus
+            vivante : compétences, vidéo et certification réunies dans un profil clair et accessible
+            aux recruteurs.
           </p>
 
           <p className="mt-4 font-mono text-xs font-semibold uppercase tracking-wider text-ink-muted">
@@ -61,9 +58,7 @@ export function HeroSection() {
                   <LuUserRound aria-hidden="true" className="size-6" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-ink">
-                    Votre profil, en un coup d’œil
-                  </h2>
+                  <h2 className="text-lg font-bold text-ink">Votre profil, en un coup d’œil</h2>
                   <p className="mt-1 text-sm text-ink-muted">
                     Tout ce qui aide un recruteur à vous comprendre
                   </p>
@@ -84,9 +79,7 @@ export function HeroSection() {
                       <Icon aria-hidden="true" className="size-5" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h3 className="text-base font-bold text-ink">
-                        {profileModule.title}
-                      </h3>
+                      <h3 className="text-base font-bold text-ink">{profileModule.title}</h3>
                       <p className="mt-1 text-sm leading-snug text-ink-muted">
                         {profileModule.description}
                       </p>
@@ -100,8 +93,8 @@ export function HeroSection() {
             </div>
 
             <p className="mt-6 border-t border-brand/12 pt-5 text-base leading-relaxed text-ink-muted">
-              Un profil unique pour présenter vos compétences aux recruteurs
-              et faire reconnaître vos aptitudes par des certificateurs.
+              Un profil unique pour présenter vos compétences aux recruteurs et faire reconnaître
+              vos aptitudes par des certificateurs.
             </p>
           </div>
         </div>

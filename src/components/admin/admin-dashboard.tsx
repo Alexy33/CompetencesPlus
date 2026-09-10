@@ -1,18 +1,18 @@
 "use client";
 
-import { useState } from "react";
-import { BadgeCheck, Check, ShieldCheck, Users } from "lucide-react";
-
 import { LoadingBlock, StatusMessage } from "@/components/common/feedback";
 import { PageHeader } from "@/components/common/page-header";
-import { StatGrid, type Stat } from "@/components/common/stat-card";
+import { StatGrid } from "@/components/common/stat-card";
+import type { Stat } from "@/components/common/types";
+import { BadgeCheck, Check, ShieldCheck, Users } from "lucide-react";
+import { useState } from "react";
 import { AdminTabs } from "./admin-tabs";
 import { ModerationList } from "./moderation-list";
 import { QuestionEditor } from "./question-editor";
 import { SettingsForm } from "./settings-form";
+import type { AdminStats, Tab } from "./types";
 import { useAdminConsole } from "./use-admin-console";
 import { VideoModeration } from "./video-moderation";
-import type { AdminStats, Tab } from "./types";
 
 function statsOf(stats: AdminStats | null): Stat[] {
   return [

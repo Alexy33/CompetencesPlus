@@ -2,7 +2,10 @@ import { MAJORITY_AGE } from "@/lib/age";
 
 export function MinorApplicantNotice() {
   return (
-    <div role="note" className="rounded-lg border border-brand/20 bg-brand/5 px-4 py-3 text-sm text-ink">
+    <div
+      role="note"
+      className="rounded-lg border border-brand/20 bg-brand/5 px-4 py-3 text-sm text-ink"
+    >
       <p className="font-medium">Vous avez moins de {MAJORITY_AGE} ans</p>
       <p className="mt-1 text-brand-500">
         Votre compte est créé normalement, mais votre présentation vidéo ne sera pas diffusée

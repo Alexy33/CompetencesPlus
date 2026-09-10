@@ -1,13 +1,12 @@
 "use client";
 
+import { authClient } from "@/lib/auth-client";
+import { USER_ROLE_LABELS } from "@/lib/labels";
+import { BadgeCheck, LogOut } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { BadgeCheck, LogOut } from "lucide-react";
-
-import { authClient } from "@/lib/auth-client";
-import { USER_ROLE_LABELS } from "@/lib/labels";
-import type { SidebarSession } from "./types";
+import type { SidebarSessionCardProps } from "./types";
 
 function SignedOutActions() {
   return (
@@ -28,7 +27,7 @@ function SignedOutActions() {
   );
 }
 
-export function SidebarSessionCard({ session }: { session: SidebarSession | null }) {
+export function SidebarSessionCard({ session }: SidebarSessionCardProps) {
   const router = useRouter();
   const [signingOut, setSigningOut] = useState(false);
 

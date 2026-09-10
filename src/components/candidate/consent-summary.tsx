@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
-import { ArrowRight, ShieldCheck, ShieldOff } from "lucide-react";
-
 import { formatTimestamp } from "@/lib/dates";
 import type { OwnProfile } from "@/server/services/profiles";
+import { ArrowRight, ShieldCheck, ShieldOff } from "lucide-react";
+import Link from "next/link";
+import type { ConsentSummaryProps } from "./types";
 
 function summaryOf(consent: OwnProfile["videoConsent"]): string {
   if (consent.granted) {
@@ -16,7 +16,7 @@ function summaryOf(consent: OwnProfile["videoConsent"]): string {
   return "Jamais donné : aucune vidéo ne peut être hébergée.";
 }
 
-export function ConsentSummary({ consent }: { consent: OwnProfile["videoConsent"] }) {
+export function ConsentSummary({ consent }: ConsentSummaryProps) {
   return (
     <div className="mt-6 rounded-2xl border border-brand-300 bg-white p-5" id="consentement">
       <div className="flex flex-wrap items-center justify-between gap-4">
